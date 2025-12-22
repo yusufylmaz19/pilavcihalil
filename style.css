@@ -1,6 +1,6 @@
 :root {
-    --primary-color: #e67e22; /* Appetizing Orange */
-    --secondary-color: #2c3e50; /* Dark Blue/Grey */
+    --primary-color: #e67e22;
+    --secondary-color: #2c3e50;
     --bg-light: #f9f9f9;
     --text-color: #333;
     --white: #ffffff;
@@ -22,6 +22,7 @@ body {
     font-family: var(--font-body);
     line-height: 1.6;
     color: var(--text-color);
+    overflow-x: hidden;
 }
 
 .container {
@@ -41,6 +42,18 @@ body {
     height: 70px;
     display: flex;
     align-items: center;
+    animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .nav-container {
@@ -53,6 +66,7 @@ body {
 .logo svg {
     height: 50px;
     width: auto;
+    animation: fadeIn 1s ease-in;
 }
 
 .nav-links {
@@ -62,7 +76,13 @@ body {
 
 .nav-links li {
     margin-left: 20px;
+    animation: fadeInUp 0.6s ease-out backwards;
 }
+
+.nav-links li:nth-child(1) { animation-delay: 0.1s; }
+.nav-links li:nth-child(2) { animation-delay: 0.2s; }
+.nav-links li:nth-child(3) { animation-delay: 0.3s; }
+.nav-links li:nth-child(4) { animation-delay: 0.4s; }
 
 .nav-links a {
     text-decoration: none;
@@ -70,7 +90,24 @@ body {
     font-weight: 700;
     font-family: var(--font-heading);
     text-transform: uppercase;
-    transition: color 0.3s;
+    transition: all 0.3s ease;
+    position: relative;
+    padding: 5px 0;
+}
+
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: var(--primary-color);
+    transition: width 0.3s ease;
+}
+
+.nav-links a:hover::after {
+    width: 100%;
 }
 
 .nav-links a:hover {
@@ -80,9 +117,10 @@ body {
 /* Hero Section */
 .hero-section {
     height: 100vh;
-    background-image: url('https://cdn.getiryemek.com/restaurants/1759922837110_1125x522.webp'); /* Placeholder Rice Image */
+    background-image: url('https://cdn.getiryemek.com/restaurants/1759922837110_1125x522.webp');
     background-size: cover;
     background-position: center;
+    background-attachment: fixed;
     position: relative;
     display: flex;
     align-items: center;
@@ -99,6 +137,7 @@ body {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 1s ease-in;
 }
 
 .hero-content {
@@ -111,11 +150,14 @@ body {
     font-size: 4rem;
     margin-bottom: 1rem;
     text-transform: uppercase;
+    animation: zoomIn 1s ease-out;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 
 .hero-content p {
     font-size: 1.5rem;
     margin-bottom: 2rem;
+    animation: fadeInUp 1s ease-out 0.3s backwards;
 }
 
 .btn {
@@ -126,16 +168,28 @@ body {
     text-decoration: none;
     border-radius: 5px;
     font-weight: bold;
-    transition: background 0.3s;
+    transition: all 0.3s ease;
+    animation: fadeInUp 1s ease-out 0.6s backwards;
+    box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4);
 }
 
 .btn:hover {
     background: #d35400;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(230, 126, 34, 0.6);
 }
 
 /* Sections General */
 .section {
     padding: 80px 0;
+    opacity: 0;
+    animation: fadeInSection 1s ease-out forwards;
+}
+
+@keyframes fadeInSection {
+    to {
+        opacity: 1;
+    }
 }
 
 .section-title {
@@ -145,6 +199,7 @@ body {
     margin-bottom: 50px;
     color: var(--secondary-color);
     position: relative;
+    animation: fadeInDown 0.8s ease-out;
 }
 
 .section-title::after {
@@ -154,6 +209,16 @@ body {
     height: 4px;
     background: var(--primary-color);
     margin: 10px auto 0;
+    animation: expandWidth 0.8s ease-out 0.3s backwards;
+}
+
+@keyframes expandWidth {
+    from {
+        width: 0;
+    }
+    to {
+        width: 60px;
+    }
 }
 
 .bg-light {
@@ -170,16 +235,24 @@ body {
 
 .about-text {
     flex: 1;
+    animation: slideInLeft 1s ease-out;
 }
 
 .about-image {
     flex: 1;
+    animation: slideInRight 1s ease-out;
 }
 
 .about-image img {
     width: 100%;
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    transition: transform 0.5s ease, box-shadow 0.5s ease;
+}
+
+.about-image img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
 /* Menu Section */
@@ -194,11 +267,21 @@ body {
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    transition: transform 0.3s;
+    transition: all 0.4s ease;
+    opacity: 0;
+    animation: fadeInUp 0.8s ease-out forwards;
 }
 
+.menu-card:nth-child(1) { animation-delay: 0.1s; }
+.menu-card:nth-child(2) { animation-delay: 0.2s; }
+.menu-card:nth-child(3) { animation-delay: 0.3s; }
+.menu-card:nth-child(4) { animation-delay: 0.4s; }
+.menu-card:nth-child(5) { animation-delay: 0.5s; }
+.menu-card:nth-child(6) { animation-delay: 0.6s; }
+
 .menu-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
 }
 
 .menu-img {
@@ -206,6 +289,28 @@ body {
     background-color: #ddd;
     background-size: cover;
     background-position: center;
+    transition: transform 0.5s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.menu-card:hover .menu-img {
+    transform: scale(1.1);
+}
+
+.menu-img::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.menu-card:hover .menu-img::before {
+    left: 100%;
 }
 
 .menu-info {
@@ -217,6 +322,11 @@ body {
     font-size: 1.5rem;
     margin-bottom: 10px;
     color: var(--secondary-color);
+    transition: color 0.3s ease;
+}
+
+.menu-card:hover .menu-info h3 {
+    color: var(--primary-color);
 }
 
 .menu-info p {
@@ -231,6 +341,104 @@ body {
     font-size: 1.2rem;
     display: block;
     text-align: right;
+    transition: transform 0.3s ease;
+}
+
+.menu-card:hover .price {
+    transform: scale(1.1);
+}
+
+/* Bulk Order Section */
+.bulk-order-wrapper {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, #34495e 100%);
+    color: var(--white);
+    padding: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    animation: slideInUp 1s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.bulk-order-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(230,126,34,0.1) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.bulk-text {
+    flex: 2;
+    min-width: 300px;
+    position: relative;
+    z-index: 1;
+}
+
+.bulk-text .section-title::after {
+    margin: 10px 0 0;
+    background: var(--white);
+}
+
+.bulk-icon {
+    flex: 1;
+    text-align: center;
+    font-size: 5rem;
+    color: var(--primary-color);
+    position: relative;
+    z-index: 1;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+.btn-whatsapp {
+    background-color: #25D366;
+    margin-top: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-whatsapp::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-whatsapp:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-whatsapp:hover {
+    background-color: #128C7E;
 }
 
 /* Contact Section */
@@ -240,15 +448,27 @@ body {
     gap: 40px;
 }
 
-.contact-info, .contact-map {
+.contact-info {
     flex: 1;
     min-width: 300px;
+    animation: slideInLeft 1s ease-out;
+}
+
+.contact-map {
+    flex: 1;
+    min-width: 300px;
+    animation: slideInRight 1s ease-out;
 }
 
 .info-item {
     margin-bottom: 20px;
     display: flex;
     align-items: flex-start;
+    transition: transform 0.3s ease;
+}
+
+.info-item:hover {
+    transform: translateX(10px);
 }
 
 .info-item h4 {
@@ -265,6 +485,15 @@ body {
     justify-content: center;
     color: #666;
     border-radius: 10px;
+    overflow: hidden;
+}
+
+.map-placeholder iframe {
+    transition: transform 0.3s ease;
+}
+
+.map-placeholder:hover iframe {
+    transform: scale(1.05);
 }
 
 /* Footer */
@@ -273,50 +502,7 @@ footer {
     color: var(--white);
     text-align: center;
     padding: 20px 0;
-}
-
-/* Bulk Order Section */
-.bulk-order-wrapper {
-    background-color: var(--secondary-color);
-    color: var(--white);
-    padding: 40px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 20px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-}
-
-.bulk-text {
-    flex: 2;
-    min-width: 300px;
-}
-
-.bulk-text .section-title::after {
-    margin: 10px 0 0;
-    background: var(--white);
-}
-
-.bulk-icon {
-    flex: 1;
-    text-align: center;
-    font-size: 5rem;
-    color: var(--primary-color);
-}
-
-.btn-whatsapp {
-    background-color: #25D366;
-    margin-top: 20px;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    border: none;
-}
-
-.btn-whatsapp:hover {
-    background-color: #128C7E;
+    animation: fadeIn 1s ease-in;
 }
 
 /* Social Links in Footer */
@@ -328,13 +514,13 @@ footer {
     color: var(--white);
     font-size: 1.5rem;
     margin: 0 15px;
-    transition: color 0.3s;
+    transition: all 0.3s ease;
     display: inline-block;
 }
 
 .social-links a:hover {
     color: var(--primary-color);
-    transform: translateY(-3px);
+    transform: translateY(-5px) rotate(360deg);
 }
 
 /* Floating Whatsapp */
@@ -349,22 +535,106 @@ footer {
     border-radius: 50px;
     text-align: center;
     font-size: 30px;
-    box-shadow: 2px 2px 3px #999;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
     z-index: 100;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.3s;
+    transition: all 0.3s ease;
     text-decoration: none;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+    }
+    50% {
+        box-shadow: 0 4px 25px rgba(37, 211, 102, 0.8);
+        transform: scale(1.05);
+    }
 }
 
 .float-wa:hover {
-    transform: scale(1.1);
+    transform: scale(1.15) rotate(15deg);
     background-color: #128C7E;
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
 }
 
 .my-float {
     margin-top: 2px;
+}
+
+/* Keyframe Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 /* Mobile Responsive */
@@ -395,6 +665,7 @@ footer {
         transform: translateX(100%);
         transition: transform 0.5s ease-in;
         padding-top: 50px;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.1);
     }
 
     .nav-links li {
@@ -438,9 +709,19 @@ footer {
         height: 50px;
         font-size: 25px;
     }
+
+    .hero-section {
+        background-attachment: scroll;
+    }
 }
 
 @keyframes navLinkFade {
-    from { opacity: 0; transform: translateX(50px); }
-    to { opacity: 1; transform: translateX(0px); }
+    from { 
+        opacity: 0; 
+        transform: translateX(50px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateX(0px); 
+    }
 }

@@ -275,6 +275,98 @@ footer {
     padding: 20px 0;
 }
 
+/* Bulk Order Section */
+.bulk-order-wrapper {
+    background-color: var(--secondary-color);
+    color: var(--white);
+    padding: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.bulk-text {
+    flex: 2;
+    min-width: 300px;
+}
+
+.bulk-text .section-title::after {
+    margin: 10px 0 0;
+    background: var(--white);
+}
+
+.bulk-icon {
+    flex: 1;
+    text-align: center;
+    font-size: 5rem;
+    color: var(--primary-color);
+}
+
+.btn-whatsapp {
+    background-color: #25D366;
+    margin-top: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    border: none;
+}
+
+.btn-whatsapp:hover {
+    background-color: #128C7E;
+}
+
+/* Social Links in Footer */
+.social-links {
+    margin-bottom: 20px;
+}
+
+.social-links a {
+    color: var(--white);
+    font-size: 1.5rem;
+    margin: 0 15px;
+    transition: color 0.3s;
+    display: inline-block;
+}
+
+.social-links a:hover {
+    color: var(--primary-color);
+    transform: translateY(-3px);
+}
+
+/* Floating Whatsapp */
+.float-wa {
+    position: fixed;
+    width: 60px;
+    height: 60px;
+    bottom: 40px;
+    right: 40px;
+    background-color: #25d366;
+    color: #FFF;
+    border-radius: 50px;
+    text-align: center;
+    font-size: 30px;
+    box-shadow: 2px 2px 3px #999;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s;
+    text-decoration: none;
+}
+
+.float-wa:hover {
+    transform: scale(1.1);
+    background-color: #128C7E;
+}
+
+.my-float {
+    margin-top: 2px;
+}
+
 /* Mobile Responsive */
 .burger {
     display: none;
@@ -324,6 +416,27 @@ footer {
     
     .about-wrapper {
         flex-direction: column;
+    }
+
+    .bulk-order-wrapper {
+        text-align: center;
+        flex-direction: column-reverse;
+    }
+    
+    .bulk-text .section-title {
+        text-align: center !important;
+    }
+    
+    .bulk-text .section-title::after {
+        margin: 10px auto 0 !important;
+    }
+
+    .float-wa {
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 25px;
     }
 }
 

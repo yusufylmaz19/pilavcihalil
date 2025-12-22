@@ -5,8 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pilavcı Halil Usta</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Favicon updated to match the logo icon -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cpath d='M25 20 Q30 5 35 20 T45 20' stroke='%23e67e22' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3Cpath d='M40 15 Q45 0 50 15 T60 15' stroke='%23e67e22' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3Cpath d='M15 40 Q40 10 65 40' fill='%23fff' stroke='%23e67e22' stroke-width='2'/%3E%3Cpath d='M10 40 Q40 80 70 40' fill='%232c3e50' /%3E%3Cline x1='10' y1='40' x2='70' y2='40' stroke='%232c3e50' stroke-width='2'/%3E%3C/svg%3E">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
@@ -53,6 +57,13 @@
         </div>
     </section>
 
+    <!-- Bulk Order Section -->
+    <section id="bulk-order" class="section">
+        <div class="container" id="bulk-order-content">
+            <!-- Content injected via JS -->
+        </div>
+    </section>
+
     <!-- Contact Section -->
     <section id="contact" class="section">
         <div class="container">
@@ -64,8 +75,12 @@
     </section>
 
     <footer>
+        <div class="social-links" id="social-links"></div>
         <p>&copy; <span id="year"></span> Pilavcı Halil Usta. Tüm hakları saklıdır.</p>
     </footer>
+
+    <!-- Floating Whatsapp Button -->
+    <div id="floating-whatsapp"></div>
 
     <script src="script.js"></script>
 </body>

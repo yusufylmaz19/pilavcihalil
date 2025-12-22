@@ -51,9 +51,19 @@ const siteContent = {
     ],
     contact: {
         address: "Lezzet Mahallesi, Pilavcılar Caddesi No: 10, Sultanbeyli / İstanbul",
-        phone: "+90 212 555 00 00",
+        phone: "+90 534 498 29 27",
         hours: "Her gün: 11:00 - 23:00",
         mapText: '<iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?q=40.9655,29.2620&hl=tr&z=14&output=embed"></iframe>'
+    },
+    bulkOrder: {
+        title: "Toplu Yemek & Organizasyon",
+        text: "Düğün, nişan, mevlüt, iş yeri yemekleri ve özel günleriniz için toplu pilav siparişi alıyoruz. Özel araçlarımızla sıcak teslimat yapıyoruz.",
+        whatsappMessage: "Merhaba, toplu yemek organizasyonu hakkında bilgi almak istiyorum."
+    },
+    socials: {
+        whatsapp: "905344982927", // Telefon numarasını buraya girin (başında + olmadan)
+        instagram: "https://instagram.com",
+        facebook: "https://facebook.com"
     }
 };
 
@@ -64,7 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
     renderHero();
     renderAbout();
     renderMenu();
+    renderBulkOrder();
     renderContact();
+    renderSocials();
+    renderFloatingWhatsapp();
     document.getElementById('year').textContent = new Date().getFullYear();
     setupMobileNav();
 });
@@ -73,16 +86,23 @@ function renderLogo() {
     // SVG Logo Creation
     const logoContainer = document.getElementById('logo-container');
     const svgLogo = `
-    <svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
-        <!-- Icon: A stylized bowl with steam -->
-        <circle cx="50" cy="60" r="30" fill="#e67e22" />
-        <path d="M20 60 Q50 90 80 60" fill="#fff" />
-        <path d="M35 25 Q45 10 55 25 T75 25" stroke="#e67e22" stroke-width="3" fill="none" />
-        <path d="M25 35 Q35 20 45 35 T65 35" stroke="#e67e22" stroke-width="3" fill="none" />
+    <svg viewBox="0 0 300 80" xmlns="http://www.w3.org/2000/svg">
+        <g transform="translate(10, 5) scale(0.9)">
+            <!-- Steam -->
+            <path d="M25 20 Q30 5 35 20 T45 20" stroke="#e67e22" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M40 15 Q45 0 50 15 T60 15" stroke="#e67e22" stroke-width="3" fill="none" stroke-linecap="round"/>
+            
+            <!-- Rice -->
+            <path d="M15 40 Q40 10 65 40" fill="#fff" stroke="#e67e22" stroke-width="2"/>
+            
+            <!-- Bowl -->
+            <path d="M10 40 Q40 80 70 40" fill="#2c3e50" />
+            <line x1="10" y1="40" x2="70" y2="40" stroke="#2c3e50" stroke-width="2"/>
+        </g>
         
         <!-- Text -->
-        <text x="90" y="50" font-family="Oswald, sans-serif" font-size="30" fill="#2c3e50" font-weight="bold">PİLAVCI</text>
-        <text x="90" y="80" font-family="Oswald, sans-serif" font-size="24" fill="#e67e22" font-weight="bold">HALİL USTA</text>
+        <text x="80" y="45" font-family="Oswald, sans-serif" font-size="28" fill="#2c3e50" font-weight="bold">PİLAVCI</text>
+        <text x="80" y="72" font-family="Oswald, sans-serif" font-size="22" fill="#e67e22" font-weight="bold" letter-spacing="1">HALİL USTA</text>
     </svg>
     `;
     logoContainer.innerHTML = svgLogo;
@@ -115,7 +135,7 @@ function renderAbout() {
 function renderMenu() {
     const menuGrid = document.getElementById('menu-grid');
     let menuHTML = '';
-    
+
     siteContent.menu.forEach(item => {
         menuHTML += `
             <div class="menu-card">
@@ -128,7 +148,7 @@ function renderMenu() {
             </div>
         `;
     });
-    
+
     menuGrid.innerHTML = menuHTML;
 }
 
@@ -160,6 +180,44 @@ function renderContact() {
                 ${siteContent.contact.mapText}
             </div>
         </div>
+    `;
+}
+
+function renderBulkOrder() {
+    const container = document.getElementById('bulk-order-content');
+    const waLink = `https://wa.me/${siteContent.socials.whatsapp}?text=${encodeURIComponent(siteContent.bulkOrder.whatsappMessage)}`;
+
+    container.innerHTML = `
+        <div class="bulk-order-wrapper">
+            <div class="bulk-text">
+                <h2 class="section-title" style="color: #fff; text-align: left; margin-bottom: 20px;">${siteContent.bulkOrder.title}</h2>
+                <p>${siteContent.bulkOrder.text}</p>
+                <a href="${waLink}" target="_blank" class="btn btn-whatsapp">
+                    <i class="fab fa-whatsapp"></i> Fiyat Teklifi Al
+                </a>
+            </div>
+            <div class="bulk-icon">
+                <i class="fas fa-truck-moving"></i>
+            </div>
+        </div>
+    `;
+}
+
+function renderSocials() {
+    const container = document.getElementById('social-links');
+    container.innerHTML = `
+        <a href="${siteContent.socials.instagram}" target="_blank"><i class="fab fa-instagram"></i></a>
+        <a href="${siteContent.socials.facebook}" target="_blank"><i class="fab fa-facebook-f"></i></a>
+        <a href="https://wa.me/${siteContent.socials.whatsapp}" target="_blank"><i class="fab fa-whatsapp"></i></a>
+    `;
+}
+
+function renderFloatingWhatsapp() {
+    const container = document.getElementById('floating-whatsapp');
+    container.innerHTML = `
+        <a href="https://wa.me/${siteContent.socials.whatsapp}" class="float-wa" target="_blank">
+            <i class="fab fa-whatsapp my-float"></i>
+        </a>
     `;
 }
 

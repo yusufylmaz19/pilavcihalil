@@ -201,12 +201,16 @@
                     const card = document.createElement('div');
                     card.className = 'menu-card reveal';
                     card.style.animationDelay = `${i * 0.04}s`;
+                    const priceHTML = item.price
+                        ? `<div class="menu-price">₺${item.price}</div>`
+                        : '';
                     card.innerHTML = `
             <div class="menu-emoji">${item.emoji}</div>
             <div class="menu-info">
               <div class="menu-name">${item.name}</div>
               <div class="menu-tag">${item.desc}</div>
-            </div>`;
+            </div>
+            ${priceHTML}`;
                     grid.appendChild(card);
                 });
 

@@ -89,124 +89,176 @@
   "menu": {
     "categories": [
       {
-        "id": "yiyecek",
-        "label": "🍛 Yiyecekler",
+        "id": "pilavlar",
+        "label": "🍛 Pilavlar",
         "items": [
           {
             "name": "Pilav Porsiyon",
             "emoji": "🍛",
-            "desc": "Klasik lezzet"
+            "desc": "Klasik lezzet",
+            "price": 130
           },
           {
             "name": "Nohutlu Pilav Porsiyon",
             "emoji": "🍛",
-            "desc": "Klasik lezzet"
+            "desc": "Nohutlu pilav",
+            "price": 140
           },
           {
             "name": "Mısırlı Pilav Porsiyon",
             "emoji": "🍛",
-            "desc": "Klasik lezzet"
-          },
-          {
-            "name": "Pilav Üstü Tavuk",
-            "emoji": "🍗",
-            "desc": "Özel soslu izgara tavuk"
-          },
-          {
-            "name": "Nohutlu Pilav Üstü Tavuk",
-            "emoji": "🍗",
-            "desc": "Klasik lezzet"
-          },
-          {
-            "name": "Mısırlı Pilav Üstü Tavuk",
-            "emoji": "🍗",
-            "desc": "Klasik lezzet"
-          },
-          {
-            "name": "Pilav Üstü Fajita",
-            "emoji": "🌯",
-            "desc": "Acılı & baharatlı"
-          },
-          {
-            "name": "Pilav Üstü Köri Soslu",
-            "emoji": "🍛",
-            "desc": "Egzotik köri sosu"
-          },
-          {
-            "name": "Pilav Üstü K. Kremalı",
-            "emoji": "🥛",
-            "desc": "Kadifemsi krema sosu"
-          },
-          {
-            "name": "Pilav Üstü S. Baharatlı",
-            "emoji": "🌶️",
-            "desc": "Sıcak baharatlar"
-          },
-          {
-            "name": "Patates patates Porsiyon",
-            "emoji": "🍟",
-            "desc": "Çıtır patates kızartması"
+            "desc": "Mısırlı pilav",
+            "price": 140
           }
         ]
       },
       {
-        "id": "icecek",
+        "id": "pilav-ustu",
+        "label": "🍗 Pilav Üstü",
+        "items": [
+          {
+            "name": "Pilav Üstü Tavuk",
+            "emoji": "🍗",
+            "desc": "Özel soslu izgara tavuk",
+            "price": 150
+          },
+          {
+            "name": "Nohutlu Pilav Üstü Tavuk",
+            "emoji": "🍗",
+            "desc": "Nohutlu pilav üstü tavuk",
+            "price": 160
+          },
+          {
+            "name": "Mısırlı Pilav Üstü Tavuk",
+            "emoji": "🍗",
+            "desc": "Mısırlı pilav üstü tavuk",
+            "price": 160
+          },
+          {
+            "name": "Pilav Üstü Fajita",
+            "emoji": "🌯",
+            "desc": "Acılı & baharatlı fajita",
+            "price": 190
+          },
+          {
+            "name": "Pilav Üstü Köri Soslu Tavuk",
+            "emoji": "🍛",
+            "desc": "Egzotik köri sosu",
+            "price": 180
+          },
+          {
+            "name": "Pilav Üstü Köri Kremalı",
+            "emoji": "🥛",
+            "desc": "Kadifemsi krema sosu",
+            "price": 180
+          },
+          {
+            "name": "Pilav Üstü Soslu Baharatlı",
+            "emoji": "🌶️",
+            "desc": "Sıcak baharatlar",
+            "price": 180
+          }
+        ]
+      },
+      {
+        "id": "corbalar",
+        "label": "🍲 Çorbalar",
+        "items": [
+          {
+            "name": "Mercimek Çorbası",
+            "emoji": "🍲",
+            "desc": "Geleneksel kırmızı mercimek",
+            "price": 130
+          },
+          {
+            "name": "Ezogelin Çorbası",
+            "emoji": "🍲",
+            "desc": "Baharatlı ezogelin",
+            "price": 130
+          }
+        ]
+      },
+      {
+        "id": "yan-urunler",
+        "label": "🍟 Yan Ürünler",
+        "items": [
+          {
+            "name": "Patates Kızartması Porsiyon",
+            "emoji": "🍟",
+            "desc": "Çıtır patates kızartması",
+            "price": 70
+          }
+        ]
+      },
+      {
+        "id": "icecekler",
         "label": "🥤 İçecekler",
         "items": [
           {
-            "name": "Büyük Ayran",
+            "name": "B.Ayran",
             "emoji": "🥛",
-            "desc": "Soğuk & taze"
+            "desc": "Büyük boy ayran",
+            "price": 35
           },
           {
-            "name": "Küçük Ayran",
+            "name": "K.Ayran",
             "emoji": "🥛",
-            "desc": "Soğuk & taze"
+            "desc": "Küçük boy ayran",
+            "price": 25
           },
           {
             "name": "Kola",
             "emoji": "🥤",
-            "desc": "Soğuk içecek"
+            "desc": "Soğuk içecek",
+            "price": 40
           },
           {
             "name": "Sade Soda",
             "emoji": "💧",
-            "desc": "Ferahlatıcı"
+            "desc": "Ferahlatıcı",
+            "price": 25
           },
           {
             "name": "Meyveli Soda",
             "emoji": "🍓",
-            "desc": "Çeşitli tatlar"
+            "desc": "Çeşitli tatlar",
+            "price": 35
           },
           {
             "name": "Şalgam Acılı",
             "emoji": "🌶️",
-            "desc": "Geleneksel lezzet"
+            "desc": "Geleneksel lezzet",
+            "price": 35
           },
           {
             "name": "Meyve Suyu Kutu",
             "emoji": "🧃",
-            "desc": "Büyük boy"
+            "desc": "Büyük boy",
+            "price": 35
           },
           {
             "name": "Meyve Suyu Küçük",
             "emoji": "🧃",
-            "desc": "Küçük boy"
+            "desc": "Küçük boy",
+            "price": 25
           },
           {
             "name": "Soğuk Çay",
             "emoji": "🍵",
-            "desc": "Serinletici"
+            "desc": "Serinletici",
+            "price": 40
           },
           {
             "name": "Su",
             "emoji": "💧",
-            "desc": "Doğal kaynak suyu"
+            "desc": "Doğal kaynak suyu",
+            "price": 10
           },
           {
             "name": "Çay",
             "emoji": "☕",
-            "desc": "Sıcak demlik çay"
+            "desc": "Sıcak demlik çay",
+            "price": 15
           }
         ]
       }

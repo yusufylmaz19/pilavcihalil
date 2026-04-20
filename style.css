@@ -251,6 +251,31 @@ nav {
   color: var(--gold);
 }
 
+.btn-pdf {
+  padding: 14px 28px;
+  background: rgba(245,166,35,0.12);
+  color: var(--gold-lt);
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 1px solid rgba(245,166,35,0.35);
+  border-radius: 100px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s;
+}
+
+.btn-pdf:hover {
+  background: rgba(245,166,35,0.22);
+  border-color: var(--gold);
+  color: var(--gold);
+  transform: translateY(-2px);
+}
+
 .hero-scroll {
   position: absolute;
   bottom: 32px;

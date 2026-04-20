@@ -1,0 +1,214 @@
+{
+  "restaurant": {
+    "name": "Max Pilav Halil Usta",
+    "slogan": "Sultanbeyli'nin Lezzet Durağı",
+    "hero_badge": "Sultanbeyli'nin En Lezzetli Pilav Durağı",
+    "hero_desc": "Taze malzemeler, özel soslar ve lezzet dolu porsiyon pilav çeşitleriyle hizmetinizdeyiz.",
+    "logo": "logo.png",
+    "hero_image": "hero.png"
+  },
+  "contact": {
+    "phones": [
+      {
+        "id": "phone-main",
+        "number": "+90 546 159 16 49",
+        "href": "tel:+905461591649",
+        "label": "Ana Hat (WhatsApp)",
+        "whatsapp": true,
+        "whatsapp_href": "https://wa.me/905461591649"
+      },
+      {
+        "id": "phone-2",
+        "number": "+90 534 498 29 27",
+        "href": "tel:+905344982927",
+        "label": "İkinci Hat",
+        "whatsapp": false
+      }
+    ],
+    "email": {
+      "address": "maxpilavhalilusta@gmail.com",
+      "href": "mailto:maxpilavhalilusta@gmail.com"
+    },
+    "address": {
+      "text": "Necip Fazıl Mh. Milli İrade Cd, Cihan Cd. No4/B, 34920 Sultanbeyli / İstanbul",
+      "maps_embed": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3012.0543741!2d29.2803217!3d40.9377971!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cad11c63cb5e65%3A0xa208c42792774c6d!2sMax%20Pilav%20Halil%20Usta!5e0!3m2!1str!2str!4v1700000000000!5m2!1str!2str",
+      "maps_link": "https://www.google.com/maps/place/Max+Pilav+Halil+Usta/@40.9412824,29.2711242,14z/data=!4m6!3m5!1s0x14cad11c63cb5e65:0xa208c42792774c6d!8m2!3d40.9377971!4d29.2825466!16s%2Fg%2F11z55kjgr1?entry=ttu&g_ep=EgoyMDI2MDQxNS4wIKXMDSoASAFQAw%3D%3D"
+    },
+    "hours": [
+      {
+        "day": "Pazartesi – Cumartesi",
+        "open": "09:30",
+        "close": "00:00"
+      },
+      {
+        "day": "Pazar",
+        "open": "11:00",
+        "close": "00:00"
+      }
+    ]
+  },
+  "platforms": [
+    {
+      "id": "platform-yemeksepeti",
+      "name": "Yemeksepeti",
+      "cta": "Hemen sipariş ver →",
+      "emoji": "🍽️",
+      "href": "https://www.yemeksepeti.com/restaurant/ykr3/max-pilav-halil-usta",
+      "theme": "yemeksepeti",
+      "active": true
+    },
+    {
+      "id": "platform-trendyol",
+      "name": "Trendyol Go",
+      "cta": "Hemen sipariş ver →",
+      "emoji": "🟠",
+      "href": "https://tgoyemek.com/restoranlar/442672",
+      "theme": "trendyol",
+      "active": true
+    },
+    {
+      "id": "platform-getir",
+      "name": "Getir Yemek",
+      "cta": "Hemen sipariş ver →",
+      "emoji": "🟣",
+      "href": "https://tgoyemek.com/restoranlar/442672",
+      "theme": "getir",
+      "active": true
+    },
+    {
+      "id": "platform-tel",
+      "name": "Telefonla Sipariş",
+      "cta": "+90 546 159 16 49",
+      "emoji": "📞",
+      "href": "tel:+905461591649",
+      "theme": "tel",
+      "active": true
+    }
+  ],
+  "menu": {
+    "categories": [
+      {
+        "id": "yiyecek",
+        "label": "🍛 Yiyecekler",
+        "items": [
+          {
+            "name": "Pilav Porsiyon",
+            "emoji": "🍛",
+            "desc": "Klasik lezzet"
+          },
+          {
+            "name": "Nohutlu Pilav Porsiyon",
+            "emoji": "🍛",
+            "desc": "Klasik lezzet"
+          },
+          {
+            "name": "Mısırlı Pilav Porsiyon",
+            "emoji": "🍛",
+            "desc": "Klasik lezzet"
+          },
+          {
+            "name": "Pilav Üstü Tavuk",
+            "emoji": "🍗",
+            "desc": "Özel soslu izgara tavuk"
+          },
+          {
+            "name": "Nohutlu Pilav Üstü Tavuk",
+            "emoji": "🍗",
+            "desc": "Klasik lezzet"
+          },
+          {
+            "name": "Mısırlı Pilav Üstü Tavuk",
+            "emoji": "🍗",
+            "desc": "Klasik lezzet"
+          },
+          {
+            "name": "Pilav Üstü Fajita",
+            "emoji": "🌯",
+            "desc": "Acılı & baharatlı"
+          },
+          {
+            "name": "Pilav Üstü Köri Soslu",
+            "emoji": "🍛",
+            "desc": "Egzotik köri sosu"
+          },
+          {
+            "name": "Pilav Üstü K. Kremalı",
+            "emoji": "🥛",
+            "desc": "Kadifemsi krema sosu"
+          },
+          {
+            "name": "Pilav Üstü S. Baharatlı",
+            "emoji": "🌶️",
+            "desc": "Sıcak baharatlar"
+          },
+          {
+            "name": "Patates K. Porsiyon",
+            "emoji": "🍟",
+            "desc": "Çıtır patates kızartması"
+          }
+        ]
+      },
+      {
+        "id": "icecek",
+        "label": "🥤 İçecekler",
+        "items": [
+          {
+            "name": "Büyük Ayran",
+            "emoji": "🥛",
+            "desc": "Soğuk & taze"
+          },
+          {
+            "name": "Küçük Ayran",
+            "emoji": "🥛",
+            "desc": "Soğuk & taze"
+          },
+          {
+            "name": "Kola",
+            "emoji": "🥤",
+            "desc": "Soğuk içecek"
+          },
+          {
+            "name": "Sade Soda",
+            "emoji": "💧",
+            "desc": "Ferahlatıcı"
+          },
+          {
+            "name": "Meyveli Soda",
+            "emoji": "🍓",
+            "desc": "Çeşitli tatlar"
+          },
+          {
+            "name": "Şalgam Acılı",
+            "emoji": "🌶️",
+            "desc": "Geleneksel lezzet"
+          },
+          {
+            "name": "Meyve Suyu Kutu",
+            "emoji": "🧃",
+            "desc": "Büyük boy"
+          },
+          {
+            "name": "Meyve Suyu Küçük",
+            "emoji": "🧃",
+            "desc": "Küçük boy"
+          },
+          {
+            "name": "Soğuk Çay",
+            "emoji": "🍵",
+            "desc": "Serinletici"
+          },
+          {
+            "name": "Su",
+            "emoji": "💧",
+            "desc": "Doğal kaynak suyu"
+          },
+          {
+            "name": "Çay",
+            "emoji": "☕",
+            "desc": "Sıcak demlik çay"
+          }
+        ]
+      }
+    ]
+  }
+}

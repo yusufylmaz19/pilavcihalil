@@ -855,11 +855,6 @@ section {
   height: 320px;
   display: block;
   border: none;
-  transition: filter 0.3s;
-}
-
-.map-wrapper:hover iframe {
-  filter: grayscale(0%) !important;
 }
 
 .map-open-btn {

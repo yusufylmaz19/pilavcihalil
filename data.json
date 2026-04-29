@@ -38,12 +38,12 @@
     "hours": [
       {
         "day": "Pazartesi – Cumartesi",
-        "open": "09:30",
-        "close": "00:00"
+        "open": "11:30",
+        "close": "01:30"
       },
       {
         "day": "Pazar",
-        "open": "11:00",
+        "open": "11:30",
         "close": "00:00"
       }
     ]
@@ -120,43 +120,43 @@
             "name": "Pilav Üstü Tavuk",
             "emoji": "🍗",
             "desc": "Özel soslu izgara tavuk",
-            "price": 150
+            "price": 170
           },
           {
             "name": "Nohutlu Pilav Üstü Tavuk",
             "emoji": "🍗",
             "desc": "Nohutlu pilav üstü tavuk",
-            "price": 160
+            "price": 180
           },
           {
             "name": "Mısırlı Pilav Üstü Tavuk",
             "emoji": "🍗",
             "desc": "Mısırlı pilav üstü tavuk",
-            "price": 160
+            "price": 180
           },
           {
             "name": "Pilav Üstü Fajita",
             "emoji": "🌯",
             "desc": "Acılı & baharatlı fajita",
-            "price": 190
+            "price": 230
           },
           {
             "name": "Pilav Üstü Köri Soslu Tavuk",
             "emoji": "🍛",
             "desc": "Egzotik köri sosu",
-            "price": 180
+            "price": 230
           },
           {
             "name": "Pilav Üstü Köri Kremalı",
             "emoji": "🥛",
             "desc": "Kadifemsi krema sosu",
-            "price": 180
+            "price": 230
           },
           {
             "name": "Pilav Üstü Soslu Baharatlı",
             "emoji": "🌶️",
             "desc": "Sıcak baharatlar",
-            "price": 180
+            "price": 230
           }
         ]
       },
@@ -181,14 +181,7 @@
       {
         "id": "yan-urunler",
         "label": "🍟 Yan Ürünler",
-        "items": [
-          {
-            "name": "Patates Kızartması Porsiyon",
-            "emoji": "🍟",
-            "desc": "Çıtır patates kızartması",
-            "price": 70
-          }
-        ]
+        "items": []
       },
       {
         "id": "icecekler",
@@ -198,19 +191,19 @@
             "name": "B.Ayran",
             "emoji": "🥛",
             "desc": "Büyük boy ayran",
-            "price": 35
+            "price": 40
           },
           {
             "name": "K.Ayran",
             "emoji": "🥛",
             "desc": "Küçük boy ayran",
-            "price": 25
+            "price": 30
           },
           {
             "name": "Kola",
             "emoji": "🥤",
             "desc": "Soğuk içecek",
-            "price": 40
+            "price": 60
           },
           {
             "name": "Sade Soda",
@@ -228,31 +221,31 @@
             "name": "Şalgam Acılı",
             "emoji": "🌶️",
             "desc": "Geleneksel lezzet",
-            "price": 35
+            "price": 40
           },
           {
             "name": "Meyve Suyu Kutu",
             "emoji": "🧃",
             "desc": "Büyük boy",
-            "price": 35
+            "price": 60
           },
           {
             "name": "Meyve Suyu Küçük",
             "emoji": "🧃",
             "desc": "Küçük boy",
-            "price": 25
+            "price": 35
           },
           {
             "name": "Soğuk Çay",
             "emoji": "🍵",
             "desc": "Serinletici",
-            "price": 40
+            "price": 60
           },
           {
             "name": "Su",
             "emoji": "💧",
             "desc": "Doğal kaynak suyu",
-            "price": 10
+            "price": 20
           },
           {
             "name": "Çay",

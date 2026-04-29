@@ -89,7 +89,92 @@
    ══════════════════════════════════════ */
 let menuData = null;
 let cart = []; // { name, emoji, price, qty }
-const STORAGE_KEY = 'maxpilav_hesap_gecmisi';
+
+/* ══════════════════════════════════════
+   INDEXED DB SETUP
+   ══════════════════════════════════════ */
+const DB_NAME = 'MaxPilavDB';
+const DB_VERSION = 1;
+const STORE_NAME = 'receipts';
+let db = null;
+
+function openDB() {
+    return new Promise((resolve, reject) => {
+        if (db) { resolve(db); return; }
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onupgradeneeded = (e) => {
+            const database = e.target.result;
+            if (!database.objectStoreNames.contains(STORE_NAME)) {
+                const store = database.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                store.createIndex('date', 'date', { unique: false });
+            }
+        };
+        request.onsuccess = (e) => {
+            db = e.target.result;
+            resolve(db);
+        };
+        request.onerror = (e) => {
+            console.error('IndexedDB açılamadı:', e.target.error);
+            reject(e.target.error);
+        };
+    });
+}
+
+// Tüm hesapları getir (yeniden eskiye sıralı)
+async function getHistory() {
+    const database = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = database.transaction(STORE_NAME, 'readonly');
+        const store = tx.objectStore(STORE_NAME);
+        const request = store.getAll();
+        request.onsuccess = () => {
+            const results = request.result || [];
+            // Yeniden eskiye sırala
+            results.sort((a, b) => new Date(b.date) - new Date(a.date));
+            resolve(results);
+        };
+        request.onerror = () => reject(request.error);
+    });
+}
+
+// Tek hesap kaydet
+async function addReceipt(receipt) {
+    const database = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = database.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        const request = store.add(receipt);
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+    });
+}
+
+// Tek hesap sil
+async function removeReceipt(id) {
+    const database = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = database.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        const request = store.delete(id);
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+    });
+}
+
+// Toplam hesap sayısını getir
+async function getReceiptCount() {
+    const database = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = database.transaction(STORE_NAME, 'readonly');
+        const store = tx.objectStore(STORE_NAME);
+        const request = store.count();
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+// DB'yi başlat
+openDB().catch(err => console.error('DB başlatılamadı:', err));
 
 /* ══════════════════════════════════════
    INIT
@@ -164,7 +249,6 @@ function clearCart() {
 
 function renderCart() {
     const container = document.getElementById('cart-items');
-    const emptyEl = document.getElementById('cart-empty');
     const countEl = document.getElementById('cart-count');
     const totalEl = document.getElementById('cart-total');
     const saveBtn = document.getElementById('btn-save');
@@ -200,37 +284,32 @@ function renderCart() {
 /* ══════════════════════════════════════
    SAVE RECEIPT
    ══════════════════════════════════════ */
-function saveReceipt() {
+async function saveReceipt() {
     if (cart.length === 0) return;
 
     const now = new Date();
+    const count = await getReceiptCount();
+    const counter = (count + 1).toString().padStart(4, '0');
+    const id = `MP-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}-${counter}`;
+
     const receipt = {
-        id: generateId(),
+        id: id,
         date: now.toISOString(),
         items: cart.map(c => ({ ...c })),
         total: cart.reduce((s, c) => s + c.price * c.qty, 0),
         itemCount: cart.reduce((s, c) => s + c.qty, 0)
     };
 
-    // Save to localStorage
-    const history = getHistory();
-    history.unshift(receipt);
-    saveHistory(history);
-
-    // Show receipt
-    showReceipt(receipt);
-
-    // Clear cart
-    cart = [];
-    renderCart();
-
-    showToast('✅ Hesap kaydedildi!', 'success');
-}
-
-function generateId() {
-    const now = new Date();
-    const counter = (getHistory().length + 1).toString().padStart(4, '0');
-    return `MP-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}-${counter}`;
+    try {
+        await addReceipt(receipt);
+        showReceipt(receipt);
+        cart = [];
+        renderCart();
+        showToast('✅ Hesap kaydedildi!', 'success');
+    } catch (err) {
+        console.error('Hesap kaydedilemedi:', err);
+        showToast('❌ Kayıt hatası!', '');
+    }
 }
 
 /* ══════════════════════════════════════
@@ -279,25 +358,15 @@ function closeReceipt() {
 }
 
 /* ══════════════════════════════════════
-   HISTORY (localStorage)
+   HISTORY (IndexedDB)
    ══════════════════════════════════════ */
-function getHistory() {
-    try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    } catch { return []; }
-}
-
-function saveHistory(data) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-
-function toggleHistory() {
+async function toggleHistory() {
     const overlay = document.getElementById('history-overlay');
     const isOpen = overlay.classList.contains('show');
     if (isOpen) {
         overlay.classList.remove('show');
     } else {
-        renderHistory();
+        await renderHistory();
         overlay.classList.add('show');
     }
 }
@@ -308,9 +377,9 @@ function closeHistoryOutside(e) {
     }
 }
 
-function renderHistory() {
+async function renderHistory() {
     const body = document.getElementById('history-body');
-    const history = getHistory();
+    const history = await getHistory();
 
     if (history.length === 0) {
         body.innerHTML = '<div class="history-empty">📭 Henüz kayıtlı hesap yok</div>';
@@ -356,21 +425,24 @@ function renderHistory() {
     body.innerHTML = html;
 }
 
-function viewReceipt(id) {
-    const history = getHistory();
+async function viewReceipt(id) {
+    const history = await getHistory();
     const receipt = history.find(r => r.id === id);
     if (receipt) {
         showReceipt(receipt);
     }
 }
 
-function deleteReceipt(id) {
+async function deleteReceipt(id) {
     if (!confirm('Bu hesabı silmek istediğinize emin misiniz?')) return;
-    let history = getHistory();
-    history = history.filter(r => r.id !== id);
-    saveHistory(history);
-    renderHistory();
-    showToast('🗑️ Hesap silindi', '');
+    try {
+        await removeReceipt(id);
+        await renderHistory();
+        showToast('🗑️ Hesap silindi', '');
+    } catch (err) {
+        console.error('Silme hatası:', err);
+        showToast('❌ Silme hatası!', '');
+    }
 }
 
 /* ══════════════════════════════════════

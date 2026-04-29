@@ -224,6 +224,43 @@ body {
 .cart-total-label { font-size: 0.85rem; color: var(--text2); }
 .cart-total-val { font-size: 1.4rem; font-weight: 800; color: var(--orange); }
 
+.payment-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.payment-label { font-size: 0.85rem; color: var(--text2); font-weight: 500; }
+.payment-input-wrap {
+  display: flex; align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 0 10px;
+  transition: border-color 0.2s;
+}
+.payment-input-wrap:focus-within { border-color: var(--orange); }
+.payment-currency { color: var(--text3); font-size: 0.9rem; font-weight: 600; margin-right: 4px; }
+.payment-input {
+  background: none; border: none; outline: none;
+  color: var(--text);
+  font-family: inherit; font-size: 1rem; font-weight: 700;
+  width: 90px; padding: 8px 0;
+  -moz-appearance: textfield;
+}
+.payment-input::placeholder { color: var(--text3); }
+.payment-input::-webkit-outer-spin-button,
+.payment-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+.change-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+  padding: 8px 12px;
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.15);
+  border-radius: 8px;
+}
+.change-label { font-size: 0.85rem; color: var(--text2); }
+.change-val { font-size: 1.1rem; font-weight: 800; color: var(--green); }
+
 .btn-save {
   width: 100%;
   padding: 14px;

@@ -51,6 +51,17 @@
                 <span class="cart-total-label">Toplam</span>
                 <span class="cart-total-val" id="cart-total">₺0</span>
             </div>
+            <div class="payment-row">
+                <label class="payment-label" for="paid-amount">💵 Alınan</label>
+                <div class="payment-input-wrap">
+                    <span class="payment-currency">₺</span>
+                    <input type="number" id="paid-amount" class="payment-input" placeholder="0" min="0" oninput="calcChange()" />
+                </div>
+            </div>
+            <div class="change-row" id="change-row">
+                <span class="change-label">Para Üstü</span>
+                <span class="change-val" id="change-val">₺0</span>
+            </div>
             <button class="btn-save" id="btn-save" disabled onclick="saveReceipt()">
                 💾 Hesabı Kaydet & Yazdır
             </button>
@@ -260,6 +271,10 @@ function renderCart() {
     totalEl.textContent = '₺' + totalPrice;
     saveBtn.disabled = cart.length === 0;
 
+    // Reset ödeme alanı
+    document.getElementById('paid-amount').value = '';
+    calcChange();
+
     if (cart.length === 0) {
         container.innerHTML = `<div class="cart-empty"><div class="empty-icon">🛒</div>Menüden ürün ekleyin</div>`;
         return;
@@ -292,12 +307,19 @@ async function saveReceipt() {
     const counter = (count + 1).toString().padStart(4, '0');
     const id = `MP-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}-${counter}`;
 
+    const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
+    const paidInput = document.getElementById('paid-amount');
+    const paid = parseFloat(paidInput.value) || 0;
+    const change = paid > 0 ? paid - total : 0;
+
     const receipt = {
         id: id,
         date: now.toISOString(),
         items: cart.map(c => ({ ...c })),
-        total: cart.reduce((s, c) => s + c.price * c.qty, 0),
-        itemCount: cart.reduce((s, c) => s + c.qty, 0)
+        total: total,
+        itemCount: cart.reduce((s, c) => s + c.qty, 0),
+        paid: paid,
+        change: change
     };
 
     try {
@@ -341,8 +363,12 @@ function showReceipt(receipt) {
         <hr class="r-divider"/>
         <div class="r-total-row">
             <span>TOPLAM</span>
-            <span>₺${receipt.total}</span>
+            <span>₺${receipt.total.toFixed(2)}</span>
         </div>
+        ${receipt.paid > 0 ? `
+        <div class="r-row"><span>Alınan:</span><span>₺${receipt.paid.toFixed(2)}</span></div>
+        <div class="r-row" style="font-weight:700;color:#22c55e"><span>Para Üstü:</span><span>₺${receipt.change.toFixed(2)}</span></div>
+        ` : ''}
         <div class="r-footer">Afiyet olsun! • Max Pilav Halil Usta</div>
     `;
 
@@ -442,6 +468,30 @@ async function deleteReceipt(id) {
     } catch (err) {
         console.error('Silme hatası:', err);
         showToast('❌ Silme hatası!', '');
+    }
+}
+
+/* ══════════════════════════════════════
+   PAYMENT / CHANGE
+   ══════════════════════════════════════ */
+function calcChange() {
+    const totalPrice = cart.reduce((s, c) => s + c.price * c.qty, 0);
+    const paid = parseFloat(document.getElementById('paid-amount').value) || 0;
+    const change = paid - totalPrice;
+    const changeEl = document.getElementById('change-val');
+    const changeRow = document.getElementById('change-row');
+
+    if (paid > 0) {
+        changeEl.textContent = '₺' + change.toFixed(2);
+        changeRow.style.display = 'flex';
+        if (change < 0) {
+            changeEl.style.color = '#ef4444';
+        } else {
+            changeEl.style.color = '#22c55e';
+        }
+    } else {
+        changeEl.textContent = '₺0';
+        changeEl.style.color = 'var(--text2)';
     }
 }
 

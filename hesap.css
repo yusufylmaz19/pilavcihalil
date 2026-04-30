@@ -384,20 +384,21 @@ body {
 .receipt-box {
   background:#fff;
   color:#111;
-  width:320px;
+  width:72mm;
   border-radius:var(--radius);
-  padding:28px 24px;
-  font-family:'Courier New',monospace;
-  font-size:0.78rem;
+  padding:4mm 4mm;
+  font-family:'Courier New','Lucida Console',monospace;
+  font-size:11px;
+  line-height:1.4;
   animation: modalIn 0.25s ease;
 }
-.receipt-box .r-header { text-align:center; margin-bottom:14px; }
-.receipt-box .r-shop { font-size:1rem; font-weight:700; }
-.receipt-box .r-sub { font-size:0.7rem; color:#666; }
-.receipt-box .r-divider { border:none; border-top:1px dashed #ccc; margin:10px 0; }
-.receipt-box .r-row { display:flex; justify-content:space-between; padding:2px 0; }
-.receipt-box .r-total-row { display:flex; justify-content:space-between; font-weight:700; font-size:0.9rem; padding:6px 0; }
-.receipt-box .r-footer { text-align:center; margin-top:10px; font-size:0.68rem; color:#888; }
+.receipt-box .r-header { text-align:center; margin-bottom:3mm; }
+.receipt-box .r-shop { font-size:14px; font-weight:700; letter-spacing:0.5px; }
+.receipt-box .r-sub { font-size:10px; color:#666; margin-top:1mm; }
+.receipt-box .r-divider { border:none; border-top:1px dashed #333; margin:2mm 0; }
+.receipt-box .r-row { display:flex; justify-content:space-between; padding:0.5mm 0; font-size:11px; }
+.receipt-box .r-total-row { display:flex; justify-content:space-between; font-weight:700; font-size:13px; padding:1.5mm 0; border-top:1px solid #333; border-bottom:1px solid #333; margin:1mm 0; }
+.receipt-box .r-footer { text-align:center; margin-top:3mm; font-size:9px; color:#666; }
 
 .receipt-actions {
   display:flex; gap:8px; margin-top:16px; justify-content:center;
@@ -417,13 +418,43 @@ body {
 .receipt-actions .btn-close-receipt { background:#333; color:#fff; }
 .receipt-actions .btn-close-receipt:hover { background:#555; }
 
-/* ── PRINT STYLES ── */
+/* ── PRINT STYLES (Zijiang POS-8360 — 80mm thermal) ── */
+@page {
+  size: 80mm auto;
+  margin: 0;
+}
+
 @media print {
+  html, body {
+    width: 80mm;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
   body * { visibility:hidden; }
-  .receipt-box, .receipt-box * { visibility:visible; }
-  .receipt-box { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); box-shadow:none; }
+  .receipt-box, .receipt-box * { visibility:visible !important; }
+  .receipt-box {
+    position:absolute;
+    left:0; top:0;
+    width:72mm;
+    margin:4mm auto;
+    padding:0 !important;
+    box-shadow:none !important;
+    border-radius:0 !important;
+    border:none !important;
+    font-size:11px;
+    line-height:1.35;
+    page-break-inside: avoid;
+  }
+  .receipt-box .r-shop { font-size:14px; }
+  .receipt-box .r-sub { font-size:10px; }
+  .receipt-box .r-row { font-size:11px; padding:0.3mm 0; }
+  .receipt-box .r-total-row { font-size:13px; }
+  .receipt-box .r-footer { font-size:9px; }
+  .receipt-box .r-divider { border-top:1px dashed #000; }
   .receipt-actions { display:none !important; }
   .receipt-overlay { background:transparent !important; backdrop-filter:none !important; }
+  .topbar, .app-layout, .history-overlay, .toast { display:none !important; }
 }
 
 /* ── TOAST ── */

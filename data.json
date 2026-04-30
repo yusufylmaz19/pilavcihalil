@@ -181,7 +181,20 @@
       {
         "id": "yan-urunler",
         "label": "🍟 Yan Ürünler",
-        "items": []
+        "items": [
+          {
+            "name": "Nohut",
+            "emoji": "🍛",
+            "desc": "Pilav üstü",
+            "price": 10
+          },
+           {
+            "name": "Mısır",
+            "emoji": "🍛",
+            "desc": "Pilav üstü",
+            "price": 10
+          }
+        ]
       },
       {
         "id": "icecekler",

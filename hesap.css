@@ -383,22 +383,25 @@ body {
 
 .receipt-box {
   background:#fff;
-  color:#111;
+  color:#000;
   width:72mm;
   border-radius:var(--radius);
   padding:4mm 4mm;
-  font-family:'Courier New','Lucida Console',monospace;
-  font-size:11px;
-  line-height:1.4;
+  font-family:'Arial Black','Helvetica Neue',Arial,sans-serif;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.5;
   animation: modalIn 0.25s ease;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 .receipt-box .r-header { text-align:center; margin-bottom:3mm; }
-.receipt-box .r-shop { font-size:14px; font-weight:700; letter-spacing:0.5px; }
-.receipt-box .r-sub { font-size:10px; color:#666; margin-top:1mm; }
-.receipt-box .r-divider { border:none; border-top:1px dashed #333; margin:2mm 0; }
-.receipt-box .r-row { display:flex; justify-content:space-between; padding:0.5mm 0; font-size:11px; }
-.receipt-box .r-total-row { display:flex; justify-content:space-between; font-weight:700; font-size:13px; padding:1.5mm 0; border-top:1px solid #333; border-bottom:1px solid #333; margin:1mm 0; }
-.receipt-box .r-footer { text-align:center; margin-top:3mm; font-size:9px; color:#666; }
+.receipt-box .r-shop { font-size:16px; font-weight:900; letter-spacing:0.5px; color:#000; text-transform:uppercase; }
+.receipt-box .r-sub { font-size:11px; color:#000; margin-top:1mm; font-weight:700; }
+.receipt-box .r-divider { border:none; border-top:2px dashed #000; margin:2.5mm 0; }
+.receipt-box .r-row { display:flex; justify-content:space-between; padding:0.8mm 0; font-size:12px; font-weight:700; color:#000; }
+.receipt-box .r-total-row { display:flex; justify-content:space-between; font-weight:900; font-size:15px; padding:2mm 0; border-top:2px solid #000; border-bottom:2px solid #000; margin:1.5mm 0; color:#000; }
+.receipt-box .r-footer { text-align:center; margin-top:3mm; font-size:10px; color:#000; font-weight:700; }
 
 .receipt-actions {
   display:flex; gap:8px; margin-top:16px; justify-content:center;
@@ -432,26 +435,30 @@ body {
     background: #fff !important;
   }
   body * { visibility:hidden; }
-  .receipt-box, .receipt-box * { visibility:visible !important; }
+  .receipt-box, .receipt-box * { visibility:visible !important; color:#000 !important; }
   .receipt-box {
     position:absolute;
     left:0; top:0;
     width:72mm;
-    margin:4mm auto;
+    margin:2mm auto;
     padding:0 !important;
     box-shadow:none !important;
     border-radius:0 !important;
     border:none !important;
-    font-size:11px;
-    line-height:1.35;
+    font-family:'Arial Black','Helvetica Neue',Arial,sans-serif;
+    font-size:12px;
+    font-weight:700;
+    line-height:1.5;
     page-break-inside: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
-  .receipt-box .r-shop { font-size:14px; }
-  .receipt-box .r-sub { font-size:10px; }
-  .receipt-box .r-row { font-size:11px; padding:0.3mm 0; }
-  .receipt-box .r-total-row { font-size:13px; }
-  .receipt-box .r-footer { font-size:9px; }
-  .receipt-box .r-divider { border-top:1px dashed #000; }
+  .receipt-box .r-shop { font-size:16px; font-weight:900; }
+  .receipt-box .r-sub { font-size:11px; font-weight:700; }
+  .receipt-box .r-row { font-size:12px; font-weight:700; padding:0.5mm 0; }
+  .receipt-box .r-total-row { font-size:15px; font-weight:900; }
+  .receipt-box .r-footer { font-size:10px; font-weight:700; }
+  .receipt-box .r-divider { border-top:2px dashed #000; }
   .receipt-actions { display:none !important; }
   .receipt-overlay { background:transparent !important; backdrop-filter:none !important; }
   .topbar, .app-layout, .history-overlay, .toast { display:none !important; }

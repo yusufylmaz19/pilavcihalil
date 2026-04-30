@@ -367,7 +367,7 @@ function showReceipt(receipt) {
         </div>
         ${receipt.paid > 0 ? `
         <div class="r-row"><span>Alınan:</span><span>₺${receipt.paid.toFixed(2)}</span></div>
-        <div class="r-row" style="font-weight:700;color:#22c55e"><span>Para Üstü:</span><span>₺${receipt.change.toFixed(2)}</span></div>
+        <div class="r-row" style="font-weight:900;color:#000"><span>Para Üstü:</span><span>₺${receipt.change.toFixed(2)}</span></div>
         ` : ''}
         <div class="r-footer">Afiyet olsun! • Max Pilav Halil Usta</div>
     `;

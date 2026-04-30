@@ -24,6 +24,7 @@
     </div>
     <div class="topbar-right">
         <button class="topbar-btn" id="btn-zrapor" onclick="openZReport()">📊 Z Raporu</button>
+        <button class="topbar-btn" id="btn-products" onclick="openProductManager()">⚙️ Ürünler</button>
         <button class="topbar-btn" id="btn-history" onclick="toggleHistory()">📋 Geçmiş</button>
         <a class="topbar-btn" href="index.html">🏠 Ana Sayfa</a>
     </div>
@@ -146,6 +147,21 @@
     </div>
 </div>
 
+<!-- ═══ PRODUCT MANAGEMENT MODAL ═══ -->
+<div class="prod-overlay" id="prod-overlay" onclick="closeProdOutside(event)">
+    <div class="prod-modal">
+        <div class="prod-header">
+            <h2>⚙️ Ürün Yönetimi</h2>
+            <button class="history-close" onclick="closeProductManager()">&times;</button>
+        </div>
+        <div class="prod-toolbar">
+            <button class="topbar-btn" onclick="showAddProductForm()">➕ Yeni Ürün</button>
+            <button class="topbar-btn" onclick="resetAllProducts()">🔄 Tümünü Varsayılana Dön</button>
+        </div>
+        <div class="prod-body" id="prod-body"></div>
+    </div>
+</div>
+
 <!-- ═══ TOAST ═══ -->
 <div class="toast" id="toast"></div>
 
@@ -160,9 +176,11 @@ let cart = []; // { name, emoji, price, qty }
    INDEXED DB SETUP
    ══════════════════════════════════════ */
 const DB_NAME = 'MaxPilavDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_NAME = 'receipts';
+const PRODUCT_STORE = 'products';
 let db = null;
+let defaultCategories = []; // data.json'dan gelen orijinal ürünler
 
 function openDB() {
     return new Promise((resolve, reject) => {
@@ -173,6 +191,9 @@ function openDB() {
             if (!database.objectStoreNames.contains(STORE_NAME)) {
                 const store = database.createObjectStore(STORE_NAME, { keyPath: 'id' });
                 store.createIndex('date', 'date', { unique: false });
+            }
+            if (!database.objectStoreNames.contains(PRODUCT_STORE)) {
+                database.createObjectStore(PRODUCT_STORE, { keyPath: 'name' });
             }
         };
         request.onsuccess = (e) => {
@@ -186,7 +207,7 @@ function openDB() {
     });
 }
 
-// Tüm hesapları getir (yeniden eskiye sıralı)
+// ── Receipt CRUD ──
 async function getHistory() {
     const database = await openDB();
     return new Promise((resolve, reject) => {
@@ -195,7 +216,6 @@ async function getHistory() {
         const request = store.getAll();
         request.onsuccess = () => {
             const results = request.result || [];
-            // Yeniden eskiye sırala
             results.sort((a, b) => new Date(b.date) - new Date(a.date));
             resolve(results);
         };
@@ -203,7 +223,6 @@ async function getHistory() {
     });
 }
 
-// Tek hesap kaydet
 async function addReceipt(receipt) {
     const database = await openDB();
     return new Promise((resolve, reject) => {
@@ -215,7 +234,6 @@ async function addReceipt(receipt) {
     });
 }
 
-// Tek hesap sil
 async function removeReceipt(id) {
     const database = await openDB();
     return new Promise((resolve, reject) => {
@@ -227,7 +245,6 @@ async function removeReceipt(id) {
     });
 }
 
-// Toplam hesap sayısını getir
 async function getReceiptCount() {
     const database = await openDB();
     return new Promise((resolve, reject) => {
@@ -239,19 +256,125 @@ async function getReceiptCount() {
     });
 }
 
+// ── Product CRUD (IndexedDB) ──
+async function getAllProducts() {
+    const database = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = database.transaction(PRODUCT_STORE, 'readonly');
+        const store = tx.objectStore(PRODUCT_STORE);
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+async function saveProduct(product) {
+    const database = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = database.transaction(PRODUCT_STORE, 'readwrite');
+        const store = tx.objectStore(PRODUCT_STORE);
+        const request = store.put(product);
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+    });
+}
+
+async function removeProduct(name) {
+    const database = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = database.transaction(PRODUCT_STORE, 'readwrite');
+        const store = tx.objectStore(PRODUCT_STORE);
+        const request = store.delete(name);
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+    });
+}
+
+async function clearAllProducts() {
+    const database = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = database.transaction(PRODUCT_STORE, 'readwrite');
+        const store = tx.objectStore(PRODUCT_STORE);
+        const request = store.clear();
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+    });
+}
+
 // DB'yi başlat
 openDB().catch(err => console.error('DB başlatılamadı:', err));
 
 /* ══════════════════════════════════════
+   MERGE: data.json + IndexedDB
+   ══════════════════════════════════════ */
+async function getMergedCategories() {
+    const overrides = await getAllProducts();
+    const overrideMap = {};
+    const customProducts = [];
+    overrides.forEach(p => {
+        if (p.isCustom) {
+            customProducts.push(p);
+        } else {
+            overrideMap[p.name] = p;
+        }
+    });
+
+    // Clone defaults and apply overrides
+    const merged = defaultCategories.map(cat => {
+        const items = cat.items.map(item => {
+            const ov = overrideMap[item.name];
+            if (ov) {
+                return { ...item, price: ov.price, desc: ov.desc, emoji: ov.emoji, _modified: true };
+            }
+            return { ...item };
+        });
+        return { ...cat, items };
+    });
+
+    // Group custom products by category
+    const customByCat = {};
+    customProducts.forEach(p => {
+        const catId = p.category || 'ozel';
+        if (!customByCat[catId]) customByCat[catId] = [];
+        customByCat[catId].push(p);
+    });
+
+    // Add custom products to existing categories or create new ones
+    for (const [catId, products] of Object.entries(customByCat)) {
+        const existingCat = merged.find(c => c.id === catId);
+        if (existingCat) {
+            products.forEach(p => {
+                existingCat.items.push({ name: p.name, emoji: p.emoji, desc: p.desc, price: p.price, _modified: true, _custom: true });
+            });
+        } else {
+            merged.push({
+                id: catId,
+                label: '⭐ Özel Ürünler',
+                items: products.map(p => ({ name: p.name, emoji: p.emoji, desc: p.desc, price: p.price, _modified: true, _custom: true }))
+            });
+        }
+    }
+
+    return merged;
+}
+
+/* ══════════════════════════════════════
    INIT
    ══════════════════════════════════════ */
-fetch('data.json')
-    .then(r => r.json())
-    .then(data => {
+async function initApp() {
+    try {
+        const resp = await fetch('data.json');
+        const data = await resp.json();
         menuData = data;
-        buildMenuPanel(data.menu.categories);
-    })
-    .catch(err => console.error('data.json yüklenemedi:', err));
+        defaultCategories = JSON.parse(JSON.stringify(data.menu.categories)); // deep clone
+        const merged = await getMergedCategories();
+        buildMenuPanel(merged);
+    } catch (err) {
+        console.error('Başlatma hatası:', err);
+    }
+}
+
+initApp();
 
 /* ══════════════════════════════════════
    BUILD MENU
@@ -269,6 +392,7 @@ function buildMenuPanel(categories) {
         grid.className = 'items-grid';
 
         cat.items.forEach(item => {
+            item._catId = cat.id; // store category reference
             const btn = document.createElement('div');
             btn.className = 'item-btn';
             btn.innerHTML = `
@@ -279,6 +403,22 @@ function buildMenuPanel(categories) {
                 addToCart(item);
                 createRipple(e, btn);
             });
+            // Right-click quick edit
+            btn.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                showQuickEdit(e, item);
+            });
+            // Long press for mobile
+            let longPressTimer;
+            btn.addEventListener('touchstart', (e) => {
+                longPressTimer = setTimeout(() => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    showQuickEdit({ clientX: touch.clientX, clientY: touch.clientY }, item);
+                }, 600);
+            }, { passive: false });
+            btn.addEventListener('touchend', () => clearTimeout(longPressTimer));
+            btn.addEventListener('touchmove', () => clearTimeout(longPressTimer));
             grid.appendChild(btn);
         });
         panel.appendChild(grid);
@@ -977,6 +1117,306 @@ async function downloadZReportPDF() {
         showToast('📄 HTML olarak indirildi, tarayıcıda açıp PDF yapabilirsiniz', 'success');
         setTimeout(() => URL.revokeObjectURL(url), 10000);
     }
+}
+
+/* ══════════════════════════════════════
+   QUICK EDIT POPUP (sağ tık / uzun basış)
+   ══════════════════════════════════════ */
+function showQuickEdit(e, item) {
+    closeQuickEdit(); // önceki varsa kapat
+    const popup = document.createElement('div');
+    popup.className = 'quick-edit-popup';
+    popup.id = 'quick-edit-popup';
+
+    // Position
+    let x = e.clientX, y = e.clientY;
+    popup.style.left = Math.min(x, window.innerWidth - 250) + 'px';
+    popup.style.top = Math.min(y, window.innerHeight - 200) + 'px';
+
+    popup.innerHTML = `
+        <div class="qe-title">${item.emoji} ${item.name}</div>
+        <div class="qe-row"><label>Fiyat</label><input type="number" id="qe-price" value="${item.price}" min="0" /></div>
+        <div class="qe-row"><label>Açıklama</label><input type="text" id="qe-desc" value="${item.desc || ''}" /></div>
+        <div class="qe-row"><label>Emoji</label><input type="text" id="qe-emoji" value="${item.emoji}" /></div>
+        <div class="qe-btns">
+            <button class="qe-cancel" onclick="closeQuickEdit()">İptal</button>
+            <button class="qe-save" id="qe-save-btn">💾 Kaydet</button>
+        </div>
+    `;
+    document.body.appendChild(popup);
+
+    // Save handler
+    document.getElementById('qe-save-btn').addEventListener('click', async () => {
+        const newPrice = parseFloat(document.getElementById('qe-price').value) || 0;
+        const newDesc = document.getElementById('qe-desc').value.trim();
+        const newEmoji = document.getElementById('qe-emoji').value.trim() || item.emoji;
+
+        await saveProduct({
+            name: item.name,
+            emoji: newEmoji,
+            desc: newDesc,
+            price: newPrice,
+            category: item._catId || '',
+            isCustom: !!item._custom
+        });
+
+        closeQuickEdit();
+        showToast(`✅ ${item.name} güncellendi!`, 'success');
+        await refreshMenu();
+    });
+
+    // Click outside to close
+    setTimeout(() => {
+        document.addEventListener('click', quickEditOutsideHandler);
+    }, 100);
+}
+
+function quickEditOutsideHandler(e) {
+    const popup = document.getElementById('quick-edit-popup');
+    if (popup && !popup.contains(e.target)) {
+        closeQuickEdit();
+    }
+}
+
+function closeQuickEdit() {
+    const popup = document.getElementById('quick-edit-popup');
+    if (popup) popup.remove();
+    document.removeEventListener('click', quickEditOutsideHandler);
+}
+
+/* ══════════════════════════════════════
+   REFRESH MENU (after product changes)
+   ══════════════════════════════════════ */
+async function refreshMenu() {
+    const merged = await getMergedCategories();
+    buildMenuPanel(merged);
+}
+
+/* ══════════════════════════════════════
+   PRODUCT MANAGER MODAL
+   ══════════════════════════════════════ */
+function openProductManager() {
+    document.getElementById('prod-overlay').classList.add('show');
+    renderProductList();
+}
+
+function closeProductManager() {
+    document.getElementById('prod-overlay').classList.remove('show');
+}
+
+function closeProdOutside(e) {
+    if (e.target === document.getElementById('prod-overlay')) closeProductManager();
+}
+
+async function renderProductList() {
+    const body = document.getElementById('prod-body');
+    const overrides = await getAllProducts();
+    const overrideMap = {};
+    overrides.forEach(p => { overrideMap[p.name] = p; });
+
+    let html = '';
+
+    // Default categories with overrides
+    defaultCategories.forEach(cat => {
+        html += `<div class="prod-cat-title">${cat.label}</div>`;
+        cat.items.forEach(item => {
+            const ov = overrideMap[item.name];
+            const isModified = !!ov && !ov.isCustom;
+            const displayItem = ov ? { ...item, price: ov.price, desc: ov.desc, emoji: ov.emoji } : item;
+            html += buildProdCard(displayItem, cat.id, isModified, false);
+        });
+    });
+
+    // Custom products (not in data.json)
+    const customProducts = overrides.filter(p => p.isCustom);
+    if (customProducts.length > 0) {
+        html += `<div class="prod-cat-title">⭐ Özel (Eklenen) Ürünler</div>`;
+        customProducts.forEach(p => {
+            html += buildProdCard({ name: p.name, emoji: p.emoji, desc: p.desc, price: p.price, _catId: p.category }, p.category, true, true);
+        });
+    }
+
+    body.innerHTML = html;
+}
+
+function buildProdCard(item, catId, isModified, isCustom) {
+    const modBadge = isModified ? `<span class="prod-modified-badge">${isCustom ? 'ÖZEL' : 'DÜZENLENDI'}</span>` : '';
+    const escapedName = item.name.replace(/'/g, "\\'");
+    return `
+    <div class="prod-card ${isCustom ? 'custom' : ''}" id="pcard-${item.name.replace(/\s/g, '_')}">
+        <div class="prod-emoji">${item.emoji}</div>
+        <div class="prod-info">
+            <div class="prod-name">${item.name}${modBadge}</div>
+            <div class="prod-desc">${item.desc || ''}</div>
+        </div>
+        <div class="prod-price-badge">₺${item.price}</div>
+        <div class="prod-actions">
+            <button title="Düzenle" onclick="toggleEditForm('${escapedName}', '${catId}', ${isCustom})">✏️</button>
+            ${isCustom ? `<button class="del" title="Sil" onclick="deleteCustomProduct('${escapedName}')">🗑️</button>` : ''}
+            ${isModified && !isCustom ? `<button title="Varsayılana dön" onclick="resetProduct('${escapedName}')">↩️</button>` : ''}
+        </div>
+    </div>`;
+}
+
+function toggleEditForm(name, catId, isCustom) {
+    const cardId = 'pcard-' + name.replace(/\s/g, '_');
+    const card = document.getElementById(cardId);
+    if (!card) return;
+
+    // If already has form, toggle it
+    const existing = card.querySelector('.prod-edit-form');
+    if (existing) {
+        existing.classList.toggle('show');
+        card.classList.toggle('editing');
+        return;
+    }
+
+    // Find current values
+    let currentItem = null;
+    defaultCategories.forEach(cat => {
+        cat.items.forEach(item => {
+            if (item.name === name) currentItem = { ...item };
+        });
+    });
+
+    // Check IndexedDB override (use displayed values from the card)
+    const priceText = card.querySelector('.prod-price-badge').textContent.replace('₺', '');
+    const descText = card.querySelector('.prod-desc').textContent;
+    const emojiText = card.querySelector('.prod-emoji').textContent.trim();
+
+    const form = document.createElement('div');
+    form.className = 'prod-edit-form show';
+    form.innerHTML = `
+        <div class="prod-edit-row"><label>Emoji</label><input type="text" id="pedit-emoji-${name.replace(/\s/g, '_')}" value="${emojiText}" /></div>
+        <div class="prod-edit-row"><label>Açıklama</label><input type="text" id="pedit-desc-${name.replace(/\s/g, '_')}" value="${descText}" /></div>
+        <div class="prod-edit-row"><label>Fiyat (₺)</label><input type="number" id="pedit-price-${name.replace(/\s/g, '_')}" value="${priceText}" min="0" /></div>
+        ${isCustom ? `<div class="prod-edit-row"><label>Kategori</label>
+            <select id="pedit-cat-${name.replace(/\s/g, '_')}">
+                ${defaultCategories.map(c => `<option value="${c.id}" ${c.id === catId ? 'selected' : ''}>${c.label}</option>`).join('')}
+                <option value="ozel" ${catId === 'ozel' ? 'selected' : ''}>⭐ Özel</option>
+            </select>
+        </div>` : ''}
+        <div class="prod-edit-btns">
+            ${!isCustom ? `<button class="btn-reset-prod" onclick="resetProduct('${name.replace(/'/g, "\\'")}')">↩️ Varsayılan</button>` : ''}
+            <button class="btn-cancel-prod" onclick="this.closest('.prod-edit-form').classList.remove('show'); this.closest('.prod-card').classList.remove('editing');">İptal</button>
+            <button class="btn-save-prod" onclick="saveEditedProduct('${name.replace(/'/g, "\\'")}', '${catId}', ${isCustom})">💾 Kaydet</button>
+        </div>
+    `;
+
+    card.appendChild(form);
+    card.classList.add('editing');
+    // Make card layout wrap
+    card.style.flexWrap = 'wrap';
+}
+
+async function saveEditedProduct(name, catId, isCustom) {
+    const safeName = name.replace(/\s/g, '_');
+    const emoji = document.getElementById('pedit-emoji-' + safeName)?.value.trim() || '🍽️';
+    const desc = document.getElementById('pedit-desc-' + safeName)?.value.trim() || '';
+    const price = parseFloat(document.getElementById('pedit-price-' + safeName)?.value) || 0;
+    const newCat = document.getElementById('pedit-cat-' + safeName)?.value || catId;
+
+    await saveProduct({
+        name: name,
+        emoji: emoji,
+        desc: desc,
+        price: price,
+        category: newCat,
+        isCustom: isCustom
+    });
+
+    showToast(`✅ ${name} kaydedildi!`, 'success');
+    await renderProductList();
+    await refreshMenu();
+}
+
+async function resetProduct(name) {
+    await removeProduct(name);
+    showToast(`↩️ ${name} varsayılana döndürüldü`, '');
+    await renderProductList();
+    await refreshMenu();
+}
+
+async function deleteCustomProduct(name) {
+    if (!confirm(`"${name}" ürününü silmek istediğinize emin misiniz?`)) return;
+    await removeProduct(name);
+    showToast(`🗑️ ${name} silindi`, '');
+    await renderProductList();
+    await refreshMenu();
+}
+
+async function resetAllProducts() {
+    if (!confirm('Tüm ürün değişikliklerini silip varsayılana dönmek istediğinize emin misiniz?')) return;
+    await clearAllProducts();
+    showToast('🔄 Tüm ürünler varsayılana döndürüldü', 'success');
+    await renderProductList();
+    await refreshMenu();
+}
+
+/* ══════════════════════════════════════
+   ADD NEW PRODUCT
+   ══════════════════════════════════════ */
+function showAddProductForm() {
+    const body = document.getElementById('prod-body');
+    // Remove existing add form if any
+    const existingForm = document.getElementById('add-product-form');
+    if (existingForm) { existingForm.remove(); return; }
+
+    const form = document.createElement('div');
+    form.id = 'add-product-form';
+    form.className = 'prod-card editing';
+    form.style.flexWrap = 'wrap';
+    form.style.borderColor = 'var(--green)';
+    form.innerHTML = `
+        <div style="width:100%;font-weight:700;font-size:0.9rem;margin-bottom:8px;">➕ Yeni Ürün Ekle</div>
+        <div class="prod-edit-form show" style="border-top:none;margin-top:0;padding-top:0;">
+            <div class="prod-edit-row"><label>İsim</label><input type="text" id="pnew-name" placeholder="Ürün adı" /></div>
+            <div class="prod-edit-row"><label>Emoji</label><input type="text" id="pnew-emoji" value="🍽️" /></div>
+            <div class="prod-edit-row"><label>Açıklama</label><input type="text" id="pnew-desc" placeholder="Kısa açıklama" /></div>
+            <div class="prod-edit-row"><label>Fiyat (₺)</label><input type="number" id="pnew-price" placeholder="0" min="0" /></div>
+            <div class="prod-edit-row"><label>Kategori</label>
+                <select id="pnew-cat">
+                    ${defaultCategories.map(c => `<option value="${c.id}">${c.label}</option>`).join('')}
+                    <option value="ozel">⭐ Özel</option>
+                </select>
+            </div>
+            <div class="prod-edit-btns">
+                <button class="btn-cancel-prod" onclick="document.getElementById('add-product-form').remove()">İptal</button>
+                <button class="btn-save-prod" onclick="addNewProduct()">💾 Ekle</button>
+            </div>
+        </div>
+    `;
+    body.insertBefore(form, body.firstChild);
+    document.getElementById('pnew-name').focus();
+}
+
+async function addNewProduct() {
+    const name = document.getElementById('pnew-name').value.trim();
+    const emoji = document.getElementById('pnew-emoji').value.trim() || '🍽️';
+    const desc = document.getElementById('pnew-desc').value.trim();
+    const price = parseFloat(document.getElementById('pnew-price').value) || 0;
+    const category = document.getElementById('pnew-cat').value;
+
+    if (!name) {
+        showToast('❌ Ürün adı boş olamaz!', '');
+        return;
+    }
+
+    // Check if name already exists
+    const allProds = await getAllProducts();
+    const exists = allProds.some(p => p.name === name) || defaultCategories.some(c => c.items.some(i => i.name === name));
+    if (exists) {
+        showToast('❌ Bu isimde bir ürün zaten var!', '');
+        return;
+    }
+
+    await saveProduct({
+        name, emoji, desc, price, category, isCustom: true
+    });
+
+    showToast(`✅ ${name} eklendi!`, 'success');
+    await renderProductList();
+    await refreshMenu();
 }
 
 // Sayfa yüklenince ayarları yükle

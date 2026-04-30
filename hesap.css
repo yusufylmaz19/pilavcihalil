@@ -725,6 +725,183 @@ body {
 }
 .zr-pay-row:last-child { border-bottom:none; }
 
+/* ── PRODUCT MANAGEMENT MODAL ── */
+.prod-overlay {
+  display:none;
+  position:fixed; inset:0; z-index:260;
+  background:rgba(0,0,0,0.65);
+  backdrop-filter:blur(6px);
+  animation: fadeIn 0.2s;
+}
+.prod-overlay.show { display:flex; justify-content:center; align-items:flex-start; padding-top:30px; }
+
+.prod-modal {
+  background:var(--bg2);
+  border:1px solid var(--border2);
+  border-radius:var(--radius);
+  width:95%; max-width:750px;
+  max-height:88vh;
+  display:flex; flex-direction:column;
+  animation: modalIn 0.25s ease;
+}
+.prod-header {
+  padding:16px 22px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.prod-header h2 { font-size:1.05rem; font-weight:700; display:flex; align-items:center; gap:8px; }
+
+.prod-toolbar {
+  padding:12px 22px;
+  border-bottom:1px solid var(--border);
+  background:var(--bg3);
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}
+.prod-toolbar .topbar-btn { font-size:0.78rem; padding:7px 12px; }
+
+.prod-body {
+  flex:1; overflow-y:auto; padding:16px 22px;
+}
+.prod-body::-webkit-scrollbar { width:5px; }
+.prod-body::-webkit-scrollbar-thumb { background:var(--surface2); border-radius:9px; }
+
+.prod-cat-title {
+  font-size:0.8rem; font-weight:600; color:var(--orange2);
+  margin:16px 0 8px; text-transform:uppercase; letter-spacing:1px;
+}
+.prod-cat-title:first-child { margin-top:0; }
+
+.prod-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:12px 16px;
+  margin-bottom:6px;
+  display:flex; align-items:center; gap:12px;
+  transition:all 0.15s;
+}
+.prod-card:hover { border-color:var(--orange); background:var(--bg3); }
+.prod-card.editing { border-color:var(--orange); background:var(--bg3); }
+.prod-card.custom { border-left:3px solid var(--green); }
+
+.prod-emoji { font-size:1.4rem; flex-shrink:0; width:36px; text-align:center; }
+.prod-info { flex:1; min-width:0; }
+.prod-name { font-size:0.85rem; font-weight:600; }
+.prod-desc { font-size:0.72rem; color:var(--text3); margin-top:2px; }
+.prod-price-badge {
+  background:rgba(255,107,26,0.12);
+  color:var(--orange);
+  font-size:0.82rem; font-weight:700;
+  padding:4px 10px; border-radius:6px;
+  flex-shrink:0;
+}
+.prod-actions { display:flex; gap:4px; flex-shrink:0; }
+.prod-actions button {
+  width:30px; height:30px;
+  border-radius:6px; border:1px solid var(--border2);
+  background:var(--surface2); color:var(--text);
+  font-size:0.85rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.15s; font-family:inherit;
+}
+.prod-actions button:hover { border-color:var(--orange); background:var(--bg3); }
+.prod-actions button.del:hover { border-color:var(--red); background:rgba(239,68,68,0.12); color:var(--red); }
+
+/* Edit form inside card */
+.prod-edit-form {
+  display:none;
+  width:100%;
+  padding-top:10px;
+  margin-top:10px;
+  border-top:1px solid var(--border);
+}
+.prod-edit-form.show { display:block; }
+.prod-edit-row {
+  display:flex; align-items:center; gap:8px; margin-bottom:8px;
+}
+.prod-edit-row label {
+  font-size:0.75rem; color:var(--text3); font-weight:600;
+  min-width:60px; flex-shrink:0;
+}
+.prod-edit-row input, .prod-edit-row select {
+  flex:1;
+  background:var(--bg3);
+  border:1px solid var(--border2);
+  color:var(--text);
+  padding:7px 10px;
+  border-radius:6px;
+  font-family:inherit;
+  font-size:0.8rem;
+  outline:none;
+}
+.prod-edit-row input:focus, .prod-edit-row select:focus { border-color:var(--orange); }
+.prod-edit-row input[type="number"] { width:80px; flex:0; }
+.prod-edit-btns {
+  display:flex; gap:6px; justify-content:flex-end; margin-top:4px;
+}
+.prod-edit-btns button {
+  padding:6px 14px;
+  border-radius:6px; border:none;
+  font-family:inherit; font-size:0.78rem; font-weight:600;
+  cursor:pointer; transition:all 0.15s;
+}
+.prod-edit-btns .btn-save-prod { background:var(--orange); color:#fff; }
+.prod-edit-btns .btn-save-prod:hover { background:var(--orange2); }
+.prod-edit-btns .btn-cancel-prod { background:var(--surface2); color:var(--text); border:1px solid var(--border2); }
+.prod-edit-btns .btn-cancel-prod:hover { border-color:var(--text3); }
+.prod-edit-btns .btn-reset-prod { background:none; color:var(--text3); border:1px solid var(--border2); }
+.prod-edit-btns .btn-reset-prod:hover { color:var(--red); border-color:var(--red); }
+
+.prod-modified-badge {
+  font-size:0.6rem; background:rgba(255,107,26,0.15); color:var(--orange);
+  padding:2px 6px; border-radius:4px; font-weight:600; margin-left:6px;
+}
+
+/* Quick edit popup on menu items */
+.quick-edit-popup {
+  position:fixed;
+  z-index:400;
+  background:var(--bg2);
+  border:1px solid var(--orange);
+  border-radius:var(--radius-sm);
+  padding:14px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.5);
+  animation: modalIn 0.2s ease;
+  min-width:220px;
+}
+.quick-edit-popup .qe-title {
+  font-size:0.82rem; font-weight:700; margin-bottom:10px;
+  display:flex; align-items:center; gap:6px;
+}
+.quick-edit-popup .qe-row {
+  display:flex; align-items:center; gap:8px; margin-bottom:8px;
+}
+.quick-edit-popup .qe-row label {
+  font-size:0.75rem; color:var(--text3); font-weight:600; min-width:50px;
+}
+.quick-edit-popup .qe-row input {
+  flex:1;
+  background:var(--bg3);
+  border:1px solid var(--border2);
+  color:var(--text);
+  padding:6px 8px;
+  border-radius:6px;
+  font-family:inherit;
+  font-size:0.8rem;
+  outline:none;
+}
+.quick-edit-popup .qe-row input:focus { border-color:var(--orange); }
+.quick-edit-popup .qe-btns {
+  display:flex; gap:6px; justify-content:flex-end; margin-top:6px;
+}
+.quick-edit-popup .qe-btns button {
+  padding:5px 12px; border-radius:6px; border:none;
+  font-family:inherit; font-size:0.75rem; font-weight:600;
+  cursor:pointer; transition:all 0.15s;
+}
+.quick-edit-popup .qe-save { background:var(--orange); color:#fff; }
+.quick-edit-popup .qe-cancel { background:var(--surface2); color:var(--text); }
+
 /* ── TOAST ── */
 .toast {
   position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);

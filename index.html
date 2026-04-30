@@ -84,12 +84,12 @@
         </div>
 
         <!-- Menü Görseli -->
-        <div class="menu-image-wrapper reveal">
+        <!-- <div class="menu-image-wrapper reveal">
             <img src="menu.png" alt="Max Pilav Halil Usta Menü" class="menu-image" loading="lazy" />
             <a href="Max_Pilav_Halil_Usta_Menu.pdf" download class="menu-pdf-download">
                 📥 Menüyü PDF Olarak İndir
             </a>
-        </div>
+        </div> -->
 
         <!-- Dijital Menü -->
         <div class="menu-digital-header reveal">
@@ -136,11 +136,100 @@
 
     <!-- ===== MAIN SCRIPT ===== -->
     <script>
-        // ── Load data.json and build page ──
-        fetch('data.json')
-            .then(r => r.json())
-            .then(data => buildPage(data))
-            .catch(err => console.error('data.json yüklenemedi:', err));
+        // ── IndexedDB: read products for menu merge ──
+        const DB_NAME = 'MaxPilavDB';
+        const DB_VERSION = 2;
+        const PRODUCT_STORE = 'products';
+
+        function openProductDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('receipts')) {
+                        const store = db.createObjectStore('receipts', { keyPath: 'id' });
+                        store.createIndex('date', 'date', { unique: false });
+                    }
+                    if (!db.objectStoreNames.contains(PRODUCT_STORE)) {
+                        db.createObjectStore(PRODUCT_STORE, { keyPath: 'name' });
+                    }
+                };
+                request.onsuccess = (e) => resolve(e.target.result);
+                request.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        async function getProductOverrides() {
+            try {
+                const db = await openProductDB();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction(PRODUCT_STORE, 'readonly');
+                    const store = tx.objectStore(PRODUCT_STORE);
+                    const req = store.getAll();
+                    req.onsuccess = () => resolve(req.result || []);
+                    req.onerror = () => resolve([]); // fail silently
+                });
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function mergeMenuCategories(defaultCats, overrides) {
+            const overrideMap = {};
+            const customProducts = [];
+            overrides.forEach(p => {
+                if (p.isCustom) customProducts.push(p);
+                else overrideMap[p.name] = p;
+            });
+
+            const merged = defaultCats.map(cat => {
+                const items = cat.items.map(item => {
+                    const ov = overrideMap[item.name];
+                    return ov ? { ...item, price: ov.price, desc: ov.desc, emoji: ov.emoji } : { ...item };
+                });
+                return { ...cat, items };
+            });
+
+            // Group custom products by category
+            const customByCat = {};
+            customProducts.forEach(p => {
+                const catId = p.category || 'ozel';
+                if (!customByCat[catId]) customByCat[catId] = [];
+                customByCat[catId].push(p);
+            });
+
+            for (const [catId, products] of Object.entries(customByCat)) {
+                const existingCat = merged.find(c => c.id === catId);
+                if (existingCat) {
+                    products.forEach(p => {
+                        existingCat.items.push({ name: p.name, emoji: p.emoji, desc: p.desc, price: p.price });
+                    });
+                } else {
+                    merged.push({
+                        id: catId,
+                        label: '⭐ Özel Ürünler',
+                        items: products.map(p => ({ name: p.name, emoji: p.emoji, desc: p.desc, price: p.price }))
+                    });
+                }
+            }
+
+            return merged;
+        }
+
+        // ── Load data.json, merge with IndexedDB, and build page ──
+        async function initPage() {
+            try {
+                const resp = await fetch('data.json');
+                const data = await resp.json();
+                const overrides = await getProductOverrides();
+                data.menu.categories = mergeMenuCategories(data.menu.categories, overrides);
+                buildPage(data);
+            } catch (err) {
+                console.error('Sayfa yüklenemedi:', err);
+            }
+        }
+
+        initPage();
 
         function buildPage(d) {
             const r = d.restaurant;
@@ -193,7 +282,7 @@
                 pg.appendChild(a);
             });
 
-            // ── Menu tabs & panels ──
+            // ── Menu tabs & panels (now uses merged data) ──
             const tabsEl = document.getElementById('menu-tabs');
             const panelsEl = document.getElementById('menu-panels');
 

@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="hesap.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
@@ -116,6 +117,15 @@
                 <input type="date" id="zreport-end" />
                 <button class="topbar-btn" onclick="generateZReport()">Filtrele</button>
             </div>
+            <div class="zreport-auto-row">
+                <label class="auto-toggle">
+                    <input type="checkbox" id="auto-zprint-toggle" onchange="saveAutoZSettings()" />
+                    <span class="toggle-slider"></span>
+                </label>
+                <span class="auto-label">⏰ Otomatik Yazdır:</span>
+                <input type="time" id="auto-zprint-time" value="23:30" onchange="saveAutoZSettings()" />
+                <span class="auto-status" id="auto-zprint-status"></span>
+            </div>
         </div>
         <div class="zreport-body" id="zreport-body"></div>
         <div class="zreport-actions">
@@ -131,6 +141,7 @@
         <div class="receipt-box" id="zprint-box"></div>
         <div class="receipt-actions">
             <button class="btn-print" onclick="printZReport()">🖨️ Yazdır</button>
+            <button class="btn-print" style="background:#2563eb" onclick="downloadZReportPDF()">📄 PDF İndir</button>
             <button class="btn-close-receipt" onclick="closeZPrint()">Kapat</button>
         </div>
     </div>
@@ -795,6 +806,157 @@ function printZReport() {
 function closeZPrint() {
     document.getElementById('zprint-overlay').classList.remove('show');
 }
+
+/* ══════════════════════════════════════
+   OTOMATIK Z RAPORU ZAMANLAYICI
+   ══════════════════════════════════════ */
+let autoZFired = false; // bugün zaten çalıştı mı?
+
+function loadAutoZSettings() {
+    const saved = localStorage.getItem('autoZPrint');
+    if (saved) {
+        const s = JSON.parse(saved);
+        document.getElementById('auto-zprint-toggle').checked = s.enabled;
+        document.getElementById('auto-zprint-time').value = s.time || '23:30';
+    }
+    updateAutoZStatus();
+}
+
+function saveAutoZSettings() {
+    const enabled = document.getElementById('auto-zprint-toggle').checked;
+    const time = document.getElementById('auto-zprint-time').value;
+    localStorage.setItem('autoZPrint', JSON.stringify({ enabled, time }));
+    autoZFired = false; // ayar değişti, resetle
+    updateAutoZStatus();
+    if (enabled) {
+        showToast(`⏰ Z Raporu saat ${time}'de otomatik yazdırılacak`, 'success');
+    } else {
+        showToast('⏰ Otomatik yazdırma kapatıldı', '');
+    }
+}
+
+function updateAutoZStatus() {
+    const statusEl = document.getElementById('auto-zprint-status');
+    const enabled = document.getElementById('auto-zprint-toggle').checked;
+    const time = document.getElementById('auto-zprint-time').value;
+    if (enabled) {
+        statusEl.textContent = `✅ Aktif • ${time}`;
+        statusEl.style.color = '#22c55e';
+    } else {
+        statusEl.textContent = 'Kapalı';
+        statusEl.style.color = '#707085';
+    }
+}
+
+// Her 30 saniyede kontrol et
+setInterval(() => {
+    const saved = localStorage.getItem('autoZPrint');
+    if (!saved) return;
+    const s = JSON.parse(saved);
+    if (!s.enabled) return;
+
+    const now = new Date();
+    const [targetH, targetM] = s.time.split(':').map(Number);
+    const nowH = now.getHours();
+    const nowM = now.getMinutes();
+
+    // Tam saatte veya 1 dk içinde tetikle (30sn aralıkla kontrol ettiğimiz için)
+    if (nowH === targetH && nowM === targetM && !autoZFired) {
+        autoZFired = true;
+        autoTriggerZReport();
+    }
+
+    // Gün değiştiğinde resetle (gece yarısı)
+    if (nowH === 0 && nowM === 0) {
+        autoZFired = false;
+    }
+}, 30000);
+
+async function autoTriggerZReport() {
+    // 🔔 Ses bildirimi çal
+    playNotificationSound();
+    showToast('⏰ Gün sonu Z Raporu hazırlanıyor...', 'success');
+
+    // Bugünü seç ve raporu oluştur
+    document.getElementById('zreport-range').value = 'today';
+    document.getElementById('zreport-custom-dates').style.display = 'none';
+    await generateZReport();
+
+    // Önizlemeyi aç
+    document.getElementById('zprint-overlay').classList.add('show');
+
+    // 📄 Önce PDF olarak otomatik indir (yedek)
+    await downloadZReportPDF();
+
+    // Kısa bekleyip yazdırma dialogunu aç
+    setTimeout(() => {
+        playNotificationSound(); // tekrar ses çal hatırlatma
+        window.print();
+    }, 1000);
+}
+
+/* ══════════════════════════════════════
+   SES BİLDİRİMİ (Web Audio API)
+   ══════════════════════════════════════ */
+function playNotificationSound() {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const playBeep = (time, freq, duration) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.frequency.value = freq;
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.4, time);
+            gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
+            osc.start(time);
+            osc.stop(time + duration);
+        };
+        // 3 bip sesi: dikkat çekici
+        const now = ctx.currentTime;
+        playBeep(now, 880, 0.15);        // bip 1
+        playBeep(now + 0.2, 880, 0.15);  // bip 2
+        playBeep(now + 0.4, 1175, 0.3);  // bip 3 (yüksek nota)
+    } catch (e) {
+        console.warn('Ses çalınamadı:', e);
+    }
+}
+
+/* ══════════════════════════════════════
+   PDF İNDİRME (html2pdf.js)
+   ══════════════════════════════════════ */
+async function downloadZReportPDF() {
+    const element = document.getElementById('zprint-box');
+    if (!element || !element.innerHTML.trim()) {
+        showToast('❌ Önce rapor oluşturun', '');
+        return;
+    }
+
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('tr-TR', { day:'2-digit', month:'2-digit', year:'numeric' }).replace(/\./g, '-');
+    const timeStr = now.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' }).replace(':', '');
+    const filename = `Z-Raporu_${dateStr}_${timeStr}.pdf`;
+
+    const opt = {
+        margin:       [2, 2, 2, 2],
+        filename:     filename,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'mm', format: [80, 297], orientation: 'portrait' }
+    };
+
+    try {
+        await html2pdf().set(opt).from(element).save();
+        showToast(`📄 PDF kaydedildi: ${filename}`, 'success');
+    } catch (e) {
+        console.error('PDF oluşturma hatası:', e);
+        showToast('❌ PDF oluşturulamadı', '');
+    }
+}
+
+// Sayfa yüklenince ayarları yükle
+loadAutoZSettings();
 </script>
 </body>
 </html>

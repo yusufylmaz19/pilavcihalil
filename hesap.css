@@ -546,6 +546,63 @@ body {
 .zreport-custom-dates input[type="date"]:focus { border-color:var(--orange); }
 .zreport-custom-dates span { color:var(--text3); font-weight:600; }
 
+/* ── Auto Z Print Settings ── */
+.zreport-auto-row {
+  display:flex; align-items:center; gap:10px;
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px solid var(--border);
+}
+.auto-label { font-size:0.82rem; font-weight:600; color:var(--text2); }
+.auto-status { font-size:0.75rem; font-weight:600; margin-left:auto; }
+
+.zreport-auto-row input[type="time"] {
+  background:var(--surface);
+  border:1px solid var(--border2);
+  color:var(--text);
+  padding:6px 10px;
+  border-radius:8px;
+  font-family:inherit;
+  font-size:0.82rem;
+  font-weight:600;
+  outline:none;
+  cursor:pointer;
+}
+.zreport-auto-row input[type="time"]:focus { border-color:var(--orange); }
+
+/* iOS-style toggle */
+.auto-toggle {
+  position:relative;
+  display:inline-block;
+  width:40px; height:22px;
+  flex-shrink:0;
+}
+.auto-toggle input { opacity:0; width:0; height:0; }
+.toggle-slider {
+  position:absolute; cursor:pointer;
+  top:0; left:0; right:0; bottom:0;
+  background:var(--surface2);
+  border-radius:22px;
+  transition:0.3s;
+  border:1px solid var(--border2);
+}
+.toggle-slider:before {
+  content:"";
+  position:absolute;
+  height:16px; width:16px;
+  left:2px; bottom:2px;
+  background:#fff;
+  border-radius:50%;
+  transition:0.3s;
+}
+.auto-toggle input:checked + .toggle-slider {
+  background:var(--orange);
+  border-color:var(--orange);
+}
+.auto-toggle input:checked + .toggle-slider:before {
+  transform:translateX(18px);
+}
+
 .zreport-body {
   flex:1; overflow-y:auto; padding:18px 22px;
 }

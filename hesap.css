@@ -380,6 +380,23 @@ body {
   justify-content:center; align-items:center;
 }
 .receipt-overlay.show { display:flex; }
+.receipt-overlay > div {
+  display:flex;
+  flex-direction:column;
+  max-height:90vh;
+}
+.receipt-overlay .receipt-box {
+  flex:1;
+  overflow-y:auto;
+}
+.receipt-overlay .receipt-actions {
+  flex-shrink:0;
+  position:sticky;
+  bottom:0;
+  background:rgba(10,10,15,0.95);
+  padding:12px 0;
+  backdrop-filter:blur(8px);
+}
 
 .receipt-box {
   background:#fff;

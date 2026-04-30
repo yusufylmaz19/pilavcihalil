@@ -10,7 +10,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="hesap.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
@@ -936,22 +935,47 @@ async function downloadZReportPDF() {
     const now = new Date();
     const dateStr = now.toLocaleDateString('tr-TR', { day:'2-digit', month:'2-digit', year:'numeric' }).replace(/\./g, '-');
     const timeStr = now.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' }).replace(':', '');
-    const filename = `Z-Raporu_${dateStr}_${timeStr}.pdf`;
 
-    const opt = {
-        margin:       [2, 2, 2, 2],
-        filename:     filename,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
-        jsPDF:        { unit: 'mm', format: [80, 297], orientation: 'portrait' }
-    };
+    // Bağımsız HTML sayfası oluştur - tarayıcı kendi font motoru kullanır, her zaman kalın çıkar
+    const htmlContent = '<!DOCTYPE html>'
+    + '<html><head>'
+    + '<meta charset="UTF-8">'
+    + '<title>Z Raporu - ' + dateStr + '<\/title>'
+    + '<style>'
+    + '@page { size: 80mm auto; margin: 0; }'
+    + '* { margin:0; padding:0; box-sizing:border-box; }'
+    + 'body { width:80mm; margin:0 auto; font-family: Arial Black, Helvetica Neue, Arial, sans-serif; font-size:12px; font-weight:900; color:#000; line-height:1.5; -webkit-print-color-adjust: exact; }'
+    + '.receipt-box { width:72mm; margin:4mm auto; padding:0; }'
+    + '.r-header { text-align:center; margin-bottom:3mm; }'
+    + '.r-shop { font-size:16px; font-weight:900; text-transform:uppercase; letter-spacing:0.5px; }'
+    + '.r-sub { font-size:11px; font-weight:700; margin-top:1mm; }'
+    + '.r-divider { border:none; border-top:2px dashed #000; margin:2.5mm 0; }'
+    + '.r-row { display:flex; justify-content:space-between; padding:0.8mm 0; font-size:12px; font-weight:700; }'
+    + '.r-total-row { display:flex; justify-content:space-between; font-weight:900; font-size:15px; padding:2mm 0; border-top:2px solid #000; border-bottom:2px solid #000; margin:1.5mm 0; }'
+    + '.r-footer { text-align:center; margin-top:3mm; font-size:10px; font-weight:700; }'
+    + 'div, span { font-weight:900 !important; color:#000 !important; }'
+    + '<' + '/style>'
+    + '<' + '/head><body>'
+    + '<div class="receipt-box">' + element.innerHTML + '<' + '/div>'
+    + '<' + 'script>window.onload=function(){window.print();}<' + '/script>'
+    + '<' + '/body><' + '/html>';
 
-    try {
-        await html2pdf().set(opt).from(element).save();
-        showToast(`📄 PDF kaydedildi: ${filename}`, 'success');
-    } catch (e) {
-        console.error('PDF oluşturma hatası:', e);
-        showToast('❌ PDF oluşturulamadı', '');
+    const blob = new Blob([htmlContent], { type: 'text/html; charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const win = window.open(url, '_blank');
+
+    if (win) {
+        showToast('📄 PDF penceresi açıldı → "PDF olarak kaydet" seçin', 'success');
+        // Bellek temizleme
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } else {
+        // Popup engellendi, doğrudan indir
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Z-Raporu_${dateStr}_${timeStr}.html`;
+        a.click();
+        showToast('📄 HTML olarak indirildi, tarayıcıda açıp PDF yapabilirsiniz', 'success');
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
     }
 }
 

@@ -439,7 +439,11 @@ function buildMenuPanel(categories) {
                 <div class="name">${item.name}</div>
                 <div class="price">₺${item.price}</div>`;
             btn.addEventListener('click', (e) => {
-                showPortionPopup(item);
+                if (item._catId === 'icecekler') {
+                    addToStaging(item, 1);
+                } else {
+                    showPortionPopup(item);
+                }
                 createRipple(e, btn);
             });
             // Right-click quick edit

@@ -97,66 +97,60 @@
             "emoji": "🍛",
             "desc": "Klasik lezzet",
             "price": 130
-          },
-          {
-            "name": "Nohutlu Pilav Porsiyon",
-            "emoji": "🍛",
-            "desc": "Nohutlu pilav",
-            "price": 140
-          },
-          {
-            "name": "Mısırlı Pilav Porsiyon",
-            "emoji": "🍛",
-            "desc": "Mısırlı pilav",
-            "price": 140
           }
         ]
       },
       {
-        "id": "pilav-ustu",
-        "label": "🍗 Pilav Üstü",
+        "id": "tavuklar",
+        "label": "🍗 Tavuklar",
         "items": [
           {
-            "name": "Pilav Üstü Tavuk",
+            "name": "Tavuk",
             "emoji": "🍗",
-            "desc": "Özel soslu izgara tavuk",
-            "price": 170
+            "desc": "Düz izgara tavuk",
+            "price": 40
           },
           {
-            "name": "Nohutlu Pilav Üstü Tavuk",
-            "emoji": "🍗",
-            "desc": "Nohutlu pilav üstü tavuk",
-            "price": 180
-          },
-          {
-            "name": "Mısırlı Pilav Üstü Tavuk",
-            "emoji": "🍗",
-            "desc": "Mısırlı pilav üstü tavuk",
-            "price": 180
-          },
-          {
-            "name": "Pilav Üstü Fajita",
-            "emoji": "🌯",
-            "desc": "Acılı & baharatlı fajita",
-            "price": 230
-          },
-          {
-            "name": "Pilav Üstü Köri Soslu Tavuk",
+            "name": "Köri Tavuk",
             "emoji": "🍛",
             "desc": "Egzotik köri sosu",
-            "price": 230
+            "price": 100
           },
           {
-            "name": "Pilav Üstü Köri Kremalı",
+            "name": "Köri Kremalı Tavuk",
             "emoji": "🥛",
             "desc": "Kadifemsi krema sosu",
-            "price": 230
+            "price": 100
           },
           {
-            "name": "Pilav Üstü Soslu Baharatlı",
+            "name": "Fajita Tavuk",
+            "emoji": "🌯",
+            "desc": "Acılı & baharatlı fajita",
+            "price": 100
+          },
+          {
+            "name": "Soslu Baharatlı Tavuk",
             "emoji": "🌶️",
             "desc": "Sıcak baharatlar",
-            "price": 230
+            "price": 100
+          }
+        ]
+      },
+      {
+        "id": "yan-urunler",
+        "label": "🍟 Ekstralar",
+        "items": [
+          {
+            "name": "Nohut",
+            "emoji": "🫘",
+            "desc": "Pilav üstü",
+            "price": 10
+          },
+          {
+            "name": "Mısır",
+            "emoji": "🌽",
+            "desc": "Pilav üstü",
+            "price": 10
           }
         ]
       },
@@ -175,24 +169,6 @@
             "emoji": "🍲",
             "desc": "Baharatlı ezogelin",
             "price": 130
-          }
-        ]
-      },
-      {
-        "id": "yan-urunler",
-        "label": "🍟 Yan Ürünler",
-        "items": [
-          {
-            "name": "Nohut",
-            "emoji": "🍛",
-            "desc": "Pilav üstü",
-            "price": 10
-          },
-           {
-            "name": "Mısır",
-            "emoji": "🍛",
-            "desc": "Pilav üstü",
-            "price": 10
           }
         ]
       },

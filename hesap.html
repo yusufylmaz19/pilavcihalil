@@ -36,40 +36,77 @@
     <!-- LEFT: MENU ITEMS -->
     <section class="menu-panel" id="menu-panel"></section>
 
-    <!-- RIGHT: CART / CURRENT BILL -->
+    <!-- RIGHT: STAGING + BILL -->
     <aside class="cart-panel">
-        <div class="cart-header">
-            <h2>🧾 Hesap <span class="cart-count" id="cart-count">0</span></h2>
-            <button class="cart-clear" id="btn-clear" onclick="clearCart()">Temizle</button>
-        </div>
-        <div class="cart-items" id="cart-items">
-            <div class="cart-empty" id="cart-empty">
-                <div class="empty-icon">🛒</div>
-                Menüden ürün ekleyin
+        <!-- STAGING AREA: Build one person's order -->
+        <div class="staging-section">
+            <div class="staging-header">
+                <h2>📋 Sipariş Oluştur</h2>
+                <button class="cart-clear" id="btn-staging-clear" onclick="clearStaging()">Temizle</button>
             </div>
-        </div>
-        <div class="cart-footer">
-            <div class="cart-total-row">
-                <span class="cart-total-label">Toplam</span>
-                <span class="cart-total-val" id="cart-total">₺0</span>
-            </div>
-            <div class="payment-row">
-                <label class="payment-label" for="paid-amount">💵 Alınan</label>
-                <div class="payment-input-wrap">
-                    <span class="payment-currency">₺</span>
-                    <input type="number" id="paid-amount" class="payment-input" placeholder="0" min="0" oninput="calcChange()" />
+            <div class="staging-items" id="staging-items">
+                <div class="staging-empty" id="staging-empty">
+                    <div class="empty-icon">👆</div>
+                    Menüden ürün seçin
                 </div>
             </div>
-            <div class="change-row" id="change-row">
-                <span class="change-label">Para Üstü</span>
-                <span class="change-val" id="change-val">₺0</span>
+            <div class="staging-footer" id="staging-footer" style="display:none">
+                <div class="staging-total-row">
+                    <span class="staging-total-label">Ara Toplam</span>
+                    <span class="staging-total-val" id="staging-total">₺0</span>
+                </div>
+                <button class="btn-add-to-bill" id="btn-add-to-bill" onclick="addStagingToBill()">
+                    ✅ Hesaba Ekle
+                </button>
             </div>
-            <button class="btn-save" id="btn-save" disabled onclick="saveReceipt()">
-                💾 Hesabı Kaydet & Yazdır
-            </button>
+        </div>
+
+        <!-- DIVIDER -->
+        <div class="panel-divider"></div>
+
+        <!-- MAIN BILL (HESAP) -->
+        <div class="bill-section">
+            <div class="cart-header">
+                <h2>🧾 Hesap <span class="cart-count" id="cart-count">0</span></h2>
+                <button class="cart-clear" id="btn-clear" onclick="clearCart()">Temizle</button>
+            </div>
+            <div class="cart-items" id="cart-items">
+                <div class="cart-empty" id="cart-empty">
+                    <div class="empty-icon">🛒</div>
+                    Sipariş oluşturup hesaba ekleyin
+                </div>
+            </div>
+            <div class="cart-footer">
+                <div class="cart-total-row">
+                    <span class="cart-total-label">Toplam</span>
+                    <span class="cart-total-val" id="cart-total">₺0</span>
+                </div>
+                <div class="payment-row">
+                    <label class="payment-label" for="paid-amount">💵 Alınan</label>
+                    <div class="payment-input-wrap">
+                        <span class="payment-currency">₺</span>
+                        <input type="number" id="paid-amount" class="payment-input" placeholder="0" min="0" oninput="calcChange()" />
+                    </div>
+                </div>
+                <div class="change-row" id="change-row">
+                    <span class="change-label">Para Üstü</span>
+                    <span class="change-val" id="change-val">₺0</span>
+                </div>
+                <button class="btn-save" id="btn-save" disabled onclick="saveReceipt()">
+                    💾 Hesabı Kaydet &amp; Yazdır
+                </button>
+            </div>
         </div>
     </aside>
 </main>
+
+<!-- ═══ PORTION PICKER POPUP ═══ -->
+<div class="portion-popup-overlay" id="portion-popup-overlay" onclick="closePortionPopup()">
+    <div class="portion-popup" id="portion-popup" onclick="event.stopPropagation()">
+        <div class="portion-popup-title" id="portion-popup-title"></div>
+        <div class="portion-popup-options" id="portion-popup-options"></div>
+    </div>
+</div>
 
 <!-- ═══ HISTORY MODAL ═══ -->
 <div class="history-overlay" id="history-overlay" onclick="closeHistoryOutside(event)">
@@ -170,7 +207,9 @@
    STATE
    ══════════════════════════════════════ */
 let menuData = null;
-let cart = []; // { name, emoji, price, qty }
+let staging = []; // { name, emoji, basePrice, portion, qty }
+let cart = [];     // confirmed bill items
+let portionPopupItem = null; // item being selected in portion popup
 
 /* ══════════════════════════════════════
    INDEXED DB SETUP
@@ -400,7 +439,7 @@ function buildMenuPanel(categories) {
                 <div class="name">${item.name}</div>
                 <div class="price">₺${item.price}</div>`;
             btn.addEventListener('click', (e) => {
-                addToCart(item);
+                showPortionPopup(item);
                 createRipple(e, btn);
             });
             // Right-click quick edit
@@ -426,24 +465,159 @@ function buildMenuPanel(categories) {
 }
 
 /* ══════════════════════════════════════
-   CART LOGIC
+   PORTION HELPERS
    ══════════════════════════════════════ */
-function addToCart(item) {
-    const existing = cart.find(c => c.name === item.name);
+function getPortionLabel(p) {
+    if (p === 0.5) return '½';
+    if (p === 1) return '1';
+    if (p === 1.5) return '1½';
+    return p.toString();
+}
+
+function getPortionText(p) {
+    if (p === 0.5) return 'Yarım';
+    if (p === 1) return 'Tam';
+    if (p === 1.5) return '1.5';
+    return p.toString();
+}
+
+function calcItemPrice(item) {
+    return Math.round(item.basePrice * item.portion);
+}
+
+/* ══════════════════════════════════════
+   PORTION POPUP
+   ══════════════════════════════════════ */
+function showPortionPopup(item) {
+    portionPopupItem = item;
+    const overlay = document.getElementById('portion-popup-overlay');
+    const titleEl = document.getElementById('portion-popup-title');
+    const optionsEl = document.getElementById('portion-popup-options');
+
+    titleEl.innerHTML = `${item.emoji} ${item.name}`;
+
+    const portions = [
+        { value: 0.5, label: '½', text: 'Yarım', price: Math.round(item.price * 0.5) },
+        { value: 1,   label: '1', text: 'Tam',   price: item.price },
+        { value: 1.5, label: '1½', text: '1.5',  price: Math.round(item.price * 1.5) }
+    ];
+
+    optionsEl.innerHTML = portions.map(p => `
+        <button class="portion-option${p.value === 1 ? ' default' : ''}" onclick="selectPortion(${p.value})">
+            <span class="po-label">${p.label}</span>
+            <span class="po-text">${p.text}</span>
+            <span class="po-price">₺${p.price}</span>
+        </button>
+    `).join('');
+
+    overlay.classList.add('show');
+}
+
+function closePortionPopup() {
+    document.getElementById('portion-popup-overlay').classList.remove('show');
+    portionPopupItem = null;
+}
+
+function selectPortion(portion) {
+    if (!portionPopupItem) return;
+    addToStaging(portionPopupItem, portion);
+    closePortionPopup();
+}
+
+/* ══════════════════════════════════════
+   STAGING LOGIC (Sipariş Oluşturucu)
+   ══════════════════════════════════════ */
+function addToStaging(item, portion) {
+    const existing = staging.find(s => s.name === item.name && s.portion === portion);
     if (existing) {
         existing.qty++;
     } else {
-        cart.push({ name: item.name, emoji: item.emoji, price: item.price, qty: 1 });
+        staging.push({
+            name: item.name,
+            emoji: item.emoji,
+            basePrice: item.price,
+            portion: portion,
+            qty: 1
+        });
     }
-    renderCart();
+    renderStaging();
+    showToast(`${item.emoji} ${item.name} ${getPortionLabel(portion)} eklendi`, 'success');
 }
 
-function updateQty(name, delta) {
-    const item = cart.find(c => c.name === name);
-    if (!item) return;
-    item.qty += delta;
-    if (item.qty <= 0) {
-        cart = cart.filter(c => c.name !== name);
+function updateStagingQty(index, delta) {
+    staging[index].qty += delta;
+    if (staging[index].qty <= 0) {
+        staging.splice(index, 1);
+    }
+    renderStaging();
+}
+
+function clearStaging() {
+    staging = [];
+    renderStaging();
+}
+
+function renderStaging() {
+    const container = document.getElementById('staging-items');
+    const footer = document.getElementById('staging-footer');
+    const totalEl = document.getElementById('staging-total');
+
+    if (staging.length === 0) {
+        container.innerHTML = `<div class="staging-empty"><div class="empty-icon">👆</div>Menüden ürün seçin</div>`;
+        footer.style.display = 'none';
+        return;
+    }
+
+    footer.style.display = 'block';
+    const total = staging.reduce((s, c) => s + calcItemPrice(c) * c.qty, 0);
+    totalEl.textContent = '₺' + total;
+
+    container.innerHTML = staging.map((c, i) => {
+        const unitPrice = calcItemPrice(c);
+        const lineTotal = unitPrice * c.qty;
+        const portionBadge = c.portion !== 1 ? `<span class="portion-tag">${getPortionText(c.portion)}</span>` : '';
+        return `
+        <div class="staging-item">
+            <div class="staging-item-info">
+                <span class="staging-item-name">${c.emoji} ${c.name} ${portionBadge}</span>
+                <span class="staging-item-price">₺${unitPrice}</span>
+            </div>
+            <div class="qty-controls">
+                <button class="qty-btn minus" onclick="updateStagingQty(${i}, -1)">−</button>
+                <span class="qty-val">${c.qty}</span>
+                <button class="qty-btn" onclick="updateStagingQty(${i}, 1)">+</button>
+            </div>
+            <div class="staging-item-total">₺${lineTotal}</div>
+        </div>`;
+    }).join('');
+}
+
+function addStagingToBill() {
+    if (staging.length === 0) return;
+
+    // Merge staging into cart — combine same name+portion
+    staging.forEach(s => {
+        const existing = cart.find(c => c.name === s.name && c.portion === s.portion);
+        if (existing) {
+            existing.qty += s.qty;
+        } else {
+            cart.push({ ...s });
+        }
+    });
+
+    staging = [];
+    renderStaging();
+    renderCart();
+    showToast('✅ Sipariş hesaba eklendi!', 'success');
+}
+
+/* ══════════════════════════════════════
+   CART / BILL LOGIC (Hesap)
+   ══════════════════════════════════════ */
+function updateCartQty(index, delta) {
+    cart[index].qty += delta;
+    if (cart[index].qty <= 0) {
+        cart.splice(index, 1);
     }
     renderCart();
 }
@@ -460,7 +634,7 @@ function renderCart() {
     const saveBtn = document.getElementById('btn-save');
 
     const totalItems = cart.reduce((s, c) => s + c.qty, 0);
-    const totalPrice = cart.reduce((s, c) => s + c.price * c.qty, 0);
+    const totalPrice = cart.reduce((s, c) => s + calcItemPrice(c) * c.qty, 0);
 
     countEl.textContent = totalItems;
     totalEl.textContent = '₺' + totalPrice;
@@ -471,24 +645,28 @@ function renderCart() {
     calcChange();
 
     if (cart.length === 0) {
-        container.innerHTML = `<div class="cart-empty"><div class="empty-icon">🛒</div>Menüden ürün ekleyin</div>`;
+        container.innerHTML = `<div class="cart-empty"><div class="empty-icon">🛒</div>Sipariş oluşturup hesaba ekleyin</div>`;
         return;
     }
 
-    container.innerHTML = cart.map(c => `
+    container.innerHTML = cart.map((c, i) => {
+        const unitPrice = calcItemPrice(c);
+        const lineTotal = unitPrice * c.qty;
+        const portionBadge = c.portion !== 1 ? `<span class="portion-tag">${getPortionText(c.portion)}</span>` : '';
+        return `
         <div class="cart-item">
             <div class="cart-item-info">
-                <div class="cart-item-name">${c.emoji} ${c.name}</div>
-                <div class="cart-item-price">₺${c.price} / adet</div>
+                <div class="cart-item-name">${c.emoji} ${c.name} ${portionBadge}</div>
+                <div class="cart-item-price">₺${c.basePrice} × ${getPortionLabel(c.portion)} = ₺${unitPrice}</div>
             </div>
             <div class="qty-controls">
-                <button class="qty-btn minus" onclick="updateQty('${c.name.replace(/'/g, "\\'")}', -1)">−</button>
+                <button class="qty-btn minus" onclick="updateCartQty(${i}, -1)">−</button>
                 <span class="qty-val">${c.qty}</span>
-                <button class="qty-btn" onclick="updateQty('${c.name.replace(/'/g, "\\'")}', 1)">+</button>
+                <button class="qty-btn" onclick="updateCartQty(${i}, 1)">+</button>
             </div>
-            <div class="cart-item-total">₺${c.price * c.qty}</div>
-        </div>
-    `).join('');
+            <div class="cart-item-total">₺${lineTotal}</div>
+        </div>`;
+    }).join('');
 }
 
 /* ══════════════════════════════════════
@@ -502,15 +680,25 @@ async function saveReceipt() {
     const counter = (count + 1).toString().padStart(4, '0');
     const id = `MP-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}-${counter}`;
 
-    const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
+    const total = cart.reduce((s, c) => s + calcItemPrice(c) * c.qty, 0);
     const paidInput = document.getElementById('paid-amount');
     const paid = parseFloat(paidInput.value) || 0;
     const change = paid > 0 ? paid - total : 0;
 
+    // Flatten cart items for receipt storage
+    const receiptItems = cart.map(c => ({
+        name: c.name + (c.portion !== 1 ? ' (' + getPortionText(c.portion) + ')' : ''),
+        emoji: c.emoji,
+        price: calcItemPrice(c),
+        basePrice: c.basePrice,
+        portion: c.portion,
+        qty: c.qty
+    }));
+
     const receipt = {
         id: id,
         date: now.toISOString(),
-        items: cart.map(c => ({ ...c })),
+        items: receiptItems,
         total: total,
         itemCount: cart.reduce((s, c) => s + c.qty, 0),
         paid: paid,
@@ -521,6 +709,8 @@ async function saveReceipt() {
         await addReceipt(receipt);
         showReceipt(receipt);
         cart = [];
+        staging = [];
+        renderStaging();
         renderCart();
         showToast('✅ Hesap kaydedildi!', 'success');
     } catch (err) {
@@ -670,7 +860,7 @@ async function deleteReceipt(id) {
    PAYMENT / CHANGE
    ══════════════════════════════════════ */
 function calcChange() {
-    const totalPrice = cart.reduce((s, c) => s + c.price * c.qty, 0);
+    const totalPrice = cart.reduce((s, c) => s + calcItemPrice(c) * c.qty, 0);
     const paid = parseFloat(document.getElementById('paid-amount').value) || 0;
     const change = paid - totalPrice;
     const changeEl = document.getElementById('change-val');

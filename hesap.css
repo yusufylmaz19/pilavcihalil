@@ -399,7 +399,23 @@ body {
   transition: all 0.15s;
   cursor: pointer;
 }
-.history-card:hover { border-color:var(--orange); background:var(--bg3); }
+
+.history-card.hc-kart {
+  background: rgba(59, 130, 246, 0.12);
+}
+.history-card.hc-kart:hover {
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(59, 130, 246, 0.18);
+}
+
+.history-card.hc-nakit {
+  background: rgba(34, 197, 94, 0.12);
+}
+.history-card.hc-nakit:hover {
+  border-color: rgba(34, 197, 94, 0.5);
+  background: rgba(34, 197, 94, 0.18);
+}
+
 .history-card-top {
   display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;
 }

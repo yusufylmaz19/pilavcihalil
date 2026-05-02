@@ -719,9 +719,10 @@ async function renderHistory() {
 
             const pt = r.paymentType === 'kart' ? '💳 Kart' : '💵 Nakit';
             const ptColor = r.paymentType === 'kart' ? '#3b82f6' : '#22c55e';
+            const cardClass = r.paymentType === 'kart' ? 'hc-kart' : 'hc-nakit';
 
             html += `
-                <div class="history-card">
+                <div class="history-card ${cardClass}">
                     <div class="history-card-top">
                         <span class="history-card-id">${r.id}</span>
                         <span class="history-card-time">${dateStr} • ${timeStr}</span>

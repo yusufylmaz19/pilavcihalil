@@ -39,44 +39,48 @@
     <!-- RIGHT: STAGING + BILL -->
     <aside class="cart-panel">
         <!-- MAIN BILL (HESAP) -->
-        <div class="bill-section">
-            <div class="cart-header">
-                <h2>🧾 Hesap <span class="cart-count" id="cart-count">0</span></h2>
-                <button class="cart-clear" id="btn-clear" onclick="clearCart()">Temizle</button>
-            </div>
-            <div class="cart-items" id="cart-items">
-                <div class="cart-empty" id="cart-empty">
-                    <div class="empty-icon">🛒</div>
-                    Sipariş oluşturup hesaba ekleyin
+        <div class="bill-section" style="display: flex; flex-direction: row; width: 100%;">
+            <div class="bill-items-area" style="flex: 1; display: flex; flex-direction: column; min-width: 0;">
+                <div class="cart-header">
+                    <h2>🧾 Hesap <span class="cart-count" id="cart-count">0</span></h2>
+                    <button class="cart-clear" id="btn-clear" onclick="clearCart()">Temizle</button>
                 </div>
-            </div>
-            <div class="cart-footer">
-                <div class="cart-total-row">
-                    <span class="cart-total-label">Toplam</span>
-                    <span class="cart-total-val" id="cart-total">₺0</span>
-                </div>
-                <div class="payment-row">
-                    <label class="payment-label">💳 Ödeme</label>
-                    <div class="payment-segmented" id="payment-segmented">
-                        <div class="pay-seg-btn active" onclick="setPaymentType('nakit')">💵 Nakit</div>
-                        <div class="pay-seg-btn" onclick="setPaymentType('kart')">💳 Kart</div>
-                    </div>
-                    <input type="hidden" id="payment-type" value="nakit" />
-                </div>
-                <div class="payment-row">
-                    <label class="payment-label" for="paid-amount">💵 Alınan</label>
-                    <div class="payment-input-wrap">
-                        <span class="payment-currency">₺</span>
-                        <input type="number" id="paid-amount" class="payment-input" placeholder="0" min="0" oninput="calcChange()" />
+                <div class="cart-items" id="cart-items">
+                    <div class="cart-empty" id="cart-empty">
+                        <div class="empty-icon">🛒</div>
+                        Sipariş oluşturup hesaba ekleyin
                     </div>
                 </div>
-                <div class="change-row" id="change-row">
-                    <span class="change-label">Para Üstü</span>
-                    <span class="change-val" id="change-val">₺0</span>
+            </div>
+            
+            <div class="bill-payment-area" style="width: 280px; display: flex; flex-direction: column; border-left: 1px solid var(--border); background: var(--bg3);">
+                <div class="cart-footer" style="border-top: none; flex: 1; display: flex; flex-direction: column;">
+                    <div class="cart-total-row">
+                        <span class="cart-total-label">Toplam</span>
+                        <span class="cart-total-val" id="cart-total">₺0</span>
+                    </div>
+                    <div class="payment-row" style="margin-bottom: 16px;">
+                        <div class="payment-segmented" id="payment-segmented" style="width: 100%;">
+                            <div class="pay-seg-btn active" onclick="setPaymentType('nakit')">💵 Nakit</div>
+                            <div class="pay-seg-btn" onclick="setPaymentType('kart')">💳 Kart</div>
+                        </div>
+                        <input type="hidden" id="payment-type" value="nakit" />
+                    </div>
+                    <div class="payment-row">
+                        <label class="payment-label" for="paid-amount">💵 Alınan</label>
+                        <div class="payment-input-wrap">
+                            <span class="payment-currency">₺</span>
+                            <input type="number" id="paid-amount" class="payment-input" placeholder="0" min="0" oninput="calcChange()" />
+                        </div>
+                    </div>
+                    <div class="change-row" id="change-row">
+                        <span class="change-label">Para Üstü</span>
+                        <span class="change-val" id="change-val">₺0</span>
+                    </div>
+                    <button class="btn-save" id="btn-save" disabled onclick="saveReceipt()" style="margin-top: auto;">
+                        💾 Hesabı Kaydet &amp; Yazdır
+                    </button>
                 </div>
-                <button class="btn-save" id="btn-save" disabled onclick="saveReceipt()">
-                    💾 Hesabı Kaydet &amp; Yazdır
-                </button>
             </div>
         </div>
     </aside>
@@ -890,6 +894,8 @@ async function generateZReport() {
     const avgTicket = totalRevenue / filtered.length;
     const totalPaid = filtered.reduce((s, r) => s + (r.paid || 0), 0);
     const totalChange = filtered.reduce((s, r) => s + (r.change || 0), 0);
+    const totalNakit = filtered.filter(r => r.paymentType !== 'kart').reduce((s, r) => s + r.total, 0);
+    const totalKart = filtered.filter(r => r.paymentType === 'kart').reduce((s, r) => s + r.total, 0);
 
     // Ürün bazlı döküm
     const productMap = {};
@@ -978,16 +984,19 @@ async function generateZReport() {
         <div class="zr-section-title">💰 Ödeme Özeti</div>
         <div class="zr-payment-summary">
             <div class="zr-pay-row"><span>Toplam Ciro:</span><span>₺${totalRevenue.toFixed(2)}</span></div>
-            <div class="zr-pay-row"><span>Alınan Toplam:</span><span>₺${totalPaid.toFixed(2)}</span></div>
-            <div class="zr-pay-row"><span>Verilen Para Üstü:</span><span>₺${totalChange.toFixed(2)}</span></div>
+            <div class="zr-pay-row"><span>Nakit Tahsilat:</span><span style="color:#22c55e;">₺${totalNakit.toFixed(2)}</span></div>
+            <div class="zr-pay-row"><span>Kredi Kartı:</span><span style="color:#3b82f6;">₺${totalKart.toFixed(2)}</span></div>
+            <hr style="border:none; border-top:1px solid var(--border); margin: 6px 0;" />
+            <div class="zr-pay-row" style="color:var(--text3); font-size:0.8rem;"><span>Alınan Nakit:</span><span>₺${totalPaid.toFixed(2)}</span></div>
+            <div class="zr-pay-row" style="color:var(--text3); font-size:0.8rem;"><span>Verilen Para Üstü:</span><span>₺${totalChange.toFixed(2)}</span></div>
         </div>
     `;
 
     // Z raporu print box'ı hazırla
-    prepareZPrintBox(dateLabel, filtered, totalRevenue, totalItems, avgTicket, sortedProducts, totalPaid, totalChange, hourMap);
+    prepareZPrintBox(dateLabel, filtered, totalRevenue, totalItems, avgTicket, sortedProducts, totalPaid, totalChange, hourMap, totalNakit, totalKart);
 }
 
-function prepareZPrintBox(dateLabel, receipts, totalRevenue, totalItems, avgTicket, sortedProducts, totalPaid, totalChange, hourMap) {
+function prepareZPrintBox(dateLabel, receipts, totalRevenue, totalItems, avgTicket, sortedProducts, totalPaid, totalChange, hourMap, totalNakit, totalKart) {
     const now = new Date();
     const timeStr = now.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' });
     const topSeller = sortedProducts[0];
@@ -1011,9 +1020,12 @@ function prepareZPrintBox(dateLabel, receipts, totalRevenue, totalItems, avgTick
         `).join('')}
         <hr class="r-divider"/>
         <div class="r-total-row"><span>TOPLAM CİRO</span><span>₺${totalRevenue.toFixed(2)}</span></div>
+        <div class="r-row"><span>Nakit Tahsilat:</span><span>₺${totalNakit.toFixed(2)}</span></div>
+        <div class="r-row"><span>Kredi Kartı:</span><span>₺${totalKart.toFixed(2)}</span></div>
+        <hr class="r-divider"/>
         <div class="r-row"><span>Ort. Fiş Tutarı:</span><span>₺${avgTicket.toFixed(2)}</span></div>
-        <div class="r-row"><span>Alınan Toplam:</span><span>₺${totalPaid.toFixed(2)}</span></div>
-        <div class="r-row"><span>Para Üstü Top.:</span><span>₺${totalChange.toFixed(2)}</span></div>
+        <div class="r-row" style="font-size:10px;"><span>Alınan Nakit:</span><span>₺${totalPaid.toFixed(2)}</span></div>
+        <div class="r-row" style="font-size:10px;"><span>Para Üstü Top.:</span><span>₺${totalChange.toFixed(2)}</span></div>
         ${topSeller ? `
         <hr class="r-divider"/>
         <div class="r-row"><span>🏆 En Çok Satan:</span><span>${topSeller[0]}</span></div>

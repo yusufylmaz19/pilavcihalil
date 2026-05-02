@@ -63,7 +63,7 @@ body {
 /* ── LAYOUT ── */
 .app-layout {
   display: grid;
-  grid-template-columns: 1fr 340px;
+  grid-template-columns: 1fr 640px;
   min-height: calc(100vh - 61px);
 }
 
@@ -247,9 +247,8 @@ body {
 
 /* ── CART FOOTER ── */
 .cart-footer {
-  border-top: 1px solid var(--border);
   padding: 16px 18px;
-  background: var(--bg3);
+  background: transparent;
 }
 .cart-total-row {
   display: flex; justify-content: space-between; align-items: center;
@@ -273,6 +272,8 @@ body {
   gap: 4px;
 }
 .pay-seg-btn {
+  flex: 1;
+  text-align: center;
   padding: 8px 20px;
   border-radius: 6px;
   font-size: 0.85rem;
@@ -644,6 +645,12 @@ body {
   cursor:pointer;
 }
 .zreport-auto-row input[type="time"]:focus { border-color:var(--orange); }
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
 
 /* iOS-style toggle */
 .auto-toggle {

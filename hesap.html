@@ -38,32 +38,6 @@
 
     <!-- RIGHT: STAGING + BILL -->
     <aside class="cart-panel">
-        <!-- STAGING AREA: Build one person's order -->
-        <div class="staging-section">
-            <div class="staging-header">
-                <h2>📋 Sipariş Oluştur</h2>
-                <button class="cart-clear" id="btn-staging-clear" onclick="clearStaging()">Temizle</button>
-            </div>
-            <div class="staging-items" id="staging-items">
-                <div class="staging-empty" id="staging-empty">
-                    <div class="empty-icon">👆</div>
-                    Menüden ürün seçin
-                </div>
-            </div>
-            <div class="staging-footer" id="staging-footer" style="display:none">
-                <div class="staging-total-row">
-                    <span class="staging-total-label">Ara Toplam</span>
-                    <span class="staging-total-val" id="staging-total">₺0</span>
-                </div>
-                <button class="btn-add-to-bill" id="btn-add-to-bill" onclick="addStagingToBill()">
-                    ✅ Hesaba Ekle
-                </button>
-            </div>
-        </div>
-
-        <!-- DIVIDER -->
-        <div class="panel-divider"></div>
-
         <!-- MAIN BILL (HESAP) -->
         <div class="bill-section">
             <div class="cart-header">
@@ -80,6 +54,14 @@
                 <div class="cart-total-row">
                     <span class="cart-total-label">Toplam</span>
                     <span class="cart-total-val" id="cart-total">₺0</span>
+                </div>
+                <div class="payment-row">
+                    <label class="payment-label">💳 Ödeme</label>
+                    <div class="payment-segmented" id="payment-segmented">
+                        <div class="pay-seg-btn active" onclick="setPaymentType('nakit')">💵 Nakit</div>
+                        <div class="pay-seg-btn" onclick="setPaymentType('kart')">💳 Kart</div>
+                    </div>
+                    <input type="hidden" id="payment-type" value="nakit" />
                 </div>
                 <div class="payment-row">
                     <label class="payment-label" for="paid-amount">💵 Alınan</label>
@@ -99,14 +81,6 @@
         </div>
     </aside>
 </main>
-
-<!-- ═══ PORTION PICKER POPUP ═══ -->
-<div class="portion-popup-overlay" id="portion-popup-overlay" onclick="closePortionPopup()">
-    <div class="portion-popup" id="portion-popup" onclick="event.stopPropagation()">
-        <div class="portion-popup-title" id="portion-popup-title"></div>
-        <div class="portion-popup-options" id="portion-popup-options"></div>
-    </div>
-</div>
 
 <!-- ═══ HISTORY MODAL ═══ -->
 <div class="history-overlay" id="history-overlay" onclick="closeHistoryOutside(event)">
@@ -207,9 +181,7 @@
    STATE
    ══════════════════════════════════════ */
 let menuData = null;
-let staging = []; // { name, emoji, basePrice, portion, qty }
 let cart = [];     // confirmed bill items
-let portionPopupItem = null; // item being selected in portion popup
 
 /* ══════════════════════════════════════
    INDEXED DB SETUP
@@ -434,18 +406,40 @@ function buildMenuPanel(categories) {
             item._catId = cat.id; // store category reference
             const btn = document.createElement('div');
             btn.className = 'item-btn';
+            
+            const hasPortions = (item._catId !== 'icecekler' && item._catId !== 'yan-urunler');
+            
             btn.innerHTML = `
-                <div class="emoji">${item.emoji}</div>
-                <div class="name">${item.name}</div>
-                <div class="price">₺${item.price}</div>`;
-            btn.addEventListener('click', (e) => {
-                if (item._catId === 'icecekler') {
-                    addToStaging(item, 1);
-                } else {
-                    showPortionPopup(item);
-                }
-                createRipple(e, btn);
-            });
+                <div class="item-main">
+                    <div class="emoji">${item.emoji}</div>
+                    <div class="name">${item.name}</div>
+                    <div class="price">₺${item.price}</div>
+                </div>
+                ${hasPortions ? `
+                <div class="item-portions" id="portions-${item.name.replace(/\s/g, '_')}">
+                    <div class="ps-btn" data-p="0.5">Yarım</div>
+                    <div class="ps-btn" data-p="1">Tam</div>
+                    <div class="ps-btn" data-p="1.5">1.5</div>
+                </div>
+                ` : ''}
+            `;
+            
+            if (hasPortions) {
+                const pBtns = btn.querySelectorAll('.ps-btn');
+                pBtns.forEach(pBtn => {
+                    pBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        addToCart(item, parseFloat(pBtn.dataset.p));
+                        createRipple(e, pBtn);
+                    });
+                });
+            } else {
+                btn.addEventListener('click', (e) => {
+                    addToCart(item, 1);
+                    createRipple(e, btn);
+                });
+            }
+
             // Right-click quick edit
             btn.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
@@ -489,54 +483,19 @@ function calcItemPrice(item) {
     return Math.round(item.basePrice * item.portion);
 }
 
-/* ══════════════════════════════════════
-   PORTION POPUP
-   ══════════════════════════════════════ */
-function showPortionPopup(item) {
-    portionPopupItem = item;
-    const overlay = document.getElementById('portion-popup-overlay');
-    const titleEl = document.getElementById('portion-popup-title');
-    const optionsEl = document.getElementById('portion-popup-options');
-
-    titleEl.innerHTML = `${item.emoji} ${item.name}`;
-
-    const portions = [
-        { value: 0.5, label: '½', text: 'Yarım', price: Math.round(item.price * 0.5) },
-        { value: 1,   label: '1', text: 'Tam',   price: item.price },
-        { value: 1.5, label: '1½', text: '1.5',  price: Math.round(item.price * 1.5) }
-    ];
-
-    optionsEl.innerHTML = portions.map(p => `
-        <button class="portion-option${p.value === 1 ? ' default' : ''}" onclick="selectPortion(${p.value})">
-            <span class="po-label">${p.label}</span>
-            <span class="po-text">${p.text}</span>
-            <span class="po-price">₺${p.price}</span>
-        </button>
-    `).join('');
-
-    overlay.classList.add('show');
+function setPaymentType(type) {
+    document.getElementById('payment-type').value = type;
+    const btns = document.querySelectorAll('.pay-seg-btn');
+    btns[0].classList.toggle('active', type === 'nakit');
+    btns[1].classList.toggle('active', type === 'kart');
 }
 
-function closePortionPopup() {
-    document.getElementById('portion-popup-overlay').classList.remove('show');
-    portionPopupItem = null;
-}
-
-function selectPortion(portion) {
-    if (!portionPopupItem) return;
-    addToStaging(portionPopupItem, portion);
-    closePortionPopup();
-}
-
-/* ══════════════════════════════════════
-   STAGING LOGIC (Sipariş Oluşturucu)
-   ══════════════════════════════════════ */
-function addToStaging(item, portion) {
-    const existing = staging.find(s => s.name === item.name && s.portion === portion);
+function addToCart(item, portion) {
+    const existing = cart.find(c => c.name === item.name && c.portion === portion);
     if (existing) {
         existing.qty++;
     } else {
-        staging.push({
+        cart.push({
             name: item.name,
             emoji: item.emoji,
             basePrice: item.price,
@@ -544,75 +503,8 @@ function addToStaging(item, portion) {
             qty: 1
         });
     }
-    renderStaging();
-    showToast(`${item.emoji} ${item.name} ${getPortionLabel(portion)} eklendi`, 'success');
-}
-
-function updateStagingQty(index, delta) {
-    staging[index].qty += delta;
-    if (staging[index].qty <= 0) {
-        staging.splice(index, 1);
-    }
-    renderStaging();
-}
-
-function clearStaging() {
-    staging = [];
-    renderStaging();
-}
-
-function renderStaging() {
-    const container = document.getElementById('staging-items');
-    const footer = document.getElementById('staging-footer');
-    const totalEl = document.getElementById('staging-total');
-
-    if (staging.length === 0) {
-        container.innerHTML = `<div class="staging-empty"><div class="empty-icon">👆</div>Menüden ürün seçin</div>`;
-        footer.style.display = 'none';
-        return;
-    }
-
-    footer.style.display = 'block';
-    const total = staging.reduce((s, c) => s + calcItemPrice(c) * c.qty, 0);
-    totalEl.textContent = '₺' + total;
-
-    container.innerHTML = staging.map((c, i) => {
-        const unitPrice = calcItemPrice(c);
-        const lineTotal = unitPrice * c.qty;
-        const portionBadge = c.portion !== 1 ? `<span class="portion-tag">${getPortionText(c.portion)}</span>` : '';
-        return `
-        <div class="staging-item">
-            <div class="staging-item-info">
-                <span class="staging-item-name">${c.emoji} ${c.name} ${portionBadge}</span>
-                <span class="staging-item-price">₺${unitPrice}</span>
-            </div>
-            <div class="qty-controls">
-                <button class="qty-btn minus" onclick="updateStagingQty(${i}, -1)">−</button>
-                <span class="qty-val">${c.qty}</span>
-                <button class="qty-btn" onclick="updateStagingQty(${i}, 1)">+</button>
-            </div>
-            <div class="staging-item-total">₺${lineTotal}</div>
-        </div>`;
-    }).join('');
-}
-
-function addStagingToBill() {
-    if (staging.length === 0) return;
-
-    // Merge staging into cart — combine same name+portion
-    staging.forEach(s => {
-        const existing = cart.find(c => c.name === s.name && c.portion === s.portion);
-        if (existing) {
-            existing.qty += s.qty;
-        } else {
-            cart.push({ ...s });
-        }
-    });
-
-    staging = [];
-    renderStaging();
     renderCart();
-    showToast('✅ Sipariş hesaba eklendi!', 'success');
+    showToast(`${item.emoji} ${item.name} ${getPortionLabel(portion)} eklendi`, 'success');
 }
 
 /* ══════════════════════════════════════
@@ -699,6 +591,8 @@ async function saveReceipt() {
         qty: c.qty
     }));
 
+    const paymentType = document.getElementById('payment-type').value;
+
     const receipt = {
         id: id,
         date: now.toISOString(),
@@ -706,16 +600,16 @@ async function saveReceipt() {
         total: total,
         itemCount: cart.reduce((s, c) => s + c.qty, 0),
         paid: paid,
-        change: change
+        change: change,
+        paymentType: paymentType
     };
 
     try {
         await addReceipt(receipt);
         showReceipt(receipt);
         cart = [];
-        staging = [];
-        renderStaging();
         renderCart();
+        setPaymentType('nakit');
         showToast('✅ Hesap kaydedildi!', 'success');
     } catch (err) {
         console.error('Hesap kaydedilemedi:', err);
@@ -753,6 +647,10 @@ function showReceipt(receipt) {
         <div class="r-total-row">
             <span>TOPLAM</span>
             <span>₺${receipt.total.toFixed(2)}</span>
+        </div>
+        <div class="r-row" style="font-size:10px;">
+            <span>Ödeme Tipi:</span>
+            <span>${receipt.paymentType === 'kart' ? 'Kredi Kartı' : 'Nakit'}</span>
         </div>
         ${receipt.paid > 0 ? `
         <div class="r-row"><span>Alınan:</span><span>₺${receipt.paid.toFixed(2)}</span></div>
@@ -819,6 +717,9 @@ async function renderHistory() {
             const dateStr = d.toLocaleDateString('tr-TR', { day:'2-digit', month:'2-digit', year:'numeric' });
             const itemsSummary = r.items.map(it => `${it.name} x${it.qty}`).join(', ');
 
+            const pt = r.paymentType === 'kart' ? '💳 Kart' : '💵 Nakit';
+            const ptColor = r.paymentType === 'kart' ? '#3b82f6' : '#22c55e';
+
             html += `
                 <div class="history-card">
                     <div class="history-card-top">
@@ -827,7 +728,7 @@ async function renderHistory() {
                     </div>
                     <div class="history-card-items">${itemsSummary}</div>
                     <div class="history-card-bottom">
-                        <span class="history-card-total">₺${r.total}</span>
+                        <span class="history-card-total">₺${r.total} <span style="font-size:0.75rem; color:${ptColor}; margin-left:4px;">(${pt})</span></span>
                         <div class="history-card-actions">
                             <button class="hc-btn" onclick="viewReceipt('${r.id}')">🧾 Görüntüle</button>
                             <button class="hc-btn delete" onclick="deleteReceipt('${r.id}')">🗑️ Sil</button>

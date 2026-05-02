@@ -116,15 +116,16 @@
             <button class="history-close" onclick="closeZReport()">&times;</button>
         </div>
         <div class="zreport-filters">
-            <div class="zreport-filter-row">
-                <label>📅 Tarih:</label>
-                <select id="zreport-range" onchange="handleZReportRange()">
-                    <option value="today">Bugün</option>
-                    <option value="yesterday">Dün</option>
-                    <option value="week">Bu Hafta</option>
-                    <option value="month">Bu Ay</option>
-                    <option value="custom">Özel Tarih</option>
-                </select>
+            <div class="zreport-filter-row" style="flex-direction: column; align-items: flex-start;">
+                <label style="margin-bottom: 8px;">📅 Tarih Aralığı Seçin:</label>
+                <div class="payment-segmented" id="zr-range-container" style="width: 100%; flex-wrap: wrap;">
+                    <div class="pay-seg-btn active" data-val="today" onclick="setZReportRange('today')">Bugün</div>
+                    <div class="pay-seg-btn" data-val="yesterday" onclick="setZReportRange('yesterday')">Dün</div>
+                    <div class="pay-seg-btn" data-val="week" onclick="setZReportRange('week')">Bu Hafta</div>
+                    <div class="pay-seg-btn" data-val="month" onclick="setZReportRange('month')">Bu Ay</div>
+                    <div class="pay-seg-btn" data-val="custom" onclick="setZReportRange('custom')">Özel</div>
+                </div>
+                <input type="hidden" id="zreport-range" value="today" />
             </div>
             <div class="zreport-custom-dates" id="zreport-custom-dates" style="display:none">
                 <input type="date" id="zreport-start" />
@@ -817,9 +818,7 @@ function showToast(msg, type) {
    ══════════════════════════════════════ */
 function openZReport() {
     document.getElementById('zreport-overlay').classList.add('show');
-    document.getElementById('zreport-range').value = 'today';
-    document.getElementById('zreport-custom-dates').style.display = 'none';
-    generateZReport();
+    setZReportRange('today');
 }
 
 function closeZReport() {
@@ -830,8 +829,13 @@ function closeZReportOutside(e) {
     if (e.target === document.getElementById('zreport-overlay')) closeZReport();
 }
 
-function handleZReportRange() {
-    const val = document.getElementById('zreport-range').value;
+function setZReportRange(val) {
+    document.getElementById('zreport-range').value = val;
+    const btns = document.querySelectorAll('#zr-range-container .pay-seg-btn');
+    btns.forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.querySelector(`#zr-range-container .pay-seg-btn[data-val="${val}"]`);
+    if(activeBtn) activeBtn.classList.add('active');
+    
     document.getElementById('zreport-custom-dates').style.display = val === 'custom' ? 'flex' : 'none';
     if (val !== 'custom') generateZReport();
 }
@@ -1125,9 +1129,7 @@ async function autoTriggerZReport() {
     showToast('⏰ Gün sonu Z Raporu hazırlanıyor...', 'success');
 
     // Bugünü seç ve raporu oluştur
-    document.getElementById('zreport-range').value = 'today';
-    document.getElementById('zreport-custom-dates').style.display = 'none';
-    await generateZReport();
+    setZReportRange('today');
 
     // Önizlemeyi aç
     document.getElementById('zprint-overlay').classList.add('show');

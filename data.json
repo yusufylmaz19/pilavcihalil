@@ -4,9 +4,9 @@
     "slogan": "Sultanbeyli'nin Lezzet Durağı",
     "hero_badge": "Sultanbeyli'nin En Lezzetli Pilav Durağı",
     "hero_desc": "Taze malzemeler, özel soslar ve lezzet dolu porsiyon pilav çeşitleriyle hizmetinizdeyiz.",
-    "logo": "logo.png",
-    "hero_image": "hero.png",
-    "pdf_menu": "Max_Pilav_Halil_Usta_Menu.pdf"
+    "logo": "assets/logo.png",
+    "hero_image": "assets/hero.png",
+    "pdf_menu": "assets/Max_Pilav_Halil_Usta_Menu.pdf"
   },
   "contact": {
     "phones": [

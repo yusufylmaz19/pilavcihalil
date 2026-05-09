@@ -126,9 +126,9 @@ async function saveReceipt() {
     if (cart.length === 0) return;
 
     const now = new Date();
-    const count = await getReceiptCount();
-    const counter = (count + 1).toString().padStart(4, '0');
-    const id = `MP-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}-${counter}`;
+    const dateStr = now.getFullYear().toString() + (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0');
+    const timeStr = now.getHours().toString().padStart(2, '0') + now.getMinutes().toString().padStart(2, '0') + now.getSeconds().toString().padStart(2, '0');
+    const id = `MP-${dateStr}-${timeStr}`;
 
     const total = cart.reduce((s, c) => s + calcItemPrice(c) * c.qty, 0);
     const paidInput = document.getElementById('paid-amount');

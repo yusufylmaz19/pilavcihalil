@@ -90,7 +90,12 @@
 <div class="history-overlay" id="history-overlay" onclick="closeHistoryOutside(event)">
     <div class="history-modal">
         <div class="history-header">
-            <h2>📋 Hesap Geçmişi</h2>
+            <h2>📋 Geçmiş</h2>
+            <div class="payment-segmented" id="history-grouping-tabs" style="margin: 0 16px; flex: 1; justify-content: center; max-width: 300px;">
+                <div class="pay-seg-btn active" onclick="setHistoryGrouping('day')">Gün</div>
+                <div class="pay-seg-btn" onclick="setHistoryGrouping('week')">Hafta</div>
+                <div class="pay-seg-btn" onclick="setHistoryGrouping('month')">Ay</div>
+            </div>
             <button class="history-close" onclick="toggleHistory()">&times;</button>
         </div>
         <div class="history-body" id="history-body"></div>

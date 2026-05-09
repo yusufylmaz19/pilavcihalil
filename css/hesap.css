@@ -388,8 +388,22 @@ body {
   margin: 18px 0 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .history-group-title:first-child { margin-top:0; }
+
+.group-total-badge {
+  background: var(--orange-glow);
+  color: var(--orange2);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  border: 1px solid rgba(255,107,26,0.2);
+  text-transform: none;
+  letter-spacing: 0;
+}
 
 .history-card {
   background: var(--surface);

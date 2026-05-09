@@ -97,7 +97,8 @@
             "emoji": "🍛",
             "desc": "Klasik lezzet",
             "price": 130,
-            "hasPortions": true
+            "hasPortions": true,
+            "color": "white"
           }
         ]
       },
@@ -110,35 +111,40 @@
             "emoji": "🍗",
             "desc": "Sade haşlama tavuk",
             "price": 40,
-            "hasPortions": true
+            "hasPortions": true,
+            "color": "white"
           },
           {
             "name": "Köri Tavuk",
             "emoji": "🍛",
             "desc": "Egzotik köri sosu",
             "price": 100,
-            "hasPortions": true
+            "hasPortions": true,
+            "color": "kori"
           },
           {
             "name": "Köri Kremalı Tavuk",
             "emoji": "🥛",
             "desc": "Kadifemsi krema sosu",
             "price": 100,
-            "hasPortions": true
+            "hasPortions": true,
+            "color": "kori-krema"
           },
           {
             "name": "Fajita Tavuk",
             "emoji": "🌯",
             "desc": "Acılı & baharatlı fajita",
             "price": 100,
-            "hasPortions": true
+            "hasPortions": true,
+            "color": "fajita"
           },
           {
             "name": "Soslu Baharatlı Tavuk",
             "emoji": "🌶️",
             "desc": "Sıcak baharatlar",
             "price": 100,
-            "hasPortions": true
+            "hasPortions": true,
+            "color": "soslu"
           }
         ]
       },
@@ -151,14 +157,16 @@
             "emoji": "🧆",
             "desc": "Pilav üstü",
             "price": 10,
-            "hasPortions": true
+            "hasPortions": true,
+            "color": "nohut"
           },
           {
             "name": "Mısır",
             "emoji": "🌽",
             "desc": "Pilav üstü",
             "price": 10,
-            "hasPortions": true
+            "hasPortions": true,
+            "color": "misir"
           }
         ]
       },
@@ -171,14 +179,16 @@
             "emoji": "🍲",
             "desc": "Geleneksel kırmızı mercimek",
             "price": 130,
-            "hasPortions": true
+            "hasPortions": true,
+            "color": "nohut"
           },
           {
             "name": "Ezogelin Çorbası",
             "emoji": "🍲",
             "desc": "Baharatlı ezogelin",
             "price": 130,
-            "hasPortions": true
+            "hasPortions": true,
+            "color": "fajita"
           }
         ]
       },
@@ -191,77 +201,88 @@
             "emoji": "🥛",
             "desc": "Büyük boy ayran",
             "price": 40,
-            "hasPortions": false
+            "hasPortions": false,
+            "color": "white"
           },
           {
             "name": "K.Ayran",
             "emoji": "🥛",
             "desc": "Küçük boy ayran",
             "price": 30,
-            "hasPortions": false
+            "hasPortions": false,
+            "color": "white"
           },
           {
             "name": "Kola",
             "emoji": "🥤",
             "desc": "Soğuk içecek",
             "price": 60,
-            "hasPortions": false
+            "hasPortions": false,
+            "color": "kola"
           },
           {
             "name": "Sade Soda",
             "emoji": "💧",
             "desc": "Ferahlatıcı",
             "price": 25,
-            "hasPortions": false
+            "hasPortions": false,
+            "color": "soda"
           },
           {
             "name": "Meyveli Soda",
             "emoji": "🍓",
             "desc": "Çeşitli tatlar",
             "price": 35,
-            "hasPortions": false
+            "hasPortions": false,
+            "color": "meyve"
           },
           {
-            "name": "Şalgam Acılı",
+            "name": "Şalgam",
             "emoji": "🌶️",
             "desc": "Geleneksel lezzet",
             "price": 40,
-            "hasPortions": false
+            "hasPortions": false,
+            "color": "salgam"
           },
           {
             "name": "Meyve Suyu Kutu",
             "emoji": "🧃",
             "desc": "Büyük boy",
             "price": 60,
-            "hasPortions": false
+            "hasPortions": false,
+            "color": "meyve"
           },
           {
             "name": "Meyve Suyu Küçük",
             "emoji": "🧃",
             "desc": "Küçük boy",
             "price": 35,
-            "hasPortions": false
+            "hasPortions": false,
+            "color": "meyve"
           },
           {
-            "name": "Soğuk Çay",
+            "name": "Soğuk Çay (Didi)",
             "emoji": "🍵",
             "desc": "Serinletici",
             "price": 60,
-            "hasPortions": false
+            "hasPortions": false,
+            "color": "cay"
           },
           {
             "name": "Su",
             "emoji": "💧",
             "desc": "Doğal kaynak suyu",
             "price": 20,
-            "hasPortions": false
+            "hasPortions": false,
+            "color": "su"
           },
           {
             "name": "Çay",
             "emoji": "☕",
             "desc": "Sıcak demlik çay",
             "price": 15,
-            "hasPortions": false
+            "hasPortions": false,
+            "color": "cay"
           }
         ]
       }

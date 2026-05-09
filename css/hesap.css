@@ -18,6 +18,22 @@
   --radius: 14px;
   --radius-sm: 10px;
   --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  
+  /* Item Colors - Richer/Darker Tones */
+  --c-white: #ffffff;
+  --c-nohut: #c2912e;      /* Brownish Yellow */
+  --c-misir: #ffcc00;      /* Bright Corn Yellow */
+  --c-kori: #d35400;       /* Deep Curry Orange */
+  --c-kori-krema: #e1c060; /* Creamy Darker Yellow */
+  --c-fajita: #c0392b;     /* Base Red for Fajita */
+  --c-green: #27ae60;      /* Green for Fajita mix */
+  --c-soslu: #8b0000;      /* Deep Sauce Red */
+  --c-kola: #2c1e16;
+  --c-soda: #2980b9;
+  --c-meyve: #e67e22;
+  --c-salgam: #6c3483;
+  --c-su: #3498db;
+  --c-cay: #782819;
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -139,6 +155,46 @@ body {
 @keyframes ripple-anim {
   to { transform: scale(4); opacity: 0; }
 }
+
+/* Item Color Variations */
+.item-btn[data-color] {
+    border-width: 2px;
+}
+.item-btn[data-color="white"] { border-color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.15); }
+.item-btn[data-color="nohut"] { border-color: rgba(194,145,46,0.8); background: rgba(194,145,46,0.4); }
+.item-btn[data-color="misir"] { border-color: rgba(255,204,0,0.8); background: rgba(255,204,0,0.45); }
+.item-btn[data-color="kori"] { border-color: rgba(211,84,0,0.8); background: rgba(211,84,0,0.4); }
+.item-btn[data-color="kori-krema"] { border-color: rgba(225,192,96,0.8); background: rgba(225,192,96,0.4); }
+.item-btn[data-color="fajita"] { 
+    border-color: rgba(192,57,43,0.8); 
+    background: linear-gradient(135deg, rgba(192,57,43,0.5) 0%, rgba(39,174,96,0.4) 100%); 
+}
+.item-btn[data-color="soslu"] { border-color: rgba(139,0,0,0.8); background: rgba(139,0,0,0.5); }
+.item-btn[data-color="kola"] { border-color: rgba(44,30,22,0.9); background: rgba(44,30,22,0.6); }
+.item-btn[data-color="soda"] { border-color: rgba(41,128,185,0.8); background: rgba(41,128,185,0.4); }
+.item-btn[data-color="meyve"] { border-color: rgba(230,126,34,0.8); background: rgba(230,126,34,0.4); }
+.item-btn[data-color="salgam"] { border-color: rgba(108,52,131,0.8); background: rgba(108,52,131,0.5); }
+.item-btn[data-color="su"] { border-color: rgba(52,152,219,0.8); background: rgba(52,152,219,0.4); }
+.item-btn[data-color="cay"] { border-color: rgba(120,40,25,0.8); background: rgba(120,40,25,0.5); }
+
+/* Hover effects for colored buttons */
+.item-btn[data-color]:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+.item-btn[data-color="white"]:hover { background: rgba(255,255,255,0.2); border-color: #fff; }
+.item-btn[data-color="nohut"]:hover { background: rgba(194,145,46,0.3); border-color: #c2912e; }
+.item-btn[data-color="misir"]:hover { background: rgba(255,204,0,0.3); border-color: #ffcc00; }
+.item-btn[data-color="kori"]:hover { background: rgba(211,84,0,0.3); border-color: #d35400; }
+.item-btn[data-color="kori-krema"]:hover { background: rgba(225,192,96,0.3); border-color: #e1c060; }
+.item-btn[data-color="fajita"]:hover { background: linear-gradient(135deg, rgba(192,57,43,0.35) 0%, rgba(39,174,96,0.25) 100%); border-color: #c0392b; }
+.item-btn[data-color="soslu"]:hover { background: rgba(139,0,0,0.35); border-color: #8b0000; }
+.item-btn[data-color="kola"]:hover { background: rgba(44,30,22,0.4); border-color: #2c1e16; }
+.item-btn[data-color="soda"]:hover { background: rgba(41,128,185,0.3); border-color: #2980b9; }
+.item-btn[data-color="meyve"]:hover { background: rgba(230,126,34,0.3); border-color: #e67e22; }
+.item-btn[data-color="salgam"]:hover { background: rgba(108,52,131,0.35); border-color: #6c3483; }
+.item-btn[data-color="su"]:hover { background: rgba(52,152,219,0.3); border-color: #3498db; }
+.item-btn[data-color="cay"]:hover { background: rgba(120,40,25,0.35); border-color: #782819; }
 
 /* ── CART / RIGHT PANEL ── */
 .cart-panel {

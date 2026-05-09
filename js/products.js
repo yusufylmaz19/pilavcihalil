@@ -17,7 +17,15 @@ async function getMergedCategories() {
         const items = cat.items.map(item => {
             const ov = overrideMap[item.name];
             if (ov) {
-                return { ...item, price: ov.price, desc: ov.desc, emoji: ov.emoji, hasPortions: ov.hasPortions !== undefined ? ov.hasPortions : item.hasPortions, _modified: true };
+                return { 
+                    ...item, 
+                    price: ov.price, 
+                    desc: ov.desc, 
+                    emoji: ov.emoji, 
+                    hasPortions: ov.hasPortions !== undefined ? ov.hasPortions : item.hasPortions,
+                    color: ov.color || item.color,
+                    _modified: true 
+                };
             }
             return { ...item };
         });
@@ -35,13 +43,31 @@ async function getMergedCategories() {
         const existingCat = merged.find(c => c.id === catId);
         if (existingCat) {
             products.forEach(p => {
-                existingCat.items.push({ name: p.name, emoji: p.emoji, desc: p.desc, price: p.price, hasPortions: p.hasPortions, _modified: true, _custom: true });
+                existingCat.items.push({ 
+                    name: p.name, 
+                    emoji: p.emoji, 
+                    desc: p.desc, 
+                    price: p.price, 
+                    hasPortions: p.hasPortions, 
+                    color: p.color,
+                    _modified: true, 
+                    _custom: true 
+                });
             });
         } else {
             merged.push({
                 id: catId,
                 label: '⭐ Özel Ürünler',
-                items: products.map(p => ({ name: p.name, emoji: p.emoji, desc: p.desc, price: p.price, hasPortions: p.hasPortions, _modified: true, _custom: true }))
+                items: products.map(p => ({ 
+                    name: p.name, 
+                    emoji: p.emoji, 
+                    desc: p.desc, 
+                    price: p.price, 
+                    hasPortions: p.hasPortions, 
+                    color: p.color,
+                    _modified: true, 
+                    _custom: true 
+                }))
             });
         }
     }
@@ -66,6 +92,9 @@ function buildMenuPanel(categories) {
             item._catId = cat.id;
             const btn = document.createElement('div');
             btn.className = 'item-btn';
+            if (item.color) {
+                btn.setAttribute('data-color', item.color);
+            }
             
             const hasPortions = item.hasPortions;
             
@@ -136,7 +165,24 @@ function showQuickEdit(e, item) {
         <div class="qe-row"><label>Fiyat</label><input type="number" id="qe-price" value="${item.price}" min="0" /></div>
         <div class="qe-row"><label>Açıklama</label><input type="text" id="qe-desc" value="${item.desc || ''}" /></div>
         <div class="qe-row"><label>Emoji</label><input type="text" id="qe-emoji" value="${item.emoji}" /></div>
-        <div class="qe-row"><label>Porsiyon Seçeneği</label><input type="checkbox" id="qe-hasPortions" ${item.hasPortions ? 'checked' : ''} style="width:auto; margin-left: 10px; transform: scale(1.3);" /></div>
+        <div class="qe-row"><label>Renk</label>
+            <select id="qe-color">
+                <option value="">Varsayılan</option>
+                <option value="white" ${item.color === 'white' ? 'selected' : ''}>Beyaz</option>
+                <option value="nohut" ${item.color === 'nohut' ? 'selected' : ''}>Nohut Sarısı</option>
+                <option value="misir" ${item.color === 'misir' ? 'selected' : ''}>Mısır Sarısı</option>
+                <option value="kori" ${item.color === 'kori' ? 'selected' : ''}>Köri</option>
+                <option value="kori-krema" ${item.color === 'kori-krema' ? 'selected' : ''}>Köri Kremalı</option>
+                <option value="fajita" ${item.color === 'fajita' ? 'selected' : ''}>Fajita</option>
+                <option value="soslu" ${item.color === 'soslu' ? 'selected' : ''}>Soslu</option>
+                <option value="kola" ${item.color === 'kola' ? 'selected' : ''}>Kola</option>
+                <option value="soda" ${item.color === 'soda' ? 'selected' : ''}>Soda</option>
+                <option value="meyve" ${item.color === 'meyve' ? 'selected' : ''}>Meyve Suyu</option>
+                <option value="salgam" ${item.color === 'salgam' ? 'selected' : ''}>Şalgam</option>
+                <option value="su" ${item.color === 'su' ? 'selected' : ''}>Su</option>
+                <option value="cay" ${item.color === 'cay' ? 'selected' : ''}>Çay</option>
+            </select>
+        </div>
         <div class="qe-btns">
             <button class="qe-cancel" onclick="closeQuickEdit()">İptal</button>
             <button class="qe-save" id="qe-save-btn">💾 Kaydet</button>
@@ -149,6 +195,7 @@ function showQuickEdit(e, item) {
         const newDesc = document.getElementById('qe-desc').value.trim();
         const newEmoji = document.getElementById('qe-emoji').value.trim() || item.emoji;
         const newHasPortions = document.getElementById('qe-hasPortions').checked;
+        const newColor = document.getElementById('qe-color').value;
 
         await saveProduct({
             name: item.name,
@@ -157,7 +204,8 @@ function showQuickEdit(e, item) {
             price: newPrice,
             category: item._catId || '',
             isCustom: !!item._custom,
-            hasPortions: newHasPortions
+            hasPortions: newHasPortions,
+            color: newColor
         });
 
         closeQuickEdit();
@@ -279,6 +327,24 @@ function toggleEditForm(name, catId, isCustom) {
         <div class="prod-edit-row"><label>Porsiyon Seçeneği</label><input type="checkbox" id="pedit-hasPortions-${name.replace(/\\s/g, '_')}" ${currentItem.hasPortions ? 'checked' : ''} style="width: auto; transform: scale(1.3); margin-left: 10px;" /></div>
         <div class="prod-edit-row"><label>Açıklama</label><input type="text" id="pedit-desc-${name.replace(/\\s/g, '_')}" value="${descText}" /></div>
         <div class="prod-edit-row"><label>Fiyat (₺)</label><input type="number" id="pedit-price-${name.replace(/\\s/g, '_')}" value="${priceText}" min="0" /></div>
+        <div class="prod-edit-row"><label>Renk</label>
+            <select id="pedit-color-${name.replace(/\\s/g, '_')}">
+                <option value="">Varsayılan</option>
+                <option value="white" ${currentItem && currentItem.color === 'white' ? 'selected' : ''}>Beyaz</option>
+                <option value="nohut" ${currentItem && currentItem.color === 'nohut' ? 'selected' : ''}>Nohut Sarısı</option>
+                <option value="misir" ${currentItem && currentItem.color === 'misir' ? 'selected' : ''}>Mısır Sarısı</option>
+                <option value="kori" ${currentItem && currentItem.color === 'kori' ? 'selected' : ''}>Köri</option>
+                <option value="kori-krema" ${currentItem && currentItem.color === 'kori-krema' ? 'selected' : ''}>Köri Kremalı</option>
+                <option value="fajita" ${currentItem && currentItem.color === 'fajita' ? 'selected' : ''}>Fajita</option>
+                <option value="soslu" ${currentItem && currentItem.color === 'soslu' ? 'selected' : ''}>Soslu</option>
+                <option value="kola" ${currentItem && currentItem.color === 'kola' ? 'selected' : ''}>Kola</option>
+                <option value="soda" ${currentItem && currentItem.color === 'soda' ? 'selected' : ''}>Soda</option>
+                <option value="meyve" ${currentItem && currentItem.color === 'meyve' ? 'selected' : ''}>Meyve Suyu</option>
+                <option value="salgam" ${currentItem && currentItem.color === 'salgam' ? 'selected' : ''}>Şalgam</option>
+                <option value="su" ${currentItem && currentItem.color === 'su' ? 'selected' : ''}>Su</option>
+                <option value="cay" ${currentItem && currentItem.color === 'cay' ? 'selected' : ''}>Çay</option>
+            </select>
+        </div>
         ${isCustom ? `<div class="prod-edit-row"><label>Kategori</label>
             <select id="pedit-cat-${name.replace(/\\s/g, '_')}">
                 ${defaultCategories.map(c => `<option value="${c.id}" ${c.id === catId ? 'selected' : ''}>${c.label}</option>`).join('')}
@@ -304,6 +370,7 @@ async function saveEditedProduct(name, catId, isCustom) {
     const price = parseFloat(document.getElementById('pedit-price-' + safeName)?.value) || 0;
     const newCat = document.getElementById('pedit-cat-' + safeName)?.value || catId;
     const hasPortions = document.getElementById('pedit-hasPortions-' + safeName)?.checked ?? false;
+    const color = document.getElementById('pedit-color-' + safeName)?.value || '';
 
     await saveProduct({
         name: name,
@@ -312,7 +379,8 @@ async function saveEditedProduct(name, catId, isCustom) {
         price: price,
         category: newCat,
         isCustom: isCustom,
-        hasPortions: hasPortions
+        hasPortions: hasPortions,
+        color: color
     });
 
     showToast(`✅ ${name} kaydedildi!`, 'success');
@@ -361,6 +429,24 @@ function showAddProductForm() {
             <div class="prod-edit-row"><label>Porsiyon Seçeneği</label><input type="checkbox" id="pnew-hasPortions" checked style="width: auto; transform: scale(1.3); margin-left: 10px;" /></div>
             <div class="prod-edit-row"><label>Açıklama</label><input type="text" id="pnew-desc" placeholder="Kısa açıklama" /></div>
             <div class="prod-edit-row"><label>Fiyat (₺)</label><input type="number" id="pnew-price" placeholder="0" min="0" /></div>
+            <div class="prod-edit-row"><label>Renk</label>
+                <select id="pnew-color">
+                    <option value="">Varsayılan</option>
+                    <option value="white">Beyaz</option>
+                    <option value="nohut">Nohut Sarısı</option>
+                    <option value="misir">Mısır Sarısı</option>
+                    <option value="kori">Köri</option>
+                    <option value="kori-krema">Köri Kremalı</option>
+                    <option value="fajita">Fajita</option>
+                    <option value="soslu">Soslu</option>
+                    <option value="kola">Kola</option>
+                    <option value="soda">Soda</option>
+                    <option value="meyve">Meyve Suyu</option>
+                    <option value="salgam">Şalgam</option>
+                    <option value="su">Su</option>
+                    <option value="cay">Çay</option>
+                </select>
+            </div>
             <div class="prod-edit-row"><label>Kategori</label>
                 <select id="pnew-cat">
                     ${defaultCategories.map(c => `<option value="${c.id}">${c.label}</option>`).join('')}
@@ -384,6 +470,7 @@ async function addNewProduct() {
     const price = parseFloat(document.getElementById('pnew-price').value) || 0;
     const category = document.getElementById('pnew-cat').value;
     const hasPortions = document.getElementById('pnew-hasPortions').checked;
+    const color = document.getElementById('pnew-color').value;
 
     if (!name) {
         showToast('❌ Ürün adı boş olamaz!', '');
@@ -398,7 +485,7 @@ async function addNewProduct() {
     }
 
     await saveProduct({
-        name, emoji, desc, price, category, isCustom: true, hasPortions
+        name, emoji, desc, price, category, isCustom: true, hasPortions, color
     });
 
     showToast(`✅ ${name} eklendi!`, 'success');

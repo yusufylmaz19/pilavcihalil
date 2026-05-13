@@ -105,7 +105,7 @@ function buildMenuPanel(categories) {
                     <div class="price">₺${item.price}</div>
                 </div>
                 ${hasPortions ? `
-                <div class="item-portions" id="portions-${item.name.replace(/\\s/g, '_')}">
+                <div class="item-portions" id="portions-${item.name.replace(/\s/g, '_')}">
                     <div class="ps-btn" data-p="0.5">Yarım</div>
                     <div class="ps-btn" data-p="1">Tam</div>
                     <div class="ps-btn" data-p="1.5">1.5</div>
@@ -163,6 +163,7 @@ function showQuickEdit(e, item) {
     popup.innerHTML = `
         <div class="qe-title">${item.emoji} ${item.name}</div>
         <div class="qe-row"><label>Fiyat</label><input type="number" id="qe-price" value="${item.price}" min="0" /></div>
+        <div class="qe-row"><label>Porsiyon Seçeneği</label><input type="checkbox" id="qe-hasPortions" ${item.hasPortions ? 'checked' : ''} style="width: auto; transform: scale(1.3); margin-left: 10px;" /></div>
         <div class="qe-row"><label>Açıklama</label><input type="text" id="qe-desc" value="${item.desc || ''}" /></div>
         <div class="qe-row"><label>Emoji</label><input type="text" id="qe-emoji" value="${item.emoji}" /></div>
         <div class="qe-row"><label>Renk</label>
@@ -282,7 +283,7 @@ function buildProdCard(item, catId, isModified, isCustom) {
     const modBadge = isModified ? `<span class="prod-modified-badge">${isCustom ? 'ÖZEL' : 'DÜZENLENDI'}</span>` : '';
     const escapedName = item.name.replace(/'/g, "\\\\'");
     return `
-    <div class="prod-card ${isCustom ? 'custom' : ''}" id="pcard-${item.name.replace(/\\s/g, '_')}">
+    <div class="prod-card ${isCustom ? 'custom' : ''}" id="pcard-${item.name.replace(/\s/g, '_')}">
         <div class="prod-emoji">${item.emoji}</div>
         <div class="prod-info">
             <div class="prod-name">${item.name}${modBadge}</div>
@@ -297,8 +298,8 @@ function buildProdCard(item, catId, isModified, isCustom) {
     </div>`;
 }
 
-function toggleEditForm(name, catId, isCustom) {
-    const cardId = 'pcard-' + name.replace(/\\s/g, '_');
+async function toggleEditForm(name, catId, isCustom) {
+    const cardId = 'pcard-' + name.replace(/\s/g, '_');
     const card = document.getElementById(cardId);
     if (!card) return;
 
@@ -309,12 +310,27 @@ function toggleEditForm(name, catId, isCustom) {
         return;
     }
 
+    // Ürün bilgisini güncel halinden al (DB veya Varsayılan)
+    const overrides = await getAllProducts();
+    const override = overrides.find(o => o.name === name);
+    
     let currentItem = null;
     defaultCategories.forEach(cat => {
         cat.items.forEach(item => {
             if (item.name === name) currentItem = { ...item };
         });
     });
+
+    if (override) {
+        currentItem = {
+            ...(currentItem || {}),
+            ...override
+        };
+    }
+
+    if (!currentItem) {
+        currentItem = { name, emoji: '🍽️', price: 0, desc: '', hasPortions: true, color: '' };
+    }
 
     const priceText = card.querySelector('.prod-price-badge').textContent.replace('₺', '');
     const descText = card.querySelector('.prod-desc').textContent;
@@ -323,30 +339,30 @@ function toggleEditForm(name, catId, isCustom) {
     const form = document.createElement('div');
     form.className = 'prod-edit-form show';
     form.innerHTML = `
-        <div class="prod-edit-row"><label>Emoji</label><input type="text" id="pedit-emoji-${name.replace(/\\s/g, '_')}" value="${emojiText}" /></div>
-        <div class="prod-edit-row"><label>Porsiyon Seçeneği</label><input type="checkbox" id="pedit-hasPortions-${name.replace(/\\s/g, '_')}" ${currentItem.hasPortions ? 'checked' : ''} style="width: auto; transform: scale(1.3); margin-left: 10px;" /></div>
-        <div class="prod-edit-row"><label>Açıklama</label><input type="text" id="pedit-desc-${name.replace(/\\s/g, '_')}" value="${descText}" /></div>
-        <div class="prod-edit-row"><label>Fiyat (₺)</label><input type="number" id="pedit-price-${name.replace(/\\s/g, '_')}" value="${priceText}" min="0" /></div>
+        <div class="prod-edit-row"><label>Emoji</label><input type="text" id="pedit-emoji-${name.replace(/\s/g, '_')}" value="${emojiText}" /></div>
+        <div class="prod-edit-row"><label>Porsiyon Seçeneği</label><input type="checkbox" id="pedit-hasPortions-${name.replace(/\s/g, '_')}" ${currentItem.hasPortions ? 'checked' : ''} style="width: auto; transform: scale(1.3); margin-left: 10px;" /></div>
+        <div class="prod-edit-row"><label>Açıklama</label><input type="text" id="pedit-desc-${name.replace(/\s/g, '_')}" value="${descText}" /></div>
+        <div class="prod-edit-row"><label>Fiyat (₺)</label><input type="number" id="pedit-price-${name.replace(/\s/g, '_')}" value="${priceText}" min="0" /></div>
         <div class="prod-edit-row"><label>Renk</label>
-            <select id="pedit-color-${name.replace(/\\s/g, '_')}">
+            <select id="pedit-color-${name.replace(/\s/g, '_')}">
                 <option value="">Varsayılan</option>
-                <option value="white" ${currentItem && currentItem.color === 'white' ? 'selected' : ''}>Beyaz</option>
-                <option value="nohut" ${currentItem && currentItem.color === 'nohut' ? 'selected' : ''}>Nohut Sarısı</option>
-                <option value="misir" ${currentItem && currentItem.color === 'misir' ? 'selected' : ''}>Mısır Sarısı</option>
-                <option value="kori" ${currentItem && currentItem.color === 'kori' ? 'selected' : ''}>Köri</option>
-                <option value="kori-krema" ${currentItem && currentItem.color === 'kori-krema' ? 'selected' : ''}>Köri Kremalı</option>
-                <option value="fajita" ${currentItem && currentItem.color === 'fajita' ? 'selected' : ''}>Fajita</option>
-                <option value="soslu" ${currentItem && currentItem.color === 'soslu' ? 'selected' : ''}>Soslu</option>
-                <option value="kola" ${currentItem && currentItem.color === 'kola' ? 'selected' : ''}>Kola</option>
-                <option value="soda" ${currentItem && currentItem.color === 'soda' ? 'selected' : ''}>Soda</option>
-                <option value="meyve" ${currentItem && currentItem.color === 'meyve' ? 'selected' : ''}>Meyve Suyu</option>
-                <option value="salgam" ${currentItem && currentItem.color === 'salgam' ? 'selected' : ''}>Şalgam</option>
-                <option value="su" ${currentItem && currentItem.color === 'su' ? 'selected' : ''}>Su</option>
-                <option value="cay" ${currentItem && currentItem.color === 'cay' ? 'selected' : ''}>Çay</option>
+                <option value="white" ${currentItem.color === 'white' ? 'selected' : ''}>Beyaz</option>
+                <option value="nohut" ${currentItem.color === 'nohut' ? 'selected' : ''}>Nohut Sarısı</option>
+                <option value="misir" ${currentItem.color === 'misir' ? 'selected' : ''}>Mısır Sarısı</option>
+                <option value="kori" ${currentItem.color === 'kori' ? 'selected' : ''}>Köri</option>
+                <option value="kori-krema" ${currentItem.color === 'kori-krema' ? 'selected' : ''}>Köri Kremalı</option>
+                <option value="fajita" ${currentItem.color === 'fajita' ? 'selected' : ''}>Fajita</option>
+                <option value="soslu" ${currentItem.color === 'soslu' ? 'selected' : ''}>Soslu</option>
+                <option value="kola" ${currentItem.color === 'kola' ? 'selected' : ''}>Kola</option>
+                <option value="soda" ${currentItem.color === 'soda' ? 'selected' : ''}>Soda</option>
+                <option value="meyve" ${currentItem.color === 'meyve' ? 'selected' : ''}>Meyve Suyu</option>
+                <option value="salgam" ${currentItem.color === 'salgam' ? 'selected' : ''}>Şalgam</option>
+                <option value="su" ${currentItem.color === 'su' ? 'selected' : ''}>Su</option>
+                <option value="cay" ${currentItem.color === 'cay' ? 'selected' : ''}>Çay</option>
             </select>
         </div>
         ${isCustom ? `<div class="prod-edit-row"><label>Kategori</label>
-            <select id="pedit-cat-${name.replace(/\\s/g, '_')}">
+            <select id="pedit-cat-${name.replace(/\s/g, '_')}">
                 ${defaultCategories.map(c => `<option value="${c.id}" ${c.id === catId ? 'selected' : ''}>${c.label}</option>`).join('')}
                 <option value="ozel" ${catId === 'ozel' ? 'selected' : ''}>⭐ Özel</option>
             </select>
@@ -364,7 +380,7 @@ function toggleEditForm(name, catId, isCustom) {
 }
 
 async function saveEditedProduct(name, catId, isCustom) {
-    const safeName = name.replace(/\\s/g, '_');
+    const safeName = name.replace(/\s/g, '_');
     const emoji = document.getElementById('pedit-emoji-' + safeName)?.value.trim() || '🍽️';
     const desc = document.getElementById('pedit-desc-' + safeName)?.value.trim() || '';
     const price = parseFloat(document.getElementById('pedit-price-' + safeName)?.value) || 0;

@@ -255,7 +255,7 @@ function findProductByName(name, categories) {
 }
 
 // ── Komboyu sepete ekle ──
-function addComboToCart(comboId, categories) {
+function addComboToCart(comboId, categories, multiplier = 1) {
     const combo = activeCombos.find(c => c.id === comboId);
     if (!combo) return;
 
@@ -263,13 +263,16 @@ function addComboToCart(comboId, categories) {
     combo.items.forEach(ci => {
         const product = findProductByName(ci.name, categories);
         if (product) {
-            addToCart(product, ci.portion);
+            // Kombo içindeki porsiyon ile seçilen porsiyon çarpanını uygula
+            addToCart(product, ci.portion * multiplier);
             addedCount++;
         }
     });
 
     if (addedCount > 0) {
-        showToast(`⚡ ${combo.emoji} ${combo.name} eklendi (${addedCount} ürün)`, 'success');
+        const pLabel = multiplier === 0.5 ? '½' : multiplier === 1.5 ? '1½' : '';
+        const nameWithPortion = pLabel ? `${combo.name} (${pLabel})` : combo.name;
+        showToast(`⚡ ${combo.emoji} ${nameWithPortion} eklendi`, 'success');
     }
 }
 
@@ -346,10 +349,27 @@ function buildCombosPanel(categories) {
                     <div class="price">₺${totalPrice}</div>
                 </div>
                 <div class="combo-contents">${itemNames.join(' + ')}</div>
+                <div class="item-portions">
+                    <div class="ps-btn" data-p="0.5">Yarım</div>
+                    <div class="ps-btn" data-p="1">Tam</div>
+                    <div class="ps-btn" data-p="1.5">1.5</div>
+                </div>
             `;
 
+            // Porsiyon butonları için event listener
+            const pBtns = btn.querySelectorAll('.ps-btn');
+            pBtns.forEach(pBtn => {
+                pBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const multiplier = parseFloat(pBtn.dataset.p);
+                    addComboToCart(combo.id, categories, multiplier);
+                    createRipple(e, pBtn);
+                });
+            });
+
+            // Kartın geneline tıklanırsa default "Tam" ekle
             btn.addEventListener('click', (e) => {
-                addComboToCart(combo.id, categories);
+                addComboToCart(combo.id, categories, 1);
                 createRipple(e, btn);
             });
 

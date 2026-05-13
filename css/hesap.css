@@ -1161,6 +1161,13 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   border-radius: var(--radius-sm);
   position: relative;
   overflow: hidden;
+  min-height: 165px;
+  display: flex;
+  flex-direction: column;
+}
+
+.combo-btn .item-main {
+  flex: 0 0 auto;
 }
 
 .combo-btn::before {

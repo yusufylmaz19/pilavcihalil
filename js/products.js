@@ -138,6 +138,12 @@ function buildMenuPanel(categories) {
                         createRipple(e, pBtn);
                     });
                 });
+                
+                // Porsiyonlu ürünün kartına tıklandığında da varsayılan olarak TAM ekle
+                btn.addEventListener('click', (e) => {
+                    addToCart(item, 1);
+                    createRipple(e, btn);
+                });
             } else {
                 btn.addEventListener('click', (e) => {
                     addToCart(item, 1);

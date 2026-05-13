@@ -80,13 +80,29 @@ function buildMenuPanel(categories) {
     panel.innerHTML = '';
 
     categories.forEach(cat => {
+        const storageKey = `cat_collapsed_${cat.id}`;
+        const isCollapsed = localStorage.getItem(storageKey) === 'true';
+
         const title = document.createElement('div');
-        title.className = 'cat-title';
-        title.textContent = cat.label;
-        panel.appendChild(title);
+        title.className = `cat-title ${isCollapsed ? 'collapsed' : ''}`;
+        title.innerHTML = `
+            <span>${cat.label}</span>
+            <span class="cat-toggle-icon">▼</span>
+        `;
 
         const grid = document.createElement('div');
         grid.className = 'items-grid';
+        if (isCollapsed) grid.style.display = 'none';
+
+        title.onclick = () => {
+            const nowCollapsed = grid.style.display !== 'none';
+            grid.style.display = nowCollapsed ? 'none' : 'grid';
+            title.classList.toggle('collapsed', nowCollapsed);
+            localStorage.setItem(storageKey, nowCollapsed);
+        };
+
+        panel.appendChild(title);
+        panel.appendChild(grid);
 
         cat.items.forEach(item => {
             item._catId = cat.id;
@@ -235,6 +251,9 @@ function closeQuickEdit() {
 async function refreshMenu() {
     const merged = await getMergedCategories();
     buildMenuPanel(merged);
+    if (typeof buildCombosPanel === 'function') {
+        buildCombosPanel(merged);
+    }
 }
 
 function openProductManager() {

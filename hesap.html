@@ -24,6 +24,7 @@
     </div>
     <div class="topbar-right">
         <button class="topbar-btn" id="btn-zrapor" onclick="openZReport()">📊 Z Raporu</button>
+        <button class="topbar-btn" id="btn-combos" onclick="openComboManager()">⚡ Kombolar</button>
         <button class="topbar-btn" id="btn-products" onclick="openProductManager()">⚙️ Ürünler</button>
         <button class="topbar-btn" id="btn-history" onclick="toggleHistory()">📋 Geçmiş</button>
         <a class="topbar-btn" href="index.html">🏠 Ana Sayfa</a>
@@ -183,12 +184,78 @@
     </div>
 </div>
 
+<!-- ═══ COMBO MANAGEMENT MODAL ═══ -->
+<div class="prod-overlay" id="combo-overlay" onclick="closeComboOutside(event)">
+    <div class="prod-modal">
+        <div class="prod-header">
+            <h2>⚡ Kombo Yönetimi</h2>
+            <button class="history-close" onclick="closeComboManager()">&times;</button>
+        </div>
+        <div class="prod-toolbar">
+            <button class="topbar-btn" onclick="openComboEditor()">➕ Yeni Kombo</button>
+            <button class="topbar-btn" onclick="resetAllCombos()">🔄 Varsayılana Dön</button>
+        </div>
+        <div class="prod-body" id="combo-body"></div>
+    </div>
+</div>
+
+<!-- ═══ COMBO EDITOR MODAL ═══ -->
+<div class="combo-edit-overlay" id="combo-edit-overlay" onclick="closeComboEditOutside(event)">
+    <div class="combo-edit-modal">
+        <div class="prod-header">
+            <h2 id="combo-edit-title">➕ Yeni Kombo</h2>
+            <button class="history-close" onclick="closeComboEditor()">&times;</button>
+        </div>
+        <div class="combo-edit-body">
+            <input type="hidden" id="combo-edit-id" />
+            <div class="prod-edit-row">
+                <label>Kombo Adı</label>
+                <input type="text" id="combo-edit-name" placeholder="ör: Nohutlu Fajita" />
+            </div>
+            <div class="prod-edit-row">
+                <label>Emoji</label>
+                <input type="text" id="combo-edit-emoji" value="🍛" />
+            </div>
+            <div class="prod-edit-row">
+                <label>Grup</label>
+                <select id="combo-edit-group">
+                    <option value="duz">⚡ Düz</option>
+                    <option value="nohutlu">🧆 Nohutlu</option>
+                    <option value="misirli">🌽 Mısırlı</option>
+                </select>
+            </div>
+            <div class="prod-edit-row">
+                <label>Renk</label>
+                <select id="combo-edit-color">
+                    <option value="">Varsayılan</option>
+                    <option value="white">Beyaz</option>
+                    <option value="nohut">Nohut Sarısı</option>
+                    <option value="misir">Mısır Sarısı</option>
+                    <option value="kori">Köri</option>
+                    <option value="kori-krema">Köri Kremalı</option>
+                    <option value="fajita">Fajita</option>
+                    <option value="soslu">Soslu</option>
+                </select>
+            </div>
+            <div class="combo-items-section">
+                <label>Ürünler</label>
+                <div id="combo-items-list"></div>
+            </div>
+            <div class="prod-edit-btns" style="margin-top: 16px;">
+                <button class="btn-cancel-prod" onclick="closeComboEditor()">İptal</button>
+                <button class="btn-save-prod" onclick="saveComboFromEditor()">💾 Kaydet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- ═══ TOAST ═══ -->
 <div class="toast" id="toast"></div>
 
 <script src="js/db.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/cart.js"></script>
+<script src="js/combos.js"></script>
 <script src="js/products.js"></script>
 <script src="js/history.js"></script>
 <script src="js/zreport.js"></script>

@@ -1,7 +1,8 @@
 const DB_NAME = 'MaxPilavDB';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const STORE_NAME = 'receipts';
 const PRODUCT_STORE = 'products';
+const COMBO_STORE = 'combos';
 let db = null;
 
 function openDB() {
@@ -16,6 +17,9 @@ function openDB() {
             }
             if (!database.objectStoreNames.contains(PRODUCT_STORE)) {
                 database.createObjectStore(PRODUCT_STORE, { keyPath: 'name' });
+            }
+            if (!database.objectStoreNames.contains(COMBO_STORE)) {
+                database.createObjectStore(COMBO_STORE, { keyPath: 'id' });
             }
         };
         request.onsuccess = (e) => {
@@ -117,6 +121,51 @@ async function clearAllProducts() {
     return new Promise((resolve, reject) => {
         const tx = database.transaction(PRODUCT_STORE, 'readwrite');
         const store = tx.objectStore(PRODUCT_STORE);
+        const request = store.clear();
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+    });
+}
+
+// ── Combo CRUD (IndexedDB) ──
+async function getAllCombos() {
+    const database = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = database.transaction(COMBO_STORE, 'readonly');
+        const store = tx.objectStore(COMBO_STORE);
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+async function saveCombo(combo) {
+    const database = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = database.transaction(COMBO_STORE, 'readwrite');
+        const store = tx.objectStore(COMBO_STORE);
+        const request = store.put(combo);
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+    });
+}
+
+async function removeCombo(id) {
+    const database = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = database.transaction(COMBO_STORE, 'readwrite');
+        const store = tx.objectStore(COMBO_STORE);
+        const request = store.delete(id);
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+    });
+}
+
+async function clearAllCombos() {
+    const database = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = database.transaction(COMBO_STORE, 'readwrite');
+        const store = tx.objectStore(COMBO_STORE);
         const request = store.clear();
         request.onsuccess = () => resolve();
         request.onerror = () => reject(request.error);

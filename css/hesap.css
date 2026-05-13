@@ -94,13 +94,39 @@ body {
 
 .cat-title {
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--orange2);
   margin: 18px 0 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255,107,26,0.05);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+  user-select: none;
+}
+.cat-title:hover {
+  background: rgba(255,107,26,0.1);
+  color: #fff;
 }
 .cat-title:first-child { margin-top:0; }
+
+.cat-toggle-icon {
+  font-size: 0.7rem;
+  transition: transform 0.3s ease;
+  opacity: 0.6;
+}
+.cat-title.collapsed .cat-toggle-icon {
+  transform: rotate(-90deg);
+}
+.cat-title.collapsed {
+  margin-bottom: 4px;
+  opacity: 0.8;
+}
 
 .items-grid {
   display: grid;
@@ -1106,4 +1132,274 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   .zr-stats-grid { grid-template-columns:repeat(2,1fr); gap:6px; }
   .zr-stat { padding:10px 6px; }
   .zr-stat-val { font-size:0.95rem; }
+  .combo-grid { grid-template-columns:repeat(2,1fr); }
+}
+
+/* ═══ COMBO SYSTEM STYLES ═══ */
+
+/* Combo section title */
+.combo-cat-title {
+  color: #f59e0b !important;
+  font-size: 0.9rem !important;
+  font-weight: 700 !important;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid rgba(245,158,11,0.3);
+}
+
+/* Combo grid - larger buttons */
+.combo-grid {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+/* Combo button - uses same data-color system as menu items */
+.combo-btn {
+  border-radius: var(--radius-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.combo-btn::before {
+  content: '⚡';
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 0.7rem;
+  opacity: 0.5;
+}
+
+.combo-btn:active {
+  transform: scale(0.97);
+}
+
+.combo-btn .name {
+  font-size: 0.85rem !important;
+}
+
+.combo-btn .price {
+  font-weight: 900 !important;
+}
+
+/* Combo contents line */
+.combo-contents {
+  font-size: 0.65rem;
+  color: #efefe;
+  opacity: 0.9;
+  text-align: center;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(245,158,11,0.15);
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+/* ── Combo Management Cards ── */
+.combo-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid #f59e0b;
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  transition: all 0.15s;
+}
+.combo-card:hover {
+  border-color: #f59e0b;
+  background: var(--bg3);
+}
+
+.combo-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.combo-card-emoji {
+  font-size: 1.3rem;
+}
+
+.combo-card-name {
+  flex: 1;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.combo-card-price {
+  background: rgba(245,158,11,0.12);
+  color: #f59e0b;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 6px;
+}
+
+.combo-card-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.combo-item-tag {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  color: var(--text2);
+  font-weight: 500;
+}
+
+.combo-card-actions {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.combo-card-actions button {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.combo-card-actions button:hover {
+  border-color: var(--orange);
+  background: var(--bg3);
+}
+.combo-card-actions button.del:hover {
+  border-color: var(--red);
+  background: rgba(239,68,68,0.12);
+  color: var(--red);
+}
+
+/* ── Combo Editor Modal ── */
+.combo-edit-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 270;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(6px);
+  animation: fadeIn 0.2s;
+}
+.combo-edit-overlay.show {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 60px;
+}
+
+.combo-edit-modal {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  width: 95%;
+  max-width: 550px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  animation: modalIn 0.25s ease;
+  overflow-y: auto;
+}
+
+.combo-edit-body {
+  padding: 20px 22px;
+}
+
+.combo-items-section {
+  margin-top: 16px;
+}
+
+.combo-items-section > label {
+  font-size: 0.8rem;
+  color: var(--text3);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.combo-item-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.combo-item-select {
+  flex: 1;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  outline: none;
+}
+.combo-item-select:focus { border-color: var(--orange); }
+
+.combo-portion-select {
+  width: 90px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  outline: none;
+}
+.combo-portion-select:focus { border-color: var(--orange); }
+
+.combo-remove-item {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--red);
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.combo-remove-item:hover {
+  border-color: var(--red);
+  background: rgba(239,68,68,0.15);
+}
+
+.combo-add-item-btn {
+  width: 100%;
+  padding: 10px;
+  background: var(--surface);
+  border: 2px dashed var(--border2);
+  border-radius: 8px;
+  color: var(--text2);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 4px;
+}
+.combo-add-item-btn:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+  background: rgba(255,107,26,0.05);
 }

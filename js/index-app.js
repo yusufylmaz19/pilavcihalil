@@ -1,25 +1,65 @@
-// ── Firestore'dan menü kategorisi oluştur ──
-function buildMenuFromProducts(products) {
-    const catMap = {};
-    const catOrder = [];
-    products.forEach(p => {
-        const catId = p.category || 'ozel';
-        if (!catMap[catId]) {
-            catMap[catId] = { id: catId, label: p.categoryLabel || '⭐ Özel', items: [] };
-            catOrder.push(catId);
-        }
-        catMap[catId].items.push(p);
+// ── Firestore'dan menü kategorisi oluştur (ÖZEL FİLTRELEME) ──
+function buildIndexMenu(products, combos) {
+    const yemeklerItems = [];
+    const iceceklerItems = [];
+
+    // 1. Düz Komboları "Yemekler"e ekle
+    const plainCombos = combos.filter(c => (c.group || 'duz') === 'duz');
+    plainCombos.forEach(c => {
+        // Kombo fiyatını hesapla
+        let totalPrice = 0;
+        c.items.forEach(ci => {
+            const p = products.find(prod => prod.name === ci.name);
+            if (p) totalPrice += Math.round(p.price * ci.portion);
+        });
+
+        yemeklerItems.push({
+            name: c.name,
+            emoji: c.emoji || '🍱',
+            desc: c.items.map(i => i.name).join(' + '),
+            price: totalPrice,
+            order: 0 // Kombolar üstte
+        });
     });
-    Object.values(catMap).forEach(cat => {
-        cat.items.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+    // 2. Çorbaları "Yemekler"e ekle
+    const corbalar = products.filter(p => (p.category || '').toLowerCase() === 'corbalar');
+    corbalar.forEach(p => {
+        yemeklerItems.push({
+            ...p,
+            order: 10 // Çorbalar kombolardan sonra
+        });
     });
-    return { categories: catOrder.map(id => catMap[id]).filter(c => c.items.length > 0) };
+
+    // 3. İçecekleri "İçecekler"e ekle
+    const icecekler = products.filter(p => (p.category || '').toLowerCase() === 'icecekler');
+    icecekler.forEach(p => {
+        iceceklerItems.push(p);
+    });
+
+    // Sıralama
+    yemeklerItems.sort((a, b) => a.order - b.order);
+    iceceklerItems.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+    const finalCategories = [];
+    if (yemeklerItems.length > 0) {
+        finalCategories.push({ id: 'yemekler', label: '🍱 Yemekler', items: yemeklerItems });
+    }
+    if (iceceklerItems.length > 0) {
+        finalCategories.push({ id: 'icecekler', label: '🥤 İçecekler', items: iceceklerItems });
+    }
+
+    return { categories: finalCategories };
 }
 
 // ── Firestore'dan ayarları ve ürünleri yükle, sayfayı oluştur ──
 async function initPage() {
     try {
-        const [settings, products] = await Promise.all([getSettings(), getAllProducts()]);
+        const [settings, products, combos] = await Promise.all([
+            getSettings(), 
+            getAllProducts(),
+            getAllCombos()
+        ]);
 
         const s = settings || {};
         const data = {
@@ -28,11 +68,8 @@ async function initPage() {
             platforms: s.platforms || []
         };
 
-        if (products.length > 0) {
-            data.menu = buildMenuFromProducts(products);
-        } else {
-            data.menu = { categories: [] };
-        }
+        // Özel menü oluştur (Kombolar + Çorbalar + İçecekler)
+        data.menu = buildIndexMenu(products, combos || []);
 
         buildPage(data);
     } catch (err) {
@@ -41,6 +78,7 @@ async function initPage() {
 }
 
 initPage();
+
 
 function buildPage(d) {
     const r = d.restaurant;

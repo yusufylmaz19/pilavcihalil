@@ -1010,11 +1010,35 @@ footer {
   transform: translateY(0);
 }
 
-/* ===== FLOATING CALL BUTTON ===== */
-.float-call {
+/* ===== FLOATING BUTTONS ===== */
+.float-insta {
   position: fixed;
   bottom: 24px;
   right: 24px;
+  z-index: 200;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(214, 36, 159, 0.45);
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+  animation: pulseInsta 2.5s infinite 1.25s;
+}
+
+.float-insta:hover {
+  transform: scale(1.12);
+  box-shadow: 0 10px 32px rgba(214, 36, 159, 0.6);
+}
+
+.float-call {
+  position: fixed;
+  bottom: 24px;
+  right: 92px; /* Side-by-side with Instagram */
   z-index: 200;
   width: 56px;
   height: 56px;
@@ -1033,6 +1057,18 @@ footer {
 .float-call:hover {
   transform: scale(1.12);
   box-shadow: 0 10px 32px rgba(37, 211, 102, 0.6);
+}
+
+@keyframes pulseInsta {
+  0% { box-shadow: 0 0 0 0 rgba(214, 36, 159, 0.5); }
+  70% { box-shadow: 0 0 0 15px rgba(214, 36, 159, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(214, 36, 159, 0); }
+}
+
+@keyframes pulseCall {
+  0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); }
+  70% { box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
 }
 
 /* ===== STARS ===== */

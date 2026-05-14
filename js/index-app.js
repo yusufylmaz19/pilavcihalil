@@ -1,90 +1,39 @@
-// ── IndexedDB: read products for menu merge ──
-const DB_NAME = 'MaxPilavDB';
-const DB_VERSION = 2;
-const PRODUCT_STORE = 'products';
-
-function openProductDB() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-        request.onupgradeneeded = (e) => {
-            const db = e.target.result;
-            if (!db.objectStoreNames.contains('receipts')) {
-                const store = db.createObjectStore('receipts', { keyPath: 'id' });
-                store.createIndex('date', 'date', { unique: false });
-            }
-            if (!db.objectStoreNames.contains(PRODUCT_STORE)) {
-                db.createObjectStore(PRODUCT_STORE, { keyPath: 'name' });
-            }
-        };
-        request.onsuccess = (e) => resolve(e.target.result);
-        request.onerror = (e) => reject(e.target.error);
-    });
-}
-
-async function getProductOverrides() {
-    try {
-        const db = await openProductDB();
-        return new Promise((resolve, reject) => {
-            const tx = db.transaction(PRODUCT_STORE, 'readonly');
-            const store = tx.objectStore(PRODUCT_STORE);
-            const req = store.getAll();
-            req.onsuccess = () => resolve(req.result || []);
-            req.onerror = () => resolve([]); // fail silently
-        });
-    } catch (e) {
-        return [];
-    }
-}
-
-function mergeMenuCategories(defaultCats, overrides) {
-    const overrideMap = {};
-    const customProducts = [];
-    overrides.forEach(p => {
-        if (p.isCustom) customProducts.push(p);
-        else overrideMap[p.name] = p;
-    });
-
-    const merged = defaultCats.map(cat => {
-        const items = cat.items.map(item => {
-            const ov = overrideMap[item.name];
-            return ov ? { ...item, price: ov.price, desc: ov.desc, emoji: ov.emoji } : { ...item };
-        });
-        return { ...cat, items };
-    });
-
-    // Group custom products by category
-    const customByCat = {};
-    customProducts.forEach(p => {
+// ── Firestore'dan menü kategorisi oluştur ──
+function buildMenuFromProducts(products) {
+    const catMap = {};
+    const catOrder = [];
+    products.forEach(p => {
         const catId = p.category || 'ozel';
-        if (!customByCat[catId]) customByCat[catId] = [];
-        customByCat[catId].push(p);
-    });
-
-    for (const [catId, products] of Object.entries(customByCat)) {
-        const existingCat = merged.find(c => c.id === catId);
-        if (existingCat) {
-            products.forEach(p => {
-                existingCat.items.push({ name: p.name, emoji: p.emoji, desc: p.desc, price: p.price });
-            });
-        } else {
-            merged.push({
-                id: catId,
-                label: '⭐ Özel Ürünler',
-                items: products.map(p => ({ name: p.name, emoji: p.emoji, desc: p.desc, price: p.price }))
-            });
+        if (!catMap[catId]) {
+            catMap[catId] = { id: catId, label: p.categoryLabel || '⭐ Özel', items: [] };
+            catOrder.push(catId);
         }
-    }
-
-    return merged;
+        catMap[catId].items.push(p);
+    });
+    Object.values(catMap).forEach(cat => {
+        cat.items.sort((a, b) => (a.order || 0) - (b.order || 0));
+    });
+    return { categories: catOrder.map(id => catMap[id]).filter(c => c.items.length > 0) };
 }
 
-// ── Load data.json, merge with IndexedDB, and build page ──
+// ── Firestore'dan ayarları ve ürünleri yükle, sayfayı oluştur ──
 async function initPage() {
     try {
-        const resp = await fetch('data.json');
-        const data = await resp.json();
-        const overrides = await getProductOverrides();
-        data.menu.categories = mergeMenuCategories(data.menu.categories, overrides);
+        const [settings, products] = await Promise.all([getSettings(), getAllProducts()]);
+
+        const s = settings || {};
+        const data = {
+            restaurant: s.restaurant || {},
+            contact: s.contact || {},
+            platforms: s.platforms || []
+        };
+
+        if (products.length > 0) {
+            data.menu = buildMenuFromProducts(products);
+        } else {
+            data.menu = { categories: [] };
+        }
+
         buildPage(data);
     } catch (err) {
         console.error('Sayfa yüklenemedi:', err);

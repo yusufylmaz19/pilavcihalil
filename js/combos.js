@@ -1,210 +1,5 @@
 // ═══ HIZLI KOMBO SİSTEMİ ═══
 
-const DEFAULT_COMBOS = [
-    // ── DÜZ KOMBOLAR (Pilav + Tavuk) ──
-    {
-        id: 'fajita-menu',
-        name: 'Fajita Menü',
-        emoji: '🌯',
-        group: 'duz',
-        color: 'fajita',
-        items: [
-            { name: 'Pilav Porsiyon', portion: 1 },
-            { name: 'Fajita Tavuk', portion: 1 }
-        ]
-    },
-    {
-        id: 'soslu-menu',
-        name: 'Soslu Baharatlı Menü',
-        emoji: '🌶️',
-        group: 'duz',
-        color: 'soslu',
-        items: [
-            { name: 'Pilav Porsiyon', portion: 1 },
-            { name: 'Soslu Baharatlı Tavuk', portion: 1 }
-        ]
-    },
-    {
-        id: 'kori-menu',
-        name: 'Köri Menü',
-        emoji: '🍛',
-        group: 'duz',
-        color: 'kori',
-        items: [
-            { name: 'Pilav Porsiyon', portion: 1 },
-            { name: 'Köri Tavuk', portion: 1 }
-        ]
-    },
-    {
-        id: 'kori-kremali-menu',
-        name: 'Köri Kremalı Menü',
-        emoji: '🥛',
-        group: 'duz',
-        color: 'kori-krema',
-        items: [
-            { name: 'Pilav Porsiyon', portion: 1 },
-            { name: 'Köri Kremalı Tavuk', portion: 1 }
-        ]
-    },
-    {
-        id: 'tiftik-tavuk-menu',
-        name: 'Tiftik Tavuk Menü',
-        emoji: '🍗',
-        group: 'duz',
-        color: 'white',
-        items: [
-            { name: 'Pilav Porsiyon', portion: 1 },
-            { name: 'Tavuk', portion: 1 }
-        ]
-    },
-
-    // ── NOHUTLU KOMBOLAR ──
-    {
-        id: 'nohutlu-pilav',
-        name: 'Nohutlu Pilav',
-        emoji: '🍛',
-        group: 'nohutlu',
-        color: 'nohut',
-        items: [
-            { name: 'Pilav Porsiyon', portion: 1 },
-            { name: 'Nohut', portion: 1 }
-        ]
-    },
-    {
-        id: 'nohutlu-fajita',
-        name: 'Nohutlu Fajita Menü',
-        emoji: '🌯',
-        group: 'nohutlu',
-        color: 'fajita',
-        items: [
-            { name: 'Pilav Porsiyon', portion: 1 },
-            { name: 'Fajita Tavuk', portion: 1 },
-            { name: 'Nohut', portion: 1 }
-        ]
-    },
-    {
-        id: 'nohutlu-soslu',
-        name: 'Nohutlu Soslu Menü',
-        emoji: '🌶️',
-        group: 'nohutlu',
-        color: 'soslu',
-        items: [
-            { name: 'Pilav Porsiyon', portion: 1 },
-            { name: 'Soslu Baharatlı Tavuk', portion: 1 },
-            { name: 'Nohut', portion: 1 }
-        ]
-    },
-    {
-        id: 'nohutlu-kori',
-        name: 'Nohutlu Köri Menü',
-        emoji: '🍛',
-        group: 'nohutlu',
-        color: 'kori',
-        items: [
-            { name: 'Pilav Porsiyon', portion: 1 },
-            { name: 'Köri Tavuk', portion: 1 },
-            { name: 'Nohut', portion: 1 }
-        ]
-    },
-    {
-        id: 'nohutlu-kori-kremali',
-        name: 'Nohutlu Köri Kremalı Menü',
-        emoji: '🥛',
-        group: 'nohutlu',
-        color: 'kori-krema',
-        items: [
-            { name: 'Pilav Porsiyon', portion: 1 },
-            { name: 'Köri Kremalı Tavuk', portion: 1 },
-            { name: 'Nohut', portion: 1 }
-        ]
-    },
-    {
-        id: 'nohutlu-tiftik-tavuk',
-        name: 'Nohutlu Tiftik Tavuk Menü',
-        emoji: '🍗',
-        group: 'nohutlu',
-        color: 'white',
-        items: [
-            { name: 'Pilav Porsiyon', portion: 1 },
-            { name: 'Tavuk', portion: 1 },
-            { name: 'Nohut', portion: 1 }
-        ]
-    },
-
-    // ── MISIRLI KOMBOLAR ──
-    {
-        id: 'misirli-pilav',
-        name: 'Mısırlı Pilav',
-        emoji: '🌽',
-        group: 'misirli',
-        color: 'misir',
-        items: [
-            { name: 'Pilav Porsiyon', portion: 1 },
-            { name: 'Mısır', portion: 1 }
-        ]
-    },
-    {
-        id: 'misirli-fajita',
-        name: 'Mısırlı Fajita Menü',
-        emoji: '🌯',
-        group: 'misirli',
-        color: 'fajita',
-        items: [
-            { name: 'Pilav Porsiyon', portion: 1 },
-            { name: 'Fajita Tavuk', portion: 1 },
-            { name: 'Mısır', portion: 1 }
-        ]
-    },
-    {
-        id: 'misirli-soslu',
-        name: 'Mısırlı Soslu Menü',
-        emoji: '🌶️',
-        group: 'misirli',
-        color: 'soslu',
-        items: [
-            { name: 'Pilav Porsiyon', portion: 1 },
-            { name: 'Soslu Baharatlı Tavuk', portion: 1 },
-            { name: 'Mısır', portion: 1 }
-        ]
-    },
-    {
-        id: 'misirli-kori',
-        name: 'Mısırlı Köri Menü',
-        emoji: '🍛',
-        group: 'misirli',
-        color: 'kori',
-        items: [
-            { name: 'Pilav Porsiyon', portion: 1 },
-            { name: 'Köri Tavuk', portion: 1 },
-            { name: 'Mısır', portion: 1 }
-        ]
-    },
-    {
-        id: 'misirli-kori-kremali',
-        name: 'Mısırlı Köri Kremalı Menü',
-        emoji: '🥛',
-        group: 'misirli',
-        color: 'kori-krema',
-        items: [
-            { name: 'Pilav Porsiyon', portion: 1 },
-            { name: 'Köri Kremalı Tavuk', portion: 1 },
-            { name: 'Mısır', portion: 1 }
-        ]
-    },
-    {
-        id: 'misirli-tiftik-tavuk',
-        name: 'Mısırlı Tiftik Tavuk Menü',
-        emoji: '🍗',
-        group: 'misirli',
-        color: 'white',
-        items: [
-            { name: 'Pilav Porsiyon', portion: 1 },
-            { name: 'Tavuk', portion: 1 },
-            { name: 'Mısır', portion: 1 }
-        ]
-    }
-];
-
 const COMBO_GROUP_LABELS = {
     'duz': '⚡ Düz Kombolar',
     'nohutlu': '🧆 Nohutlu Kombolar',
@@ -213,22 +8,13 @@ const COMBO_GROUP_LABELS = {
 
 let activeCombos = [];
 
-// ── Komboları yükle (DB'den veya varsayılanlardan) ──
+// ── Komboları Firestore'dan yükle ──
 async function loadCombos() {
     try {
-        const saved = await getAllCombos();
-        if (saved.length > 0) {
-            activeCombos = saved;
-        } else {
-            activeCombos = JSON.parse(JSON.stringify(DEFAULT_COMBOS));
-            // İlk kurulumda varsayılanları DB'ye kaydet
-            for (const combo of activeCombos) {
-                await saveCombo(combo);
-            }
-        }
+        activeCombos = await getAllCombos();
     } catch (err) {
         console.error('Kombo yükleme hatası:', err);
-        activeCombos = JSON.parse(JSON.stringify(DEFAULT_COMBOS));
+        activeCombos = [];
     }
 }
 
@@ -454,20 +240,8 @@ async function deleteCombo(id) {
     await refreshMenu();
 }
 
-async function resetAllCombos() {
-    if (!confirm('Tüm komboları varsayılana döndürmek istediğinize emin misiniz?')) return;
-    await clearAllCombos();
-    activeCombos = JSON.parse(JSON.stringify(DEFAULT_COMBOS));
-    for (const combo of activeCombos) {
-        await saveCombo(combo);
-    }
-    showToast('🔄 Kombolar varsayılana döndürüldü', 'success');
-    await renderComboList();
-    await refreshMenu();
-}
-
 // ── Kombo Ekleme / Düzenleme Formu ──
-function openComboEditor(comboId) {
+async function openComboEditor(comboId) {
     const existing = comboId ? activeCombos.find(c => c.id === comboId) : null;
     const isNew = !existing;
 
@@ -493,8 +267,8 @@ function openComboEditor(comboId) {
         colorSelect.value = existing ? (existing.color || '') : '';
     }
 
-    // Ürün seçim listesini oluştur
-    renderComboItemSelector(existing ? existing.items : []);
+    // Ürün seçim listesini oluştur (async — Firestore'dan çeker)
+    await renderComboItemSelector(existing ? existing.items : []);
 }
 
 function closeComboEditor() {
@@ -505,40 +279,39 @@ function closeComboEditOutside(e) {
     if (e.target === document.getElementById('combo-edit-overlay')) closeComboEditor();
 }
 
-function renderComboItemSelector(selectedItems) {
+async function renderComboItemSelector(selectedItems) {
     const container = document.getElementById('combo-items-list');
     container.innerHTML = '';
 
-    // Mevcut seçili ürünleri göster
+    // Firestore'dan güncel ürünleri al
+    const categories = await getMergedCategories();
+
     selectedItems.forEach((ci, index) => {
-        container.appendChild(createComboItemRow(ci, index));
+        container.appendChild(createComboItemRow(ci, index, categories));
     });
 
-    // "Ürün Ekle" butonu
     const addBtn = document.createElement('button');
     addBtn.className = 'combo-add-item-btn';
     addBtn.textContent = '➕ Ürün Ekle';
     addBtn.onclick = () => {
-        const newRow = createComboItemRow({ name: '', portion: 1 }, container.querySelectorAll('.combo-item-row').length);
+        const newRow = createComboItemRow({ name: '', portion: 1 }, container.querySelectorAll('.combo-item-row').length, categories);
         container.insertBefore(newRow, addBtn);
     };
     container.appendChild(addBtn);
 }
 
-function createComboItemRow(ci, index) {
+function createComboItemRow(ci, index, categories) {
     const row = document.createElement('div');
     row.className = 'combo-item-row';
 
-    // Tüm ürünlerin listesi
     let options = '<option value="">Ürün Seçin...</option>';
-    if (defaultCategories) {
-        defaultCategories.forEach(cat => {
-            cat.items.forEach(item => {
-                const selected = item.name === ci.name ? 'selected' : '';
-                options += `<option value="${item.name}" ${selected}>${item.emoji} ${item.name} (₺${item.price})</option>`;
-            });
+    const cats = categories || [];
+    cats.forEach(cat => {
+        cat.items.forEach(item => {
+            const selected = item.name === ci.name ? 'selected' : '';
+            options += `<option value="${item.name}" ${selected}>${item.emoji} ${item.name} (₺${item.price})</option>`;
         });
-    }
+    });
 
     row.innerHTML = `
         <select class="combo-item-select" data-index="${index}">

@@ -1,78 +1,36 @@
 let menuData = null;
 let defaultCategories = [];
 
+// Tüm ürünleri Firestore'dan çek, kategori sırasını defaultCategories'e göre koru
 async function getMergedCategories() {
-    const overrides = await getAllProducts();
-    const overrideMap = {};
-    const customProducts = [];
-    overrides.forEach(p => {
-        if (p.isCustom) {
-            customProducts.push(p);
-        } else {
-            overrideMap[p.name] = p;
-        }
+    const products = await getAllProducts();
+
+    const catMap = {};
+    const catOrder = [];
+
+    // Kategori sırasını data.json'dan al
+    defaultCategories.forEach(cat => {
+        catMap[cat.id] = { id: cat.id, label: cat.label, items: [] };
+        catOrder.push(cat.id);
     });
 
-    const merged = defaultCategories.map(cat => {
-        const items = cat.items.map(item => {
-            const ov = overrideMap[item.name];
-            if (ov) {
-                return { 
-                    ...item, 
-                    price: ov.price, 
-                    desc: ov.desc, 
-                    emoji: ov.emoji, 
-                    hasPortions: ov.hasPortions !== undefined ? ov.hasPortions : item.hasPortions,
-                    color: ov.color || item.color,
-                    _modified: true 
-                };
-            }
-            return { ...item };
-        });
-        return { ...cat, items };
-    });
-
-    const customByCat = {};
-    customProducts.forEach(p => {
+    products.forEach(p => {
         const catId = p.category || 'ozel';
-        if (!customByCat[catId]) customByCat[catId] = [];
-        customByCat[catId].push(p);
+        if (!catMap[catId]) {
+            catMap[catId] = { id: catId, label: p.categoryLabel || '⭐ Özel', items: [] };
+            catOrder.push(catId);
+        }
+        catMap[catId].items.push({ ...p, _catId: catId });
     });
 
-    for (const [catId, products] of Object.entries(customByCat)) {
-        const existingCat = merged.find(c => c.id === catId);
-        if (existingCat) {
-            products.forEach(p => {
-                existingCat.items.push({ 
-                    name: p.name, 
-                    emoji: p.emoji, 
-                    desc: p.desc, 
-                    price: p.price, 
-                    hasPortions: p.hasPortions, 
-                    color: p.color,
-                    _modified: true, 
-                    _custom: true 
-                });
-            });
-        } else {
-            merged.push({
-                id: catId,
-                label: '⭐ Özel Ürünler',
-                items: products.map(p => ({ 
-                    name: p.name, 
-                    emoji: p.emoji, 
-                    desc: p.desc, 
-                    price: p.price, 
-                    hasPortions: p.hasPortions, 
-                    color: p.color,
-                    _modified: true, 
-                    _custom: true 
-                }))
-            });
-        }
-    }
+    // Kategori içindeki ürünleri order'a göre sırala
+    Object.values(catMap).forEach(cat => {
+        cat.items.sort((a, b) => (a.order || 0) - (b.order || 0));
+    });
 
-    return merged;
+    return catOrder
+        .filter(id => catMap[id] && catMap[id].items.length > 0)
+        .map(id => catMap[id]);
 }
 
 function buildMenuPanel(categories) {
@@ -277,53 +235,41 @@ function closeProdOutside(e) {
 
 async function renderProductList() {
     const body = document.getElementById('prod-body');
-    const overrides = await getAllProducts();
-    const overrideMap = {};
-    overrides.forEach(p => { overrideMap[p.name] = p; });
+    const categories = await getMergedCategories();
 
     let html = '';
-
-    defaultCategories.forEach(cat => {
+    categories.forEach(cat => {
         html += `<div class="prod-cat-title">${cat.label}</div>`;
         cat.items.forEach(item => {
-            const ov = overrideMap[item.name];
-            const isModified = !!ov && !ov.isCustom;
-            const displayItem = ov ? { ...item, price: ov.price, desc: ov.desc, emoji: ov.emoji } : item;
-            html += buildProdCard(displayItem, cat.id, isModified, false);
+            html += buildProdCard(item, cat.id);
         });
     });
 
-    const customProducts = overrides.filter(p => p.isCustom);
-    if (customProducts.length > 0) {
-        html += `<div class="prod-cat-title">⭐ Özel (Eklenen) Ürünler</div>`;
-        customProducts.forEach(p => {
-            html += buildProdCard({ name: p.name, emoji: p.emoji, desc: p.desc, price: p.price, _catId: p.category }, p.category, true, true);
-        });
+    if (!html) {
+        html = '<div style="text-align:center;padding:40px;color:var(--text2);">Henüz ürün yok.</div>';
     }
 
     body.innerHTML = html;
 }
 
-function buildProdCard(item, catId, isModified, isCustom) {
-    const modBadge = isModified ? `<span class="prod-modified-badge">${isCustom ? 'ÖZEL' : 'DÜZENLENDI'}</span>` : '';
-    const escapedName = item.name.replace(/'/g, "\\\\'");
+function buildProdCard(item, catId) {
+    const escapedName = item.name.replace(/'/g, "\\'");
     return `
-    <div class="prod-card ${isCustom ? 'custom' : ''}" id="pcard-${item.name.replace(/\s/g, '_')}">
+    <div class="prod-card" id="pcard-${item.name.replace(/\s/g, '_')}">
         <div class="prod-emoji">${item.emoji}</div>
         <div class="prod-info">
-            <div class="prod-name">${item.name}${modBadge}</div>
+            <div class="prod-name">${item.name}</div>
             <div class="prod-desc">${item.desc || ''}</div>
         </div>
         <div class="prod-price-badge">₺${item.price}</div>
         <div class="prod-actions">
-            <button title="Düzenle" onclick="toggleEditForm('${escapedName}', '${catId}', ${isCustom})">✏️</button>
-            ${isCustom ? `<button class="del" title="Sil" onclick="deleteCustomProduct('${escapedName}')">🗑️</button>` : ''}
-            ${isModified && !isCustom ? `<button title="Varsayılana dön" onclick="resetProduct('${escapedName}')">↩️</button>` : ''}
+            <button title="Düzenle" onclick="toggleEditForm('${escapedName}', '${catId}')">✏️</button>
+            <button class="del" title="Sil" onclick="deleteProduct('${escapedName}')">🗑️</button>
         </div>
     </div>`;
 }
 
-async function toggleEditForm(name, catId, isCustom) {
+async function toggleEditForm(name, catId) {
     const cardId = 'pcard-' + name.replace(/\s/g, '_');
     const card = document.getElementById(cardId);
     if (!card) return;
@@ -335,31 +281,13 @@ async function toggleEditForm(name, catId, isCustom) {
         return;
     }
 
-    // Ürün bilgisini güncel halinden al (DB veya Varsayılan)
-    const overrides = await getAllProducts();
-    const override = overrides.find(o => o.name === name);
-    
-    let currentItem = null;
-    defaultCategories.forEach(cat => {
-        cat.items.forEach(item => {
-            if (item.name === name) currentItem = { ...item };
-        });
-    });
+    // Ürün bilgisini Firestore'dan al
+    const allProds = await getAllProducts();
+    const currentItem = allProds.find(p => p.name === name) || { name, emoji: '🍽️', price: 0, desc: '', hasPortions: true, color: '', category: catId };
 
-    if (override) {
-        currentItem = {
-            ...(currentItem || {}),
-            ...override
-        };
-    }
-
-    if (!currentItem) {
-        currentItem = { name, emoji: '🍽️', price: 0, desc: '', hasPortions: true, color: '' };
-    }
-
-    const priceText = card.querySelector('.prod-price-badge').textContent.replace('₺', '');
-    const descText = card.querySelector('.prod-desc').textContent;
-    const emojiText = card.querySelector('.prod-emoji').textContent.trim();
+    const priceText = currentItem.price;
+    const descText = currentItem.desc || '';
+    const emojiText = currentItem.emoji || '🍽️';
 
     const form = document.createElement('div');
     form.className = 'prod-edit-form show';
@@ -386,16 +314,15 @@ async function toggleEditForm(name, catId, isCustom) {
                 <option value="cay" ${currentItem.color === 'cay' ? 'selected' : ''}>Çay</option>
             </select>
         </div>
-        ${isCustom ? `<div class="prod-edit-row"><label>Kategori</label>
+        <div class="prod-edit-row"><label>Kategori</label>
             <select id="pedit-cat-${name.replace(/\s/g, '_')}">
-                ${defaultCategories.map(c => `<option value="${c.id}" ${c.id === catId ? 'selected' : ''}>${c.label}</option>`).join('')}
-                <option value="ozel" ${catId === 'ozel' ? 'selected' : ''}>⭐ Özel</option>
+                ${defaultCategories.map(c => `<option value="${c.id}" ${c.id === (currentItem.category || catId) ? 'selected' : ''}>${c.label}</option>`).join('')}
+                <option value="ozel" ${(currentItem.category || catId) === 'ozel' ? 'selected' : ''}>⭐ Özel</option>
             </select>
-        </div>` : ''}
+        </div>
         <div class="prod-edit-btns">
-            ${!isCustom ? `<button class="btn-reset-prod" onclick="resetProduct('${name.replace(/'/g, "\\\\'")}')">↩️ Varsayılan</button>` : ''}
             <button class="btn-cancel-prod" onclick="this.closest('.prod-edit-form').classList.remove('show'); this.closest('.prod-card').classList.remove('editing');">İptal</button>
-            <button class="btn-save-prod" onclick="saveEditedProduct('${name.replace(/'/g, "\\\\'")}', '${catId}', ${isCustom})">💾 Kaydet</button>
+            <button class="btn-save-prod" onclick="saveEditedProduct('${name.replace(/'/g, "\\'")}', '${catId}')">💾 Kaydet</button>
         </div>
     `;
 
@@ -404,7 +331,7 @@ async function toggleEditForm(name, catId, isCustom) {
     card.style.flexWrap = 'wrap';
 }
 
-async function saveEditedProduct(name, catId, isCustom) {
+async function saveEditedProduct(name, catId) {
     const safeName = name.replace(/\s/g, '_');
     const emoji = document.getElementById('pedit-emoji-' + safeName)?.value.trim() || '🍽️';
     const desc = document.getElementById('pedit-desc-' + safeName)?.value.trim() || '';
@@ -413,15 +340,22 @@ async function saveEditedProduct(name, catId, isCustom) {
     const hasPortions = document.getElementById('pedit-hasPortions-' + safeName)?.checked ?? false;
     const color = document.getElementById('pedit-color-' + safeName)?.value || '';
 
+    // Mevcut order değerini koru
+    const allProds = await getAllProducts();
+    const existing = allProds.find(p => p.name === name);
+    const catLabel = defaultCategories.find(c => c.id === newCat)?.label || '⭐ Özel';
+
     await saveProduct({
-        name: name,
-        emoji: emoji,
-        desc: desc,
-        price: price,
+        name,
+        emoji,
+        desc,
+        price,
         category: newCat,
-        isCustom: isCustom,
-        hasPortions: hasPortions,
-        color: color
+        categoryLabel: catLabel,
+        isCustom: existing ? (existing.isCustom || false) : false,
+        hasPortions,
+        color,
+        order: existing?.order ?? 999
     });
 
     showToast(`✅ ${name} kaydedildi!`, 'success');
@@ -429,25 +363,10 @@ async function saveEditedProduct(name, catId, isCustom) {
     await refreshMenu();
 }
 
-async function resetProduct(name) {
-    await removeProduct(name);
-    showToast(`↩️ ${name} varsayılana döndürüldü`, '');
-    await renderProductList();
-    await refreshMenu();
-}
-
-async function deleteCustomProduct(name) {
+async function deleteProduct(name) {
     if (!confirm(`"${name}" ürününü silmek istediğinize emin misiniz?`)) return;
     await removeProduct(name);
     showToast(`🗑️ ${name} silindi`, '');
-    await renderProductList();
-    await refreshMenu();
-}
-
-async function resetAllProducts() {
-    if (!confirm('Tüm ürün değişikliklerini silip varsayılana dönmek istediğinize emin misiniz?')) return;
-    await clearAllProducts();
-    showToast('🔄 Tüm ürünler varsayılana döndürüldü', 'success');
     await renderProductList();
     await refreshMenu();
 }
@@ -519,17 +438,25 @@ async function addNewProduct() {
     }
 
     const allProds = await getAllProducts();
-    const exists = allProds.some(p => p.name === name) || defaultCategories.some(c => c.items.some(i => i.name === name));
-    if (exists) {
+    if (allProds.some(p => p.name === name)) {
         showToast('❌ Bu isimde bir ürün zaten var!', '');
         return;
     }
 
+    const catLabel = defaultCategories.find(c => c.id === category)?.label || '⭐ Özel';
+
     await saveProduct({
-        name, emoji, desc, price, category, isCustom: true, hasPortions, color
+        name, emoji, desc, price,
+        category,
+        categoryLabel: catLabel,
+        isCustom: true,
+        hasPortions,
+        color,
+        order: 9999
     });
 
     showToast(`✅ ${name} eklendi!`, 'success');
+    document.getElementById('add-product-form')?.remove();
     await renderProductList();
     await refreshMenu();
 }

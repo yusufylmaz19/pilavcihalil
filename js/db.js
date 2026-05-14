@@ -1,173 +1,91 @@
-const DB_NAME = 'MaxPilavDB';
-const DB_VERSION = 3;
-const STORE_NAME = 'receipts';
-const PRODUCT_STORE = 'products';
-const COMBO_STORE = 'combos';
-let db = null;
+// ── Firebase Firestore DB katmanı ──
+// IndexedDB'nin yerini Firestore alıyor; fonksiyon imzaları aynı kaldı.
 
+const RECEIPTS_COL = 'receipts';
+const PRODUCTS_COL = 'products';
+const COMBOS_COL   = 'combos';
+
+function getFirestore() {
+    return firebase.firestore();
+}
+
+// app.js'de çağrılan openDB() artık gerekmiyor ama geriye dönük uyumluluk için boş bırakıldı
 function openDB() {
-    return new Promise((resolve, reject) => {
-        if (db) { resolve(db); return; }
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-        request.onupgradeneeded = (e) => {
-            const database = e.target.result;
-            if (!database.objectStoreNames.contains(STORE_NAME)) {
-                const store = database.createObjectStore(STORE_NAME, { keyPath: 'id' });
-                store.createIndex('date', 'date', { unique: false });
-            }
-            if (!database.objectStoreNames.contains(PRODUCT_STORE)) {
-                database.createObjectStore(PRODUCT_STORE, { keyPath: 'name' });
-            }
-            if (!database.objectStoreNames.contains(COMBO_STORE)) {
-                database.createObjectStore(COMBO_STORE, { keyPath: 'id' });
-            }
-        };
-        request.onsuccess = (e) => {
-            db = e.target.result;
-            resolve(db);
-        };
-        request.onerror = (e) => {
-            console.error('IndexedDB açılamadı:', e.target.error);
-            reject(e.target.error);
-        };
-    });
+    return Promise.resolve();
 }
 
 // ── Receipt CRUD ──
 async function getHistory() {
-    const database = await openDB();
-    return new Promise((resolve, reject) => {
-        const tx = database.transaction(STORE_NAME, 'readonly');
-        const store = tx.objectStore(STORE_NAME);
-        const request = store.getAll();
-        request.onsuccess = () => {
-            const results = request.result || [];
-            results.sort((a, b) => new Date(b.date) - new Date(a.date));
-            resolve(results);
-        };
-        request.onerror = () => reject(request.error);
-    });
+    const snap = await getFirestore()
+        .collection(RECEIPTS_COL)
+        .orderBy('date', 'desc')
+        .get();
+    return snap.docs.map(d => d.data());
 }
 
 async function addReceipt(receipt) {
-    const database = await openDB();
-    return new Promise((resolve, reject) => {
-        const tx = database.transaction(STORE_NAME, 'readwrite');
-        const store = tx.objectStore(STORE_NAME);
-        const request = store.add(receipt);
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
-    });
+    await getFirestore().collection(RECEIPTS_COL).doc(receipt.id).set(receipt);
 }
 
 async function removeReceipt(id) {
-    const database = await openDB();
-    return new Promise((resolve, reject) => {
-        const tx = database.transaction(STORE_NAME, 'readwrite');
-        const store = tx.objectStore(STORE_NAME);
-        const request = store.delete(id);
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
-    });
+    await getFirestore().collection(RECEIPTS_COL).doc(id).delete();
 }
 
 async function getReceiptCount() {
-    const database = await openDB();
-    return new Promise((resolve, reject) => {
-        const tx = database.transaction(STORE_NAME, 'readonly');
-        const store = tx.objectStore(STORE_NAME);
-        const request = store.count();
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-    });
+    const snap = await getFirestore().collection(RECEIPTS_COL).get();
+    return snap.size;
 }
 
-// ── Product CRUD (IndexedDB) ──
+// ── Product CRUD ──
 async function getAllProducts() {
-    const database = await openDB();
-    return new Promise((resolve, reject) => {
-        const tx = database.transaction(PRODUCT_STORE, 'readonly');
-        const store = tx.objectStore(PRODUCT_STORE);
-        const request = store.getAll();
-        request.onsuccess = () => resolve(request.result || []);
-        request.onerror = () => reject(request.error);
-    });
+    const snap = await getFirestore().collection(PRODUCTS_COL).get();
+    return snap.docs.map(d => d.data());
 }
 
 async function saveProduct(product) {
-    const database = await openDB();
-    return new Promise((resolve, reject) => {
-        const tx = database.transaction(PRODUCT_STORE, 'readwrite');
-        const store = tx.objectStore(PRODUCT_STORE);
-        const request = store.put(product);
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
-    });
+    await getFirestore().collection(PRODUCTS_COL).doc(product.name).set(product);
 }
 
 async function removeProduct(name) {
-    const database = await openDB();
-    return new Promise((resolve, reject) => {
-        const tx = database.transaction(PRODUCT_STORE, 'readwrite');
-        const store = tx.objectStore(PRODUCT_STORE);
-        const request = store.delete(name);
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
-    });
+    await getFirestore().collection(PRODUCTS_COL).doc(name).delete();
 }
 
 async function clearAllProducts() {
-    const database = await openDB();
-    return new Promise((resolve, reject) => {
-        const tx = database.transaction(PRODUCT_STORE, 'readwrite');
-        const store = tx.objectStore(PRODUCT_STORE);
-        const request = store.clear();
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
-    });
+    const snap = await getFirestore().collection(PRODUCTS_COL).get();
+    const batch = getFirestore().batch();
+    snap.docs.forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
 }
 
-// ── Combo CRUD (IndexedDB) ──
+// ── Combo CRUD ──
 async function getAllCombos() {
-    const database = await openDB();
-    return new Promise((resolve, reject) => {
-        const tx = database.transaction(COMBO_STORE, 'readonly');
-        const store = tx.objectStore(COMBO_STORE);
-        const request = store.getAll();
-        request.onsuccess = () => resolve(request.result || []);
-        request.onerror = () => reject(request.error);
-    });
+    const snap = await getFirestore().collection(COMBOS_COL).get();
+    return snap.docs.map(d => d.data());
 }
 
 async function saveCombo(combo) {
-    const database = await openDB();
-    return new Promise((resolve, reject) => {
-        const tx = database.transaction(COMBO_STORE, 'readwrite');
-        const store = tx.objectStore(COMBO_STORE);
-        const request = store.put(combo);
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
-    });
+    await getFirestore().collection(COMBOS_COL).doc(combo.id).set(combo);
 }
 
 async function removeCombo(id) {
-    const database = await openDB();
-    return new Promise((resolve, reject) => {
-        const tx = database.transaction(COMBO_STORE, 'readwrite');
-        const store = tx.objectStore(COMBO_STORE);
-        const request = store.delete(id);
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
-    });
+    await getFirestore().collection(COMBOS_COL).doc(id).delete();
 }
 
 async function clearAllCombos() {
-    const database = await openDB();
-    return new Promise((resolve, reject) => {
-        const tx = database.transaction(COMBO_STORE, 'readwrite');
-        const store = tx.objectStore(COMBO_STORE);
-        const request = store.clear();
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
-    });
+    const snap = await getFirestore().collection(COMBOS_COL).get();
+    const batch = getFirestore().batch();
+    snap.docs.forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
+}
+
+// ── Settings CRUD ──
+const SETTINGS_COL = 'settings';
+
+async function getSettings() {
+    const doc = await getFirestore().collection(SETTINGS_COL).doc('main').get();
+    return doc.exists ? doc.data() : null;
+}
+
+async function saveSettings(data) {
+    await getFirestore().collection(SETTINGS_COL).doc('main').set(data, { merge: true });
 }

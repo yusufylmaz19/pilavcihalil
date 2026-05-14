@@ -26,6 +26,18 @@ function adminSignOut() {
     firebase.auth().signOut();
 }
 
+function openLogoutModal() {
+    document.getElementById('logout-overlay').classList.add('show');
+}
+
+function closeLogoutModal() {
+    document.getElementById('logout-overlay').classList.remove('show');
+}
+
+function closeLogoutModalOutside(e) {
+    if (e.target.id === 'logout-overlay') closeLogoutModal();
+}
+
 // ── Auth durum gözlemcisi ──
 firebase.auth().onAuthStateChanged(function(user) {
     const loginScreen = document.getElementById('login-screen');

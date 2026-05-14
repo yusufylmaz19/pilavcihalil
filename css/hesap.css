@@ -59,7 +59,49 @@ body {
 .topbar-left img { width:36px; height:36px; border-radius:50%; }
 .topbar-left .shop-name { font-weight:700; font-size:1rem; }
 .topbar-left .shop-sub { font-size:0.75rem; color:var(--text3); }
-.topbar-right { display:flex; gap:8px; }
+.topbar-right { display:flex; gap:8px; align-items:center; }
+.topbar-user { display:flex; align-items:center; gap:8px; margin-left:4px; padding-left:12px; border-left:1px solid var(--border2); }
+#topbar-user-name { font-size:0.78rem; color:var(--text2); max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.topbar-signout { background:rgba(239,68,68,0.12) !important; border-color:rgba(239,68,68,0.3) !important; color:var(--red) !important; }
+.topbar-signout:hover { background:rgba(239,68,68,0.22) !important; }
+
+/* ── Login Screen ── */
+#login-screen {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+}
+.login-box {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 12px; padding: 48px 40px;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  width: 90%; max-width: 380px;
+  animation: modalIn 0.3s ease;
+}
+.login-logo { width: 72px; height: 72px; border-radius: 50%; margin-bottom: 4px; }
+.login-title { font-size: 1.6rem; font-weight: 800; margin: 0; }
+.login-sub { font-size: 0.88rem; color: var(--text2); margin: 0 0 12px; }
+.login-google-btn {
+  display: flex; align-items: center; gap: 12px;
+  background: #fff; color: #222;
+  border: none; border-radius: 10px;
+  padding: 12px 24px; font-size: 0.95rem; font-weight: 600;
+  cursor: pointer; width: 100%; justify-content: center;
+  transition: all 0.2s; font-family: inherit;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+.login-google-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+.login-google-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.login-error { font-size: 0.82rem; color: var(--red); min-height: 18px; text-align: center; margin: 0; }
+.login-spinner {
+  width: 16px; height: 16px; border: 2px solid #ccc;
+  border-top-color: #333; border-radius: 50%;
+  animation: spin 0.7s linear infinite; display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 .topbar-btn {
   background: var(--surface);
   border: 1px solid var(--border2);

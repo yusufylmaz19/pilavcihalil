@@ -16,86 +16,170 @@ function openDB() {
 
 // ── Receipt CRUD ──
 async function getHistory() {
-    const snap = await getFirestore()
-        .collection(RECEIPTS_COL)
-        .orderBy('date', 'desc')
-        .get();
-    return snap.docs.map(d => d.data());
+    try {
+        const snap = await getFirestore()
+            .collection(RECEIPTS_COL)
+            .orderBy('date', 'desc')
+            .get();
+        return snap.docs.map(d => d.data());
+    } catch (err) {
+        console.error('getHistory hatası:', err);
+        if (typeof showToast === 'function') showToast('❌ Adisyonlar yüklenemedi: ' + (err.message || err), '');
+        throw err;
+    }
 }
 
 async function addReceipt(receipt) {
-    await getFirestore().collection(RECEIPTS_COL).doc(receipt.id).set(receipt);
+    try {
+        await getFirestore().collection(RECEIPTS_COL).doc(receipt.id).set(receipt);
+    } catch (err) {
+        console.error('addReceipt hatası:', err);
+        if (typeof showToast === 'function') showToast('❌ Adisyon kaydedilemedi: ' + (err.message || err), '');
+        throw err;
+    }
 }
 
 async function removeReceipt(id) {
-    await getFirestore().collection(RECEIPTS_COL).doc(id).delete();
+    try {
+        await getFirestore().collection(RECEIPTS_COL).doc(id).delete();
+    } catch (err) {
+        console.error('removeReceipt hatası:', err);
+        if (typeof showToast === 'function') showToast('❌ Adisyon silinemedi: ' + (err.message || err), '');
+        throw err;
+    }
 }
 
 async function getReceiptCount() {
-    const snap = await getFirestore().collection(RECEIPTS_COL).get();
-    return snap.size;
+    try {
+        const snap = await getFirestore().collection(RECEIPTS_COL).get();
+        return snap.size;
+    } catch (err) {
+        console.error('getReceiptCount hatası:', err);
+        if (typeof showToast === 'function') showToast('❌ Adisyon sayısı alınamadı: ' + (err.message || err), '');
+        throw err;
+    }
 }
 
 // ── Product CRUD ──
 const CATEGORY_ORDER = ['pilavlar', 'tavuklar', 'yan-urunler', 'corbalar', 'icecekler'];
 
 async function getAllProducts() {
-    const snap = await getFirestore().collection(PRODUCTS_COL).get();
-    const products = snap.docs.map(d => d.data());
-    products.sort((a, b) => {
-        const ai = CATEGORY_ORDER.indexOf(a.category || '');
-        const bi = CATEGORY_ORDER.indexOf(b.category || '');
-        const catDiff = (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
-        if (catDiff !== 0) return catDiff;
-        return (a.order || 0) - (b.order || 0);
-    });
-    return products;
+    try {
+        const snap = await getFirestore().collection(PRODUCTS_COL).get();
+        const products = snap.docs.map(d => d.data());
+        products.sort((a, b) => {
+            const ai = CATEGORY_ORDER.indexOf(a.category || '');
+            const bi = CATEGORY_ORDER.indexOf(b.category || '');
+            const catDiff = (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+            if (catDiff !== 0) return catDiff;
+            return (a.order || 0) - (b.order || 0);
+        });
+        return products;
+    } catch (err) {
+        console.error('getAllProducts hatası:', err);
+        if (typeof showToast === 'function') showToast('❌ Ürünler yüklenemedi: ' + (err.message || err), '');
+        throw err;
+    }
 }
 
 async function saveProduct(product) {
-    await getFirestore().collection(PRODUCTS_COL).doc(product.name).set(product);
+    try {
+        await getFirestore().collection(PRODUCTS_COL).doc(product.name).set(product);
+    } catch (err) {
+        console.error('saveProduct hatası:', err);
+        if (typeof showToast === 'function') showToast('❌ Ürün kaydedilemedi: ' + (err.message || err), '');
+        throw err;
+    }
 }
 
 async function removeProduct(name) {
-    await getFirestore().collection(PRODUCTS_COL).doc(name).delete();
+    try {
+        await getFirestore().collection(PRODUCTS_COL).doc(name).delete();
+    } catch (err) {
+        console.error('removeProduct hatası:', err);
+        if (typeof showToast === 'function') showToast('❌ Ürün silinemedi: ' + (err.message || err), '');
+        throw err;
+    }
 }
 
 async function clearAllProducts() {
-    const snap = await getFirestore().collection(PRODUCTS_COL).get();
-    const batch = getFirestore().batch();
-    snap.docs.forEach(doc => batch.delete(doc.ref));
-    await batch.commit();
+    try {
+        const snap = await getFirestore().collection(PRODUCTS_COL).get();
+        const batch = getFirestore().batch();
+        snap.docs.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+    } catch (err) {
+        console.error('clearAllProducts hatası:', err);
+        if (typeof showToast === 'function') showToast('❌ Ürünler temizlenemedi: ' + (err.message || err), '');
+        throw err;
+    }
 }
 
 // ── Combo CRUD ──
 async function getAllCombos() {
-    const snap = await getFirestore().collection(COMBOS_COL).get();
-    return snap.docs.map(d => d.data());
+    try {
+        const snap = await getFirestore().collection(COMBOS_COL).get();
+        return snap.docs.map(d => d.data());
+    } catch (err) {
+        console.error('getAllCombos hatası:', err);
+        if (typeof showToast === 'function') showToast('❌ Kombolar yüklenemedi: ' + (err.message || err), '');
+        throw err;
+    }
 }
 
 async function saveCombo(combo) {
-    await getFirestore().collection(COMBOS_COL).doc(combo.id).set(combo);
+    try {
+        await getFirestore().collection(COMBOS_COL).doc(combo.id).set(combo);
+    } catch (err) {
+        console.error('saveCombo hatası:', err);
+        if (typeof showToast === 'function') showToast('❌ Kombo kaydedilemedi: ' + (err.message || err), '');
+        throw err;
+    }
 }
 
 async function removeCombo(id) {
-    await getFirestore().collection(COMBOS_COL).doc(id).delete();
+    try {
+        await getFirestore().collection(COMBOS_COL).doc(id).delete();
+    } catch (err) {
+        console.error('removeCombo hatası:', err);
+        if (typeof showToast === 'function') showToast('❌ Kombo silinemedi: ' + (err.message || err), '');
+        throw err;
+    }
 }
 
 async function clearAllCombos() {
-    const snap = await getFirestore().collection(COMBOS_COL).get();
-    const batch = getFirestore().batch();
-    snap.docs.forEach(doc => batch.delete(doc.ref));
-    await batch.commit();
+    try {
+        const snap = await getFirestore().collection(COMBOS_COL).get();
+        const batch = getFirestore().batch();
+        snap.docs.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+    } catch (err) {
+        console.error('clearAllCombos hatası:', err);
+        if (typeof showToast === 'function') showToast('❌ Kombolar temizlenemedi: ' + (err.message || err), '');
+        throw err;
+    }
 }
 
 // ── Settings CRUD ──
 const SETTINGS_COL = 'settings';
 
 async function getSettings() {
-    const doc = await getFirestore().collection(SETTINGS_COL).doc('main').get();
-    return doc.exists ? doc.data() : null;
+    try {
+        const doc = await getFirestore().collection(SETTINGS_COL).doc('main').get();
+        return doc.exists ? doc.data() : null;
+    } catch (err) {
+        console.error('getSettings hatası:', err);
+        if (typeof showToast === 'function') showToast('❌ Ayarlar yüklenemedi: ' + (err.message || err), '');
+        throw err;
+    }
 }
 
 async function saveSettings(data) {
-    await getFirestore().collection(SETTINGS_COL).doc('main').set(data, { merge: true });
+    try {
+        await getFirestore().collection(SETTINGS_COL).doc('main').set(data, { merge: true });
+    } catch (err) {
+        console.error('saveSettings hatası:', err);
+        if (typeof showToast === 'function') showToast('❌ Ayarlar kaydedilemedi: ' + (err.message || err), '');
+        throw err;
+    }
 }

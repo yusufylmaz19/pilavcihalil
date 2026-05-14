@@ -71,4 +71,4 @@ async function initApp() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", initApp);
+// initApp, auth.js tarafından giriş onaylandıktan sonra çağrılır.

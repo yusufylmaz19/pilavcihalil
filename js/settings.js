@@ -2,6 +2,85 @@
 // AYARLAR YÖNETİMİ
 // ═══════════════════════════════════════
 
+// ── data.json'u Firebase'den çekip indir ──
+async function exportDataJson() {
+    const btn = document.getElementById('export-json-btn');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Hazırlanıyor...'; }
+
+    try {
+        const [settings, products, combos] = await Promise.all([
+            getSettings(),
+            getAllProducts(),
+            getAllCombos()
+        ]);
+
+        // Kategori id → label eşlemesi
+        const CAT_LABELS = {
+            'pilavlar':    '🍛 Pilavlar',
+            'tavuklar':    '🍗 Tavuklar',
+            'yan-urunler': '🍟 Ekstralar',
+            'corbalar':    '🍲 Çorbalar',
+            'icecekler':   '🥤 İçecekler'
+        };
+        const CAT_ORDER = Object.keys(CAT_LABELS);
+
+        // Ürünleri kategoriye göre grupla, sadece gerekli alanları tut
+        const grouped = {};
+        (products || []).forEach(p => {
+            const cat = p.category || 'diger';
+            if (!grouped[cat]) grouped[cat] = [];
+            grouped[cat].push({
+                name:        p.name,
+                emoji:       p.emoji       || '',
+                desc:        p.desc        || '',
+                price:       p.price       || 0,
+                hasPortions: p.hasPortions || false,
+                color:       p.color       || 'white'
+            });
+        });
+
+        // Sıralı kategori dizisi oluştur
+        const categories = CAT_ORDER
+            .filter(id => grouped[id] && grouped[id].length > 0)
+            .map(id => ({
+                id,
+                label: CAT_LABELS[id],
+                items: grouped[id]
+            }));
+
+        // Kategorisi tanımsız ürünler varsa sona ekle
+        Object.keys(grouped).forEach(id => {
+            if (!CAT_ORDER.includes(id)) {
+                categories.push({ id, label: id, items: grouped[id] });
+            }
+        });
+
+        const s = settings || {};
+        const exportData = {
+            restaurant: s.restaurant || {},
+            contact:    s.contact    || {},
+            platforms:  s.platforms  || [],
+            combos:     combos       || [],
+            menu:       { categories }
+        };
+
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href     = url;
+        a.download = 'data.json';
+        a.click();
+        URL.revokeObjectURL(url);
+
+        showToast('✅ data.json indirildi! Repoyla değiştir ve push et.', 'success');
+    } catch (err) {
+        console.error('Export hatası:', err);
+        showToast('❌ Export başarısız: ' + (err.message || err), '');
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = '📥 data.json İndir'; }
+    }
+}
+
 function openSettings() {
     document.getElementById('settings-overlay').classList.add('show');
     loadSettingsForm();

@@ -1,4 +1,4 @@
-// ── Firestore'dan menü kategorisi oluştur (ÖZEL FİLTRELEME) ──
+// ── Menü kategorisi oluştur (products + combos dizisinden) ──
 function buildIndexMenu(products, combos) {
     const yemeklerItems = [];
     const iceceklerItems = [];
@@ -52,26 +52,36 @@ function buildIndexMenu(products, combos) {
     return { categories: finalCategories };
 }
 
-// ── Firestore'dan ayarları ve ürünleri yükle, sayfayı oluştur ──
+// ── data.json'dan sayfa verilerini yükle ──
 async function initPage() {
     try {
-        const [settings, products, combos] = await Promise.all([
-            getSettings(), 
-            getAllProducts(),
-            getAllCombos()
-        ]);
+        const resp = await fetch('data.json');
+        const data = await resp.json();
 
-        const s = settings || {};
-        const data = {
-            restaurant: s.restaurant || {},
-            contact: s.contact || {},
-            platforms: s.platforms || []
+        const pageData = {
+            restaurant: data.restaurant || {},
+            contact:    data.contact    || {},
+            platforms:  data.platforms  || []
         };
 
-        // Özel menü oluştur (Kombolar + Çorbalar + İçecekler)
-        data.menu = buildIndexMenu(products, combos || []);
+        // Yeni format: data.products dizisi varsa buildIndexMenu ile oluştur
+        // Eski/export format: data.menu.categories varsa → items'ı flat diziye çevirip buildIndexMenu'ya gönder
+        if (Array.isArray(data.products)) {
+            pageData.menu = buildIndexMenu(data.products, data.combos || []);
+        } else if (data.menu && data.menu.categories) {
+            // Kategorilerden flat ürün dizisi çıkar, buildIndexMenu ile combos dahil et
+            const flatProducts = [];
+            data.menu.categories.forEach(cat => {
+                (cat.items || []).forEach(item => {
+                    flatProducts.push({ ...item, category: cat.id });
+                });
+            });
+            pageData.menu = buildIndexMenu(flatProducts, data.combos || []);
+        } else {
+            pageData.menu = { categories: [] };
+        }
 
-        buildPage(data);
+        buildPage(pageData);
     } catch (err) {
         console.error('Sayfa yüklenemedi:', err);
     }

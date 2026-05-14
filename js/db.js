@@ -5,6 +5,23 @@ const RECEIPTS_COL = 'receipts';
 const PRODUCTS_COL = 'products';
 const COMBOS_COL   = 'combos';
 
+// ── Bellek Cache (Firestore okuma sayısını azaltır) ──
+const _cache = {};
+const CACHE_TTL = 10 * 60 * 1000; // 10 dakika
+
+function _getCached(key) {
+    const entry = _cache[key];
+    if (!entry) return null;
+    if (Date.now() - entry.ts > CACHE_TTL) { delete _cache[key]; return null; }
+    return entry.data;
+}
+function _setCache(key, data) {
+    _cache[key] = { data: JSON.parse(JSON.stringify(data)), ts: Date.now() };
+}
+function _invalidate(key) {
+    delete _cache[key];
+}
+
 function getFirestore() {
     return firebase.firestore();
 }
@@ -64,6 +81,8 @@ async function getReceiptCount() {
 const CATEGORY_ORDER = ['pilavlar', 'tavuklar', 'yan-urunler', 'corbalar', 'icecekler'];
 
 async function getAllProducts() {
+    const cached = _getCached('products');
+    if (cached) return cached;
     try {
         const snap = await getFirestore().collection(PRODUCTS_COL).get();
         const products = snap.docs.map(d => d.data());
@@ -74,6 +93,7 @@ async function getAllProducts() {
             if (catDiff !== 0) return catDiff;
             return (a.order || 0) - (b.order || 0);
         });
+        _setCache('products', products);
         return products;
     } catch (err) {
         console.error('getAllProducts hatası:', err);
@@ -85,6 +105,7 @@ async function getAllProducts() {
 async function saveProduct(product) {
     try {
         await getFirestore().collection(PRODUCTS_COL).doc(product.name).set(product);
+        _invalidate('products');
     } catch (err) {
         console.error('saveProduct hatası:', err);
         if (typeof showToast === 'function') showToast('❌ Ürün kaydedilemedi: ' + (err.message || err), '');
@@ -95,6 +116,7 @@ async function saveProduct(product) {
 async function removeProduct(name) {
     try {
         await getFirestore().collection(PRODUCTS_COL).doc(name).delete();
+        _invalidate('products');
     } catch (err) {
         console.error('removeProduct hatası:', err);
         if (typeof showToast === 'function') showToast('❌ Ürün silinemedi: ' + (err.message || err), '');
@@ -108,6 +130,7 @@ async function clearAllProducts() {
         const batch = getFirestore().batch();
         snap.docs.forEach(doc => batch.delete(doc.ref));
         await batch.commit();
+        _invalidate('products');
     } catch (err) {
         console.error('clearAllProducts hatası:', err);
         if (typeof showToast === 'function') showToast('❌ Ürünler temizlenemedi: ' + (err.message || err), '');
@@ -117,9 +140,13 @@ async function clearAllProducts() {
 
 // ── Combo CRUD ──
 async function getAllCombos() {
+    const cached = _getCached('combos');
+    if (cached) return cached;
     try {
         const snap = await getFirestore().collection(COMBOS_COL).get();
-        return snap.docs.map(d => d.data());
+        const combos = snap.docs.map(d => d.data());
+        _setCache('combos', combos);
+        return combos;
     } catch (err) {
         console.error('getAllCombos hatası:', err);
         if (typeof showToast === 'function') showToast('❌ Kombolar yüklenemedi: ' + (err.message || err), '');
@@ -130,6 +157,7 @@ async function getAllCombos() {
 async function saveCombo(combo) {
     try {
         await getFirestore().collection(COMBOS_COL).doc(combo.id).set(combo);
+        _invalidate('combos');
     } catch (err) {
         console.error('saveCombo hatası:', err);
         if (typeof showToast === 'function') showToast('❌ Kombo kaydedilemedi: ' + (err.message || err), '');
@@ -140,6 +168,7 @@ async function saveCombo(combo) {
 async function removeCombo(id) {
     try {
         await getFirestore().collection(COMBOS_COL).doc(id).delete();
+        _invalidate('combos');
     } catch (err) {
         console.error('removeCombo hatası:', err);
         if (typeof showToast === 'function') showToast('❌ Kombo silinemedi: ' + (err.message || err), '');
@@ -153,6 +182,7 @@ async function clearAllCombos() {
         const batch = getFirestore().batch();
         snap.docs.forEach(doc => batch.delete(doc.ref));
         await batch.commit();
+        _invalidate('combos');
     } catch (err) {
         console.error('clearAllCombos hatası:', err);
         if (typeof showToast === 'function') showToast('❌ Kombolar temizlenemedi: ' + (err.message || err), '');
@@ -164,9 +194,13 @@ async function clearAllCombos() {
 const SETTINGS_COL = 'settings';
 
 async function getSettings() {
+    const cached = _getCached('settings');
+    if (cached) return cached;
     try {
         const doc = await getFirestore().collection(SETTINGS_COL).doc('main').get();
-        return doc.exists ? doc.data() : null;
+        const data = doc.exists ? doc.data() : null;
+        if (data) _setCache('settings', data);
+        return data;
     } catch (err) {
         console.error('getSettings hatası:', err);
         if (typeof showToast === 'function') showToast('❌ Ayarlar yüklenemedi: ' + (err.message || err), '');
@@ -177,6 +211,7 @@ async function getSettings() {
 async function saveSettings(data) {
     try {
         await getFirestore().collection(SETTINGS_COL).doc('main').set(data, { merge: true });
+        _invalidate('settings');
     } catch (err) {
         console.error('saveSettings hatası:', err);
         if (typeof showToast === 'function') showToast('❌ Ayarlar kaydedilemedi: ' + (err.message || err), '');

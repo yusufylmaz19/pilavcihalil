@@ -37,9 +37,19 @@ async function getReceiptCount() {
 }
 
 // ── Product CRUD ──
+const CATEGORY_ORDER = ['pilavlar', 'tavuklar', 'yan-urunler', 'corbalar', 'icecekler'];
+
 async function getAllProducts() {
     const snap = await getFirestore().collection(PRODUCTS_COL).get();
-    return snap.docs.map(d => d.data());
+    const products = snap.docs.map(d => d.data());
+    products.sort((a, b) => {
+        const ai = CATEGORY_ORDER.indexOf(a.category || '');
+        const bi = CATEGORY_ORDER.indexOf(b.category || '');
+        const catDiff = (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+        if (catDiff !== 0) return catDiff;
+        return (a.order || 0) - (b.order || 0);
+    });
+    return products;
 }
 
 async function saveProduct(product) {

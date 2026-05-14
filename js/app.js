@@ -10,8 +10,6 @@ async function seedProducts() {
   const existing = await getAllProducts();
   if (existing.length > 0) return;
 
-  console.log("aaa")
-
   const writes = [];
   defaultCategories.forEach((cat, catIdx) => {
     cat.items.forEach((item, itemIdx) => {

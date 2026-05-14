@@ -23,6 +23,7 @@ function signInWithGoogle() {
 }
 
 function adminSignOut() {
+    closeLogoutModal();
     firebase.auth().signOut();
 }
 

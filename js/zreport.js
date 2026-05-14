@@ -173,6 +173,209 @@ async function generateZReport() {
     `;
 
     prepareZPrintBox(dateLabel, filtered, totalRevenue, totalItems, avgTicket, sortedProducts, totalPaid, totalChange, hourMap, totalNakit, totalKart);
+    renderZCharts(filtered, hourMap, sortedProducts, totalNakit, totalKart);
+}
+
+function switchZTab(tab) {
+    const tabs = document.querySelectorAll('.zr-tab');
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+    
+    document.getElementById('zreport-body').style.display = tab === 'list' ? 'block' : 'none';
+    document.getElementById('zreport-stats').style.display = tab === 'stats' ? 'block' : 'none';
+}
+
+let zCharts = {};
+
+function renderZCharts(receipts, hourMap, sortedProducts, totalNakit, totalKart) {
+    // 0. Data Preparation
+    const dailyMap = {};
+    const categoryMap = {};
+    
+    receipts.forEach(r => {
+        // Daily Map
+        const d = new Date(r.date).toLocaleDateString('tr-TR', { day:'2-digit', month:'2-digit' });
+        if (!dailyMap[d]) dailyMap[d] = 0;
+        dailyMap[d] += r.total;
+
+        // Category Map
+        r.items.forEach(it => {
+            let cat = it.categoryLabel;
+            
+            // Legacy data fallback: Try to guess category from name if missing
+            if (!cat) {
+                const name = it.name.toLowerCase();
+                if (name.includes('pilav')) cat = '🍱 Pilavlar';
+                else if (name.includes('tavuk') || name.includes('fajita') || name.includes('köri')) cat = '🍗 Tavuklar';
+                else if (name.includes('çorba')) cat = '🍲 Çorbalar';
+                else if (name.includes('ayran') || name.includes('kola') || name.includes('su') || name.includes('fanta') || name.includes('şalgam')) cat = '🥤 İçecekler';
+                else if (name.includes('cacık') || name.includes('yoğurt') || name.includes('turşu')) cat = '🥗 Ekstralar';
+                else if (name.includes('kombo')) cat = '⚡ Kombolar';
+                else cat = 'Diğer';
+            }
+            
+            if (!categoryMap[cat]) categoryMap[cat] = 0;
+            categoryMap[cat] += it.price * it.qty;
+        });
+    });
+
+    // 1. Daily Trend Chart (Bar/Line)
+    const days = Object.keys(dailyMap).sort((a,b) => {
+        const [d1, m1] = a.split('.').map(Number);
+        const [d2, m2] = b.split('.').map(Number);
+        return (m1 * 100 + d1) - (m2 * 100 + d2);
+    });
+    updateChart('chart-daily', {
+        type: 'bar',
+        data: {
+            labels: days,
+            datasets: [{
+                label: 'Günlük Ciro (₺)',
+                data: days.map(d => dailyMap[d]),
+                backgroundColor: '#22c55e',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#707085' } },
+                x: { grid: { display: false }, ticks: { color: '#707085' } }
+            }
+        }
+    });
+
+    // 2. Hourly Chart (Line)
+    const hours = Object.keys(hourMap).sort();
+    updateChart('chart-hourly', {
+        type: 'line',
+        data: {
+            labels: hours,
+            datasets: [{
+                label: 'Satış Tutarı (₺)',
+                data: hours.map(h => hourMap[h].total),
+                borderColor: '#f5a623',
+                backgroundColor: 'rgba(245, 166, 35, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#f5a623'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#707085' } },
+                x: { grid: { display: false }, ticks: { color: '#707085' } }
+            }
+        }
+    });
+
+    // 3. Top Products by Quantity (Horizontal Bar)
+    const topQty = sortedProducts.slice(0, 10);
+    updateChart('chart-products', {
+        type: 'bar',
+        data: {
+            labels: topQty.map(p => p[0]),
+            datasets: [{
+                data: topQty.map(p => p[1].qty),
+                backgroundColor: '#3b82f6',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#707085' } },
+                y: { grid: { display: false }, ticks: { color: '#707085', font: { size: 10 } } }
+            }
+        }
+    });
+
+    // 4. Top Products by Revenue (Horizontal Bar)
+    const topRev = [...sortedProducts].sort((a,b) => b[1].revenue - a[1].revenue).slice(0, 10);
+    updateChart('chart-revenue', {
+        type: 'bar',
+        data: {
+            labels: topRev.map(p => p[0]),
+            datasets: [{
+                data: topRev.map(p => p[1].revenue),
+                backgroundColor: '#a855f7',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#707085' } },
+                y: { grid: { display: false }, ticks: { color: '#707085', font: { size: 10 } } }
+            }
+        }
+    });
+
+    // 5. Payment Distribution (Doughnut)
+    updateChart('chart-payments', {
+        type: 'doughnut',
+        data: {
+            labels: ['Nakit', 'Kredi Kartı'],
+            datasets: [{
+                data: [totalNakit, totalKart],
+                backgroundColor: ['#22c55e', '#3b82f6'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { color: '#707085', font: { size: 11 } } } },
+            cutout: '65%'
+        }
+    });
+
+    // Populate Payment Totals Footer
+    document.getElementById('stats-payment-totals').innerHTML = `
+        <div class="stats-footer-row"><span>Nakit:</span><span class="text-nakit">₺${totalNakit.toFixed(2)}</span></div>
+        <div class="stats-footer-row"><span>Kredi Kartı:</span><span class="text-kart">₺${totalKart.toFixed(2)}</span></div>
+        <div class="stats-footer-row" style="margin-top:2px; border-top:1px dashed var(--border2); padding-top:4px;">
+            <span>Toplam:</span><span>₺${(totalNakit + totalKart).toFixed(2)}</span>
+        </div>
+    `;
+
+    // 6. Category Distribution (Pie)
+    const catLabels = Object.keys(categoryMap);
+    updateChart('chart-categories', {
+        type: 'pie',
+        data: {
+            labels: catLabels,
+            datasets: [{
+                data: catLabels.map(l => categoryMap[l]),
+                backgroundColor: ['#f5a623', '#3b82f6', '#22c55e', '#a855f7', '#ec4899', '#06b6d4'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { color: '#707085', font: { size: 11 } } } }
+        }
+    });
+}
+
+function updateChart(id, config) {
+    const ctx = document.getElementById(id).getContext('2d');
+    if (zCharts[id]) {
+        zCharts[id].destroy();
+    }
+    zCharts[id] = new Chart(ctx, config);
 }
 
 function prepareZPrintBox(dateLabel, receipts, totalRevenue, totalItems, avgTicket, sortedProducts, totalPaid, totalChange, hourMap, totalNakit, totalKart) {

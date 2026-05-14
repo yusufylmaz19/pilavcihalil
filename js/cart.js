@@ -37,6 +37,8 @@ function addToCart(item, portion) {
             emoji: item.emoji,
             basePrice: item.price,
             portion: portion,
+            category: item._catId || 'ozel',
+            categoryLabel: item._catLabel || 'Diğer',
             qty: 1
         });
     }
@@ -141,6 +143,8 @@ async function saveReceipt() {
         price: calcItemPrice(c),
         basePrice: c.basePrice,
         portion: c.portion,
+        category: c.category,
+        categoryLabel: c.categoryLabel,
         qty: c.qty
     }));
 

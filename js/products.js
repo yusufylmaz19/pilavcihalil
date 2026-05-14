@@ -64,6 +64,7 @@ function buildMenuPanel(categories) {
 
         cat.items.forEach(item => {
             item._catId = cat.id;
+            item._catLabel = cat.label;
             const btn = document.createElement('div');
             btn.className = 'item-btn';
             if (item.color) {

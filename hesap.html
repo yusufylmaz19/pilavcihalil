@@ -176,7 +176,42 @@
                 <span class="auto-status" id="auto-zprint-status"></span>
             </div>
         </div>
+        <div class="zreport-tabs" id="zreport-tabs">
+            <div class="zr-tab active" data-tab="list" onclick="switchZTab('list')">📄 Liste Görünümü</div>
+            <div class="zr-tab" data-tab="stats" onclick="switchZTab('stats')">📊 İstatistikler</div>
+        </div>
         <div class="zreport-body" id="zreport-body"></div>
+        <div class="zreport-stats" id="zreport-stats" style="display:none">
+            <div class="stats-grid">
+                <div class="stats-card full">
+                    <div class="stats-card-title">📈 Günlük Ciro Trendi (Seçili Dönem)</div>
+                    <div class="chart-container"><canvas id="chart-daily"></canvas></div>
+                </div>
+                <div class="stats-card full">
+                    <div class="stats-card-title">🕒 Saatlik Satış Yoğunluğu</div>
+                    <div class="chart-container"><canvas id="chart-hourly"></canvas></div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-card-title">🏆 Satış Adedi (Top 10)</div>
+                    <div class="chart-container"><canvas id="chart-products"></canvas></div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-card-title">💎 Ciro Katkısı (Top 10)</div>
+                    <div class="chart-container"><canvas id="chart-revenue"></canvas></div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-card-title">💰 Ödeme Türleri</div>
+                    <div class="chart-container"><canvas id="chart-payments"></canvas></div>
+                    <div class="stats-card-footer" id="stats-payment-totals">
+                        <!-- Will be filled by JS -->
+                    </div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-card-title">📂 Kategori Dağılımı</div>
+                    <div class="chart-container"><canvas id="chart-categories"></canvas></div>
+                </div>
+            </div>
+        </div>
         <div class="zreport-actions">
             <button class="btn-print" onclick="previewZReport()">🧾 Görüntüle & Yazdır</button>
             <button class="btn-close-receipt" onclick="closeZReport()">Kapat</button>
@@ -317,6 +352,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="js/firebaseConfig.js"></script>
 <script src="js/db.js"></script>
 <script src="js/ui.js"></script>

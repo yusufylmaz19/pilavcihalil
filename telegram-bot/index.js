@@ -2,6 +2,7 @@ require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const TelegramBot = require('node-telegram-bot-api');
 const admin = require('firebase-admin');
 const express = require('express');
+const cron = require('node-cron');
 const app = express();
 app.use(express.json());
 
@@ -328,4 +329,28 @@ bot.on('message', (msg) => {
     bot.sendMessage(msg.chat.id, '❓ Bilinmeyen komut. /yardim yaz.', HTML);
 });
 
-console.log('🤖 Kasa Bot çalışıyor...');
+// ── Otomatik gün sonu Z raporu ──
+// DAILY_REPORT_TIME_TR = "HH:MM" formatında Türkiye saati (örn: "23:00", "17:30")
+const dailyTimeTR  = (process.env.DAILY_REPORT_TIME_TR || '23:00').split(':');
+const dailyHourTR  = parseInt(dailyTimeTR[0], 10);
+const dailyMinTR   = parseInt(dailyTimeTR[1] || '0', 10);
+const dailyHourUTC = (dailyHourTR - 3 + 24) % 24;
+
+cron.schedule(`${dailyMinTR} ${dailyHourUTC} * * *`, async () => {
+  console.log(`🕐 Otomatik gün sonu Z raporu gönderiliyor (TR ${dailyHourTR}:${String(dailyMinTR).padStart(2,'0')})...`);
+  const range = todayRange();
+  try {
+    const receipts = await getReceipts(range.start, range.end);
+    const text = [
+      `🌙 <b>GÜN SONU RAPORU</b>`,
+      buildZReport(receipts, range.label),
+    ].join('\n');
+    for (const chatId of ALLOWED_IDS) {
+      await bot.sendMessage(chatId, text, HTML);
+    }
+  } catch (err) {
+    console.error('Otomatik rapor hatası:', err);
+  }
+}, { timezone: 'UTC' });
+
+console.log(`🤖 Kasa Bot çalışıyor... (Otomatik rapor: her gece TR ${dailyHourTR}:${String(dailyMinTR).padStart(2,'0')})`);

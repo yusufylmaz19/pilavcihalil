@@ -118,6 +118,18 @@ async function generateZReport() {
         hourMap[key].total += r.total;
     });
 
+    const dayMapD = {};
+    filtered.forEach(r => {
+        const d = new Date(r.date);
+        const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        const dateStr = d.toLocaleDateString('tr-TR', { day:'2-digit', month:'2-digit' });
+        const dayName = d.toLocaleDateString('tr-TR', { weekday: 'short' });
+        if (!dayMapD[key]) dayMapD[key] = { dateStr, dayName, count: 0, total: 0 };
+        dayMapD[key].count++;
+        dayMapD[key].total += r.total;
+    });
+    const sortedDayEntries = Object.entries(dayMapD).sort((a, b) => a[0].localeCompare(b[0]));
+
     const dateLabel = range.start.toLocaleDateString('tr-TR', { day:'2-digit', month:'2-digit', year:'numeric' })
         + (range.start.toDateString() !== range.end.toDateString()
             ? ' - ' + range.end.toLocaleDateString('tr-TR', { day:'2-digit', month:'2-digit', year:'numeric' })
@@ -164,6 +176,17 @@ async function generateZReport() {
             </tfoot>
         </table>
 
+        ${sortedDayEntries.length > 1 ? `
+        <div class="zr-section-title">📅 Günlük Dağılım</div>
+        <table class="zr-table">
+            <thead><tr><th>Tarih</th><th>Gün</th><th>Fiş</th><th>Tutar</th></tr></thead>
+            <tbody>
+                ${sortedDayEntries.map(([, d]) => `
+                    <tr><td>${d.dateStr}</td><td>${d.dayName}</td><td>${d.count}</td><td>₺${d.total.toFixed(2)}</td></tr>
+                `).join('')}
+            </tbody>
+        </table>
+        ` : ''}
         <div class="zr-section-title">🕐 Saat Bazlı Dağılım</div>
         <table class="zr-table">
             <thead><tr><th>Saat</th><th>Fiş</th><th>Tutar</th></tr></thead>
@@ -249,14 +272,18 @@ function renderZCharts(receipts, hourMap, sortedProducts, totalNakit, totalKart)
         return (m1 * 100 + parseInt(d1)) - (m2 * 100 + parseInt(d2));
     });
     updateChart('chart-daily', {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: days,
             datasets: [{
                 label: 'Günlük Ciro (₺)',
                 data: days.map(d => dailyMap[d]),
-                backgroundColor: '#22c55e',
-                borderRadius: 4
+                borderColor: '#22c55e',
+                backgroundColor: 'rgba(34, 197, 94, 0.15)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#22c55e'
             }]
         },
         options: {
@@ -280,14 +307,18 @@ function renderZCharts(receipts, hourMap, sortedProducts, totalNakit, totalKart)
 
     // 1b. Daily Count Chart
     updateChart('chart-daily-count', {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: days,
             datasets: [{
                 label: 'Günlük Fiş Sayısı',
                 data: days.map(d => dailyCountMap[d]),
-                backgroundColor: '#3b82f6',
-                borderRadius: 4
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#3b82f6'
             }]
         },
         options: {
@@ -456,6 +487,60 @@ function renderZCharts(receipts, hourMap, sortedProducts, totalNakit, totalKart)
             responsive: true,
             maintainAspectRatio: false,
             plugins: { legend: { position: 'bottom', labels: { color: '#707085', font: { size: 11 } } } }
+        }
+    });
+
+    // 7. Weekday Distribution (Pzt–Paz)
+    const WEEKDAYS = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+    const weekdayRev   = [0, 0, 0, 0, 0, 0, 0];
+    const weekdayCount = [0, 0, 0, 0, 0, 0, 0];
+    receipts.forEach(r => {
+        const dow = new Date(r.date).getDay(); // 0=Pazar
+        const idx = dow === 0 ? 6 : dow - 1;  // Pzt=0 … Paz=6
+        weekdayRev[idx]   += r.total;
+        weekdayCount[idx] ++;
+    });
+    const wdColors = ['#22c55e','#22c55e','#22c55e','#22c55e','#22c55e','#f5a623','#ec4899'];
+    updateChart('chart-weekday', {
+        type: 'line',
+        data: {
+            labels: WEEKDAYS,
+            datasets: [{
+                label: 'Ciro (₺)', data: weekdayRev,
+                borderColor: '#22c55e',
+                backgroundColor: 'rgba(34, 197, 94, 0.15)',
+                borderWidth: 3, fill: true, tension: 0.4,
+                pointBackgroundColor: '#22c55e'
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#707085' } },
+                x: { grid: { display: false }, ticks: { color: '#707085' } }
+            }
+        }
+    });
+    updateChart('chart-weekday-count', {
+        type: 'line',
+        data: {
+            labels: WEEKDAYS,
+            datasets: [{
+                label: 'Fiş Sayısı', data: weekdayCount,
+                borderColor: '#f5a623',
+                backgroundColor: 'rgba(245, 166, 35, 0.15)',
+                borderWidth: 3, fill: true, tension: 0.4,
+                pointBackgroundColor: '#f5a623'
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#707085' } },
+                x: { grid: { display: false }, ticks: { color: '#707085' } }
+            }
         }
     });
 }

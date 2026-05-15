@@ -165,6 +165,24 @@ function buildZReport(receipts, label) {
   const maxHourCount = Math.max(...sortedHours.map(([, v]) => v.count));
   const busyHour     = [...sortedHours].sort((a, b) => b[1].count - a[1].count)[0];
 
+  // Günlük dağılım
+  const dayMapD = {};
+  receipts.forEach(r => {
+    const trDate = new Date(new Date(r.date).getTime() + TR_OFFSET_MS);
+    const key = trDate.toISOString().slice(0, 10);
+    const dl = `${String(trDate.getUTCDate()).padStart(2,'0')}.${String(trDate.getUTCMonth()+1).padStart(2,'0')}`;
+    const dn = ['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'][trDate.getUTCDay()];
+    if (!dayMapD[key]) dayMapD[key] = { label: `${dl} ${dn}`, count: 0, total: 0 };
+    dayMapD[key].count++; dayMapD[key].total += r.total || 0;
+  });
+  const sortedDays  = Object.entries(dayMapD).sort((a, b) => a[0].localeCompare(b[0]));
+  const maxDayCount = sortedDays.length > 0 ? Math.max(...sortedDays.map(([, v]) => v.count)) : 1;
+  const dayRows     = sortedDays.map(([, v]) => {
+    const b  = bar(v.count, maxDayCount, 8);
+    const ct = padL(v.count, 2);
+    return `${v.label}  ${b}  ${ct} fiş  ₺${fmt(v.total)}`;
+  }).join('\n');
+
   // Ürün tablosu
   const SEP = '─'.repeat(34);
   const productRows = sortedProducts.slice(0, 10).map(([name, d], i) => {
@@ -212,6 +230,7 @@ function buildZReport(receipts, label) {
     ``,
     `<b>⏰ SAAT DAĞILIMI</b>`,
     `<pre>${hourRows}</pre>`,
+    sortedDays.length > 1 ? `\n<b>📅 GÜNLÜK DAĞILIM</b>\n<pre>${dayRows}</pre>` : null,
     ``,
     `<b>💵 Alınan Nakit:</b> ₺${fmt(totalPaid)}   <b>Para Üstü:</b> ₺${fmt(totalChange)}`,
   ].filter(l => l !== null).join('\n');

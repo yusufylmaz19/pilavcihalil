@@ -64,31 +64,52 @@ function bar(v, max, w=10) {
   return '█'.repeat(f) + '░'.repeat(w - f);
 }
 
+// ── Türkiye saati (UTC+3) yardımcıları ──
+const TR_OFFSET_MS = 3 * 60 * 60 * 1000;
+
+// Şu anki zamanı Türkiye saatiyle UTC Date olarak döner
+function trNow() {
+  return new Date(Date.now() + TR_OFFSET_MS);
+}
+
+// Türkiye'deki bir günün UTC başlangıç/bitiş anlarını hesaplar
+function trDayRange(y, m, d) {
+  const start = new Date(Date.UTC(y, m, d,  0,  0,  0) - TR_OFFSET_MS);
+  const end   = new Date(Date.UTC(y, m, d, 23, 59, 59) - TR_OFFSET_MS);
+  return { start, end };
+}
+
+function trDateLabel(y, m, d) {
+  return new Date(Date.UTC(y, m, d)).toLocaleDateString('tr-TR', { timeZone: 'UTC' });
+}
+
 // ── Tarih aralıkları ──
 function todayRange() {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-  const end   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-  return { start, end, label: start.toLocaleDateString('tr-TR') };
+  const t = trNow();
+  const y = t.getUTCFullYear(), m = t.getUTCMonth(), d = t.getUTCDate();
+  return { ...trDayRange(y, m, d), label: trDateLabel(y, m, d) };
 }
 function yesterdayRange() {
-  const now = new Date(); now.setDate(now.getDate() - 1);
-  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-  const end   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-  return { start, end, label: start.toLocaleDateString('tr-TR') };
+  const t = trNow(); t.setUTCDate(t.getUTCDate() - 1);
+  const y = t.getUTCFullYear(), m = t.getUTCMonth(), d = t.getUTCDate();
+  return { ...trDayRange(y, m, d), label: trDateLabel(y, m, d) };
 }
 function weekRange() {
-  const now = new Date();
-  const d = now.getDay() || 7;
-  const start = new Date(now); start.setDate(now.getDate() - d + 1); start.setHours(0,0,0,0);
-  const end   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-  return { start, end, label: `${start.toLocaleDateString('tr-TR')} – ${end.toLocaleDateString('tr-TR')}` };
+  const t   = trNow();
+  const dow = t.getUTCDay() || 7;
+  const mon = new Date(t); mon.setUTCDate(t.getUTCDate() - dow + 1);
+  const { start } = trDayRange(mon.getUTCFullYear(), mon.getUTCMonth(), mon.getUTCDate());
+  const { end }   = trDayRange(t.getUTCFullYear(),   t.getUTCMonth(),   t.getUTCDate());
+  const label = `${trDateLabel(mon.getUTCFullYear(), mon.getUTCMonth(), mon.getUTCDate())} – ${trDateLabel(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate())}`;
+  return { start, end, label };
 }
 function monthRange() {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
-  const end   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-  return { start, end, label: start.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' }) };
+  const t = trNow();
+  const y = t.getUTCFullYear(), m = t.getUTCMonth(), d = t.getUTCDate();
+  const { start } = trDayRange(y, m, 1);
+  const { end }   = trDayRange(y, m, d);
+  const label = new Date(Date.UTC(y, m, 1)).toLocaleDateString('tr-TR', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  return { start, end, label };
 }
 function rangeFromParam(p) {
   if (p === 'dun')   return yesterdayRange();

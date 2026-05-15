@@ -46,6 +46,18 @@ body {
   overflow-x: hidden;
 }
 
+/* ── GLOBAL SCROLLBARS ── */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 20px; border: 2px solid var(--bg); }
+::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+/* Apply to all scrollable areas */
+.menu-panel, .cart-items, .history-body, .zreport-body, .zreport-stats, .prod-body, .modal-body {
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface2) var(--bg);
+}
+
 /* ── TOP BAR ── */
 .topbar {
   position: sticky; top: 0; z-index: 100;
@@ -709,11 +721,40 @@ body {
   background:var(--bg2);
   border:1px solid var(--border2);
   border-radius:var(--radius);
-  width:95%; max-width:700px;
+  width:95%; max-width:900px;
   max-height:88vh;
   display:flex; flex-direction:column;
   animation: modalIn 0.25s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+.zreport-modal.fullscreen {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+}
+
+.zreport-header-btns {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.btn-fullscreen {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+.btn-fullscreen:hover { background: var(--orange); color: #fff; border-color: var(--orange); }
 
 .zreport-header {
   padding:16px 22px;

@@ -5,10 +5,23 @@ function openZReport() {
 
 function closeZReport() {
     document.getElementById('zreport-overlay').classList.remove('show');
+    document.querySelector('.zreport-modal').classList.remove('fullscreen');
 }
 
 function closeZReportOutside(e) {
     if (e.target === document.getElementById('zreport-overlay')) closeZReport();
+}
+
+function toggleZFullscreen() {
+    const modal = document.querySelector('.zreport-modal');
+    const btn = document.querySelector('.btn-fullscreen');
+    modal.classList.toggle('fullscreen');
+    btn.textContent = modal.classList.contains('fullscreen') ? '🗗' : '🗖';
+    
+    // Trigger chart resize after animation
+    setTimeout(() => {
+        Object.values(zCharts).forEach(chart => chart.resize());
+    }, 350);
 }
 
 function setZReportRange(val) {
@@ -189,13 +202,22 @@ let zCharts = {};
 function renderZCharts(receipts, hourMap, sortedProducts, totalNakit, totalKart) {
     // 0. Data Preparation
     const dailyMap = {};
+    const dailyCountMap = {};
     const categoryMap = {};
     
     receipts.forEach(r => {
         // Daily Map
-        const d = new Date(r.date).toLocaleDateString('tr-TR', { day:'2-digit', month:'2-digit' });
-        if (!dailyMap[d]) dailyMap[d] = 0;
+        const dObj = new Date(r.date);
+        const dStr = dObj.toLocaleDateString('tr-TR', { day:'2-digit', month:'2-digit' });
+        const dayName = dObj.toLocaleDateString('tr-TR', { weekday: 'long' });
+        const d = `${dStr} ${dayName}`;
+
+        if (!dailyMap[d]) {
+            dailyMap[d] = 0;
+            dailyCountMap[d] = 0;
+        }
         dailyMap[d] += r.total;
+        dailyCountMap[d]++;
 
         // Category Map
         r.items.forEach(it => {
@@ -220,9 +242,11 @@ function renderZCharts(receipts, hourMap, sortedProducts, totalNakit, totalKart)
 
     // 1. Daily Trend Chart (Bar/Line)
     const days = Object.keys(dailyMap).sort((a,b) => {
-        const [d1, m1] = a.split('.').map(Number);
-        const [d2, m2] = b.split('.').map(Number);
-        return (m1 * 100 + d1) - (m2 * 100 + d2);
+        const [d1, rest1] = a.split('.');
+        const [d2, rest2] = b.split('.');
+        const m1 = parseInt(rest1);
+        const m2 = parseInt(rest2);
+        return (m1 * 100 + parseInt(d1)) - (m2 * 100 + parseInt(d2));
     });
     updateChart('chart-daily', {
         type: 'bar',
@@ -241,7 +265,46 @@ function renderZCharts(receipts, hourMap, sortedProducts, totalNakit, totalKart)
             plugins: { legend: { display: false } },
             scales: {
                 y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#707085' } },
-                x: { grid: { display: false }, ticks: { color: '#707085' } }
+                x: { 
+                    grid: { display: false }, 
+                    ticks: { 
+                        color: '#707085',
+                        callback: function(val, index) {
+                            return days[index].split(' ')[0];
+                        }
+                    } 
+                }
+            }
+        }
+    });
+
+    // 1b. Daily Count Chart
+    updateChart('chart-daily-count', {
+        type: 'bar',
+        data: {
+            labels: days,
+            datasets: [{
+                label: 'Günlük Fiş Sayısı',
+                data: days.map(d => dailyCountMap[d]),
+                backgroundColor: '#3b82f6',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#707085' } },
+                x: { 
+                    grid: { display: false }, 
+                    ticks: { 
+                        color: '#707085',
+                        callback: function(val, index) {
+                            return days[index].split(' ')[0];
+                        }
+                    } 
+                }
             }
         }
     });
@@ -261,6 +324,33 @@ function renderZCharts(receipts, hourMap, sortedProducts, totalNakit, totalKart)
                 fill: true,
                 tension: 0.4,
                 pointBackgroundColor: '#f5a623'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#707085' } },
+                x: { grid: { display: false }, ticks: { color: '#707085' } }
+            }
+        }
+    });
+
+    // 2b. Hourly Count Chart
+    updateChart('chart-hourly-count', {
+        type: 'line',
+        data: {
+            labels: hours,
+            datasets: [{
+                label: 'Fiş Sayısı',
+                data: hours.map(h => hourMap[h].count),
+                borderColor: '#ec4899',
+                backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#ec4899'
             }]
         },
         options: {

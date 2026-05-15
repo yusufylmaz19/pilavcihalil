@@ -120,6 +120,9 @@ function buildPage(d) {
     if (mainPhone) {
         document.getElementById('float-call-btn').href = mainPhone.whatsapp_href;
     }
+    if (r.instagram) {
+        document.getElementById('float-insta-btn').href = r.instagram;
+    }
 
     // ── Platforms ──
     const pg = document.getElementById('platforms-grid');

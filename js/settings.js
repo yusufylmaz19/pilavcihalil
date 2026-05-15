@@ -123,6 +123,7 @@ async function loadSettingsForm() {
   <div class="settings-section-title">🏪 Restoran Bilgileri</div>
   <div class="srow"><label>Restoran Adı</label><input type="text" id="s-name" value="${esc(r.name)}" /></div>
   <div class="srow"><label>Slogan</label><input type="text" id="s-slogan" value="${esc(r.slogan)}" /></div>
+  <div class="srow"><label>Instagram Linki</label><input type="url" id="s-instagram" value="${esc(r.instagram)}" placeholder="https://instagram.com/..." /></div>
   <div class="srow"><label>Hero Badge</label><input type="text" id="s-hero-badge" value="${esc(r.hero_badge)}" /></div>
   <div class="srow"><label>Kısa Açıklama</label><textarea id="s-hero-desc" rows="2">${r.hero_desc || ''}</textarea></div>
 </div>
@@ -207,6 +208,7 @@ async function saveSettingsForm() {
             restaurant: {
                 name: document.getElementById('s-name').value.trim(),
                 slogan: document.getElementById('s-slogan').value.trim(),
+                instagram: document.getElementById('s-instagram').value.trim(),
                 hero_badge: document.getElementById('s-hero-badge').value.trim(),
                 hero_desc: document.getElementById('s-hero-desc').value.trim(),
                 logo: 'assets/logo.png',

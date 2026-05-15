@@ -48,72 +48,68 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🤖 Kasa Bot webhook sunucusu port ${PORT}'de çalışıyor...`));
 
 const ALLOWED_IDS = (process.env.ALLOWED_CHAT_IDS || '')
-  .split(',')
-  .map(s => s.trim())
-  .filter(Boolean);
+  .split(',').map(s => s.trim()).filter(Boolean);
 
+const HTML = { parse_mode: 'HTML' };
+
+// ── Yardımcılar ──
 function isAllowed(chatId) {
-  if (ALLOWED_IDS.length === 0) return true;
-  return ALLOWED_IDS.includes(String(chatId));
+  return ALLOWED_IDS.length === 0 || ALLOWED_IDS.includes(String(chatId));
+}
+function fmt(n)        { return Number(n).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function padR(s, n)    { s = String(s); return s + ' '.repeat(Math.max(0, n - s.length)); }
+function padL(s, n)    { s = String(s); return ' '.repeat(Math.max(0, n - s.length)) + s; }
+function bar(v, max, w=10) {
+  const f = max > 0 ? Math.round((v / max) * w) : 0;
+  return '█'.repeat(f) + '░'.repeat(w - f);
 }
 
+// ── Tarih aralıkları ──
 function todayRange() {
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
   const end   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
   return { start, end, label: start.toLocaleDateString('tr-TR') };
 }
-
 function yesterdayRange() {
-  const now = new Date();
-  const y = new Date(now);
-  y.setDate(y.getDate() - 1);
-  const start = new Date(y.getFullYear(), y.getMonth(), y.getDate(), 0, 0, 0);
-  const end   = new Date(y.getFullYear(), y.getMonth(), y.getDate(), 23, 59, 59);
+  const now = new Date(); now.setDate(now.getDate() - 1);
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+  const end   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
   return { start, end, label: start.toLocaleDateString('tr-TR') };
 }
-
 function weekRange() {
   const now = new Date();
-  const day = now.getDay() || 7;
-  const start = new Date(now);
-  start.setDate(now.getDate() - day + 1);
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-  return {
-    start,
-    end,
-    label: `${start.toLocaleDateString('tr-TR')} - ${end.toLocaleDateString('tr-TR')}`,
-  };
+  const d = now.getDay() || 7;
+  const start = new Date(now); start.setDate(now.getDate() - d + 1); start.setHours(0,0,0,0);
+  const end   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+  return { start, end, label: `${start.toLocaleDateString('tr-TR')} – ${end.toLocaleDateString('tr-TR')}` };
 }
-
 function monthRange() {
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
   const end   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-  return {
-    start,
-    end,
-    label: start.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' }),
-  };
+  return { start, end, label: start.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' }) };
+}
+function rangeFromParam(p) {
+  if (p === 'dun')   return yesterdayRange();
+  if (p === 'hafta') return weekRange();
+  if (p === 'ay')    return monthRange();
+  return todayRange();
 }
 
-// ── Firestore'dan fiş çekme ──
+// ── Firestore ──
 async function getReceipts(start, end) {
-  const snap = await db
-    .collection('receipts')
+  const snap = await db.collection('receipts')
     .where('date', '>=', start.toISOString())
     .where('date', '<=', end.toISOString())
-    .orderBy('date', 'desc')
-    .get();
+    .orderBy('date', 'desc').get();
   return snap.docs.map(d => d.data());
 }
 
-// ── Z Raporu hesaplama ve metin oluşturma ──
+// ── Rapor oluşturucu ──
 function buildZReport(receipts, label) {
-  if (receipts.length === 0) {
-    return `📭 *${label}* için kayıtlı hesap bulunamadı.`;
-  }
+  if (receipts.length === 0)
+    return `📭 <b>${label}</b> için kayıtlı hesap bulunamadı.`;
 
   const totalRevenue = receipts.reduce((s, r) => s + (r.total || 0), 0);
   const totalItems   = receipts.reduce((s, r) => s + (r.itemCount || 0), 0);
@@ -122,127 +118,193 @@ function buildZReport(receipts, label) {
   const totalKart    = receipts.filter(r => r.paymentType === 'kart').reduce((s, r) => s + (r.total || 0), 0);
   const totalPaid    = receipts.reduce((s, r) => s + (r.paid || 0), 0);
   const totalChange  = receipts.reduce((s, r) => s + (r.change || 0), 0);
+  const nakitPct     = totalRevenue > 0 ? Math.round((totalNakit / totalRevenue) * 100) : 0;
+  const kartPct      = 100 - nakitPct;
 
   // Ürün dökümü
   const productMap = {};
-  receipts.forEach(r => {
-    (r.items || []).forEach(it => {
-      if (!productMap[it.name]) productMap[it.name] = { qty: 0, revenue: 0, emoji: it.emoji || '' };
-      productMap[it.name].qty += it.qty;
-      productMap[it.name].revenue += (it.price || 0) * it.qty;
-    });
-  });
-
+  receipts.forEach(r => (r.items || []).forEach(it => {
+    if (!productMap[it.name]) productMap[it.name] = { qty: 0, revenue: 0 };
+    productMap[it.name].qty     += it.qty;
+    productMap[it.name].revenue += (it.price || 0) * it.qty;
+  }));
   const sortedProducts = Object.entries(productMap).sort((a, b) => b[1].qty - a[1].qty);
   const topSeller = sortedProducts[0];
 
-  // Saat bazlı dağılım
+  // Saat dağılımı
   const hourMap = {};
   receipts.forEach(r => {
     const h = new Date(r.date).getHours().toString().padStart(2, '0') + ':00';
     if (!hourMap[h]) hourMap[h] = { count: 0, total: 0 };
-    hourMap[h].count++;
-    hourMap[h].total += r.total || 0;
+    hourMap[h].count++; hourMap[h].total += r.total || 0;
   });
+  const sortedHours  = Object.entries(hourMap).sort((a, b) => a[0].localeCompare(b[0]));
+  const maxHourCount = Math.max(...sortedHours.map(([, v]) => v.count));
+  const busyHour     = [...sortedHours].sort((a, b) => b[1].count - a[1].count)[0];
 
-  const busyHour = Object.entries(hourMap).sort((a, b) => b[1].count - a[1].count)[0];
+  // Ürün tablosu
+  const SEP = '─'.repeat(34);
+  const productRows = sortedProducts.slice(0, 10).map(([name, d], i) => {
+    const n = padR(`${i + 1}. ${name.slice(0, 16)}`, 20);
+    const q = padL(d.qty, 4);
+    const t = padL(`₺${fmt(d.revenue)}`, 10);
+    return `${n}${q}  ${t}`;
+  }).join('\n');
 
-  // Ürün tablosu (en fazla 10 satır)
-  const productLines = sortedProducts.slice(0, 10)
-    .map(([name, d]) => `  ${d.emoji} ${name}: ${d.qty} adet — ₺${d.revenue.toFixed(2)}`)
-    .join('\n');
+  // Saat tablosu
+  const hourRows = sortedHours.map(([h, v]) => {
+    const b  = bar(v.count, maxHourCount, 8);
+    const ct = padL(v.count, 2);
+    return `${h}  ${b}  ${ct} fiş  ₺${fmt(v.total)}`;
+  }).join('\n');
 
-  return `
-🧾 *Z RAPORU — ${label}*
-${'─'.repeat(30)}
-📊 *Genel Özet*
-  • Toplam Ciro  : ₺${totalRevenue.toFixed(2)}
-  • Fiş Sayısı   : ${receipts.length}
-  • Ürün Adedi   : ${totalItems}
-  • Ort. Fiş     : ₺${avgTicket.toFixed(2)}
-
-💰 *Ödeme Dökümü*
-  • Nakit        : ₺${totalNakit.toFixed(2)}
-  • Kredi Kartı  : ₺${totalKart.toFixed(2)}
-  • Alınan Nakit : ₺${totalPaid.toFixed(2)}
-  • Para Üstü    : ₺${totalChange.toFixed(2)}
-${topSeller ? `\n🏆 *En Çok Satan*\n  ${topSeller[1].emoji} ${topSeller[0]} — ${topSeller[1].qty} adet` : ''}
-${busyHour ? `\n⏰ *En Yoğun Saat*\n  ${busyHour[0]} — ${busyHour[1].count} fiş` : ''}
-
-📦 *Ürün Bazlı Döküm*
-${productLines || '  —'}
-${'─'.repeat(30)}
-`.trim();
+  return [
+    `🧾 <b>Z RAPORU</b>`,
+    `📅 <b>${label}</b>`,
+    ``,
+    `<b>📊 GENEL ÖZET</b>`,
+    `<pre>`,
+    `Toplam Ciro   ${padL('₺' + fmt(totalRevenue), 12)}`,
+    `Fis Sayisi    ${padL(receipts.length, 12)}`,
+    `Urun Adedi    ${padL(totalItems, 12)}`,
+    `Ort. Fis      ${padL('₺' + fmt(avgTicket), 12)}`,
+    `</pre>`,
+    ``,
+    `<b>💳 ÖDEME DÖKÜMÜ</b>`,
+    `<pre>`,
+    `Nakit  ${bar(totalNakit, totalRevenue, 10)}  %${nakitPct}  ₺${fmt(totalNakit)}`,
+    `Kart   ${bar(totalKart,  totalRevenue, 10)}  %${kartPct}  ₺${fmt(totalKart)}`,
+    `</pre>`,
+    topSeller ? `🏆 <b>En Çok Satan:</b> ${topSeller[0]} — ${topSeller[1].qty} adet` : '',
+    busyHour  ? `⏰ <b>En Yoğun Saat:</b> ${busyHour[0]} — ${busyHour[1].count} fiş` : '',
+    ``,
+    `<b>📦 ÜRÜN DÖKÜMÜ</b>`,
+    `<pre>`,
+    `${padR('Urun', 20)}${padL('Adet', 4)}  ${padL('Tutar', 10)}`,
+    SEP,
+    productRows,
+    SEP,
+    `${padR('TOPLAM', 20)}${padL(totalItems, 4)}  ${padL('₺' + fmt(totalRevenue), 10)}`,
+    `</pre>`,
+    ``,
+    `<b>⏰ SAAT DAĞILIMI</b>`,
+    `<pre>${hourRows}</pre>`,
+    ``,
+    `<b>💵 Alınan Nakit:</b> ₺${fmt(totalPaid)}   <b>Para Üstü:</b> ₺${fmt(totalChange)}`,
+  ].filter(l => l !== null).join('\n');
 }
+
+// ── Inline klavye ──
+const REPORT_KEYBOARD = {
+  reply_markup: {
+    inline_keyboard: [
+      [
+        { text: '📊 Bugün',    callback_data: 'z_bugun' },
+        { text: '📅 Dün',      callback_data: 'z_dun'   },
+      ],
+      [
+        { text: '📆 Bu Hafta', callback_data: 'z_hafta' },
+        { text: '🗓️ Bu Ay',    callback_data: 'z_ay'    },
+      ],
+      [
+        { text: '💵 Hızlı Ciro', callback_data: 'ciro' },
+      ],
+    ],
+  },
+};
 
 // ── /start & /yardim ──
 bot.onText(/\/(start|yardim|help)/i, (msg) => {
   if (!isAllowed(msg.chat.id)) return;
-  const text = `
-👋 *Merhaba!* Kasa Bot burada.
-
-Kullanabileceğin komutlar:
-
-/zraporu — Bugünün Z raporu
-/zraporu bugun — Bugün
-/zraporu dun — Dün
-/zraporu hafta — Bu hafta
-/zraporu ay — Bu ay
-/ciro — Günlük hızlı ciro özeti
-  `.trim();
-  bot.sendMessage(msg.chat.id, text, { parse_mode: 'Markdown' });
+  const text = [
+    `👋 <b>Merhaba! Ben Kasa Bot.</b>`,
+    `Max Pilav kasa raporlarını Telegram'dan takip et.`,
+    ``,
+    `<b>Komutlar:</b>`,
+    `<pre>`,
+    `/zraporu          Bugünün Z raporu`,
+    `/zraporu bugun    Bugün`,
+    `/zraporu dun      Dün`,
+    `/zraporu hafta    Bu hafta`,
+    `/zraporu ay       Bu ay`,
+    `/ciro             Hizli ciro ozeti`,
+    `</pre>`,
+    `Ya da aşağıdaki butonları kullan 👇`,
+  ].join('\n');
+  bot.sendMessage(msg.chat.id, text, { ...HTML, ...REPORT_KEYBOARD });
 });
 
-// ── /ciro — hızlı özet ──
-bot.onText(/\/ciro/, async (msg) => {
-  if (!isAllowed(msg.chat.id)) return;
+// ── /ciro ──
+async function sendCiro(chatId) {
   const { start, end, label } = todayRange();
+  const wait = await bot.sendMessage(chatId, '⏳ Veriler çekiliyor…', HTML);
   try {
-    bot.sendMessage(msg.chat.id, '⏳ Veriler çekiliyor...');
-    const receipts = await getReceipts(start, end);
+    const receipts     = await getReceipts(start, end);
     const totalRevenue = receipts.reduce((s, r) => s + (r.total || 0), 0);
     const totalNakit   = receipts.filter(r => r.paymentType !== 'kart').reduce((s, r) => s + (r.total || 0), 0);
     const totalKart    = receipts.filter(r => r.paymentType === 'kart').reduce((s, r) => s + (r.total || 0), 0);
+    const nakitPct     = totalRevenue > 0 ? Math.round((totalNakit / totalRevenue) * 100) : 0;
 
     const text = receipts.length === 0
-      ? `📭 *${label}* için henüz hesap yok.`
-      : `💵 *Günlük Ciro — ${label}*\n\n  • Toplam : ₺${totalRevenue.toFixed(2)}\n  • Nakit  : ₺${totalNakit.toFixed(2)}\n  • Kart   : ₺${totalKart.toFixed(2)}\n  • Fiş    : ${receipts.length}`;
+      ? `📭 <b>${label}</b> için henüz hesap yok.`
+      : [
+          `💵 <b>GÜNLÜK CİRO — ${label}</b>`,
+          ``,
+          `<pre>`,
+          `Toplam Ciro   ${padL('₺' + fmt(totalRevenue), 12)}`,
+          `Fis Sayisi    ${padL(receipts.length, 12)}`,
+          `</pre>`,
+          `<pre>`,
+          `Nakit  ${bar(totalNakit, totalRevenue, 10)}  %${nakitPct}  ₺${fmt(totalNakit)}`,
+          `Kart   ${bar(totalKart,  totalRevenue, 10)}  %${100-nakitPct}  ₺${fmt(totalKart)}`,
+          `</pre>`,
+        ].join('\n');
 
-    bot.sendMessage(msg.chat.id, text, { parse_mode: 'Markdown' });
+    bot.editMessageText(text, { chat_id: chatId, message_id: wait.message_id, ...HTML });
   } catch (err) {
     console.error(err);
-    bot.sendMessage(msg.chat.id, '❌ Veriler alınamadı: ' + err.message);
+    bot.editMessageText('❌ Veriler alınamadı: ' + err.message, { chat_id: chatId, message_id: wait.message_id });
   }
+}
+
+bot.onText(/\/ciro/, (msg) => { if (isAllowed(msg.chat.id)) sendCiro(msg.chat.id); });
+
+// ── /zraporu ──
+async function sendZReport(chatId, param) {
+  const range = rangeFromParam(param);
+  const wait  = await bot.sendMessage(chatId, '⏳ Z Raporu hazırlanıyor…', HTML);
+  try {
+    const receipts = await getReceipts(range.start, range.end);
+    const text     = buildZReport(receipts, range.label);
+    bot.editMessageText(text, { chat_id: chatId, message_id: wait.message_id, ...HTML });
+  } catch (err) {
+    console.error(err);
+    bot.editMessageText('❌ Rapor oluşturulamadı: ' + err.message, { chat_id: chatId, message_id: wait.message_id });
+  }
+}
+
+bot.onText(/\/zraporu(?:\s+(\w+))?/, (msg, match) => {
+  if (!isAllowed(msg.chat.id)) return;
+  sendZReport(msg.chat.id, (match[1] || 'bugun').toLowerCase());
 });
 
-// ── /zraporu [bugun|dun|hafta|ay] ──
-bot.onText(/\/zraporu(?:\s+(\w+))?/, async (msg, match) => {
-  if (!isAllowed(msg.chat.id)) return;
-  const param = (match[1] || 'bugun').toLowerCase();
-
-  let range;
-  if (param === 'dun')         range = yesterdayRange();
-  else if (param === 'hafta')  range = weekRange();
-  else if (param === 'ay')     range = monthRange();
-  else                         range = todayRange(); // bugun veya default
-
-  try {
-    await bot.sendMessage(msg.chat.id, '⏳ Z Raporu hazırlanıyor...');
-    const receipts = await getReceipts(range.start, range.end);
-    const text = buildZReport(receipts, range.label);
-    bot.sendMessage(msg.chat.id, text, { parse_mode: 'Markdown' });
-  } catch (err) {
-    console.error(err);
-    bot.sendMessage(msg.chat.id, '❌ Rapor oluşturulamadı: ' + err.message);
+// ── Inline buton callback ──
+bot.on('callback_query', async (query) => {
+  if (!isAllowed(query.message.chat.id)) return;
+  await bot.answerCallbackQuery(query.id);
+  const chatId = query.message.chat.id;
+  if (query.data === 'ciro') {
+    sendCiro(chatId);
+  } else if (query.data.startsWith('z_')) {
+    sendZReport(chatId, query.data.replace('z_', ''));
   }
 });
 
 // ── Bilinmeyen komutlar ──
 bot.on('message', (msg) => {
   if (!isAllowed(msg.chat.id)) return;
-  if (msg.text && msg.text.startsWith('/') && !/^\/(start|yardim|help|zraporu|ciro)/.test(msg.text)) {
-    bot.sendMessage(msg.chat.id, '❓ Bilinmeyen komut. /yardim ile komutları görebilirsin.');
-  }
+  if (msg.text && msg.text.startsWith('/') && !/^\/(start|yardim|help|zraporu|ciro)/.test(msg.text))
+    bot.sendMessage(msg.chat.id, '❓ Bilinmeyen komut. /yardim yaz.', HTML);
 });
 
 console.log('🤖 Kasa Bot çalışıyor...');

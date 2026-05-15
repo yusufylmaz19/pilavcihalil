@@ -156,7 +156,8 @@ function buildZReport(receipts, label) {
   // Saat dağılımı
   const hourMap = {};
   receipts.forEach(r => {
-    const h = new Date(r.date).getHours().toString().padStart(2, '0') + ':00';
+    const trHour = new Date(new Date(r.date).getTime() + TR_OFFSET_MS).getUTCHours();
+    const h = trHour.toString().padStart(2, '0') + ':00';
     if (!hourMap[h]) hourMap[h] = { count: 0, total: 0 };
     hourMap[h].count++; hourMap[h].total += r.total || 0;
   });

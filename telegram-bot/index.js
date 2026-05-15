@@ -1,6 +1,9 @@
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const TelegramBot = require('node-telegram-bot-api');
 const admin = require('firebase-admin');
+const express = require('express');
+const app = express();
+app.use(express.json());
 
 // ── Firebase Admin başlatma ──
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
@@ -12,11 +15,37 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-// ── Telegram Bot başlatma ──
+// ── Telegram Bot başlatma (Webhook modu) ──
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 if (!TOKEN) throw new Error('TELEGRAM_BOT_TOKEN env değişkeni eksik!');
 
-const bot = new TelegramBot(TOKEN, { polling: true });
+const WEBHOOK_URL   = process.env.WEBHOOK_URL;    // örn: https://kasa-bot.onrender.com
+const SECRET_TOKEN  = process.env.WEBHOOK_SECRET;  // istediğin rastgele bir şifre
+
+const bot = new TelegramBot(TOKEN);
+
+if (WEBHOOK_URL) {
+  bot.setWebHook(`${WEBHOOK_URL}/bot${TOKEN}`, {
+    secret_token: SECRET_TOKEN || undefined,
+  });
+
+  app.post(`/bot${TOKEN}`, (req, res) => {
+    // Telegram'dan gelmeyen istekleri reddet
+    if (SECRET_TOKEN && req.headers['x-telegram-bot-api-secret-token'] !== SECRET_TOKEN) {
+      return res.sendStatus(403);
+    }
+    bot.processUpdate(req.body);
+    res.sendStatus(200);
+  });
+} else {
+  // Lokal geliştirme için polling
+  bot.startPolling();
+}
+
+app.get('/', (_req, res) => res.send('Kasa Bot çalışıyor 🤖'));
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🤖 Kasa Bot webhook sunucusu port ${PORT}'de çalışıyor...`));
 
 // ── İzin verilen chat ID'leri (güvenlik) ──
 // ALLOWED_CHAT_IDS env: "123456,789012" gibi virgülle ayrılmış

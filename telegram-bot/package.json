@@ -1,0 +1,21 @@
+{
+  "name": "kasa-telegram-bot",
+  "version": "1.0.0",
+  "description": "Max Pilav kasa botu – Z raporu ve ciro bilgilerini Telegram üzerinden gönderir.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "firebase-admin": "^12.2.0",
+    "node-telegram-bot-api": "^0.66.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

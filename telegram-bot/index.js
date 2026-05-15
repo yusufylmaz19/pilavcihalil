@@ -235,6 +235,13 @@ const REPORT_KEYBOARD = {
   },
 };
 
+// ── Bot komut menüsünü Telegram'a kaydet ──
+bot.setMyCommands([
+  { command: 'start',         description: '🤖 Ana menü ve butonlar' },
+  { command: 'zraporu',       description: '🧾 Bugünün Z raporu' },
+  { command: 'ciro',          description: '💵 Hızlı ciro özeti' },
+]);
+
 // ── /start & /yardim ──
 bot.onText(/\/(start|yardim|help)/i, (msg) => {
   if (!isAllowed(msg.chat.id)) return;

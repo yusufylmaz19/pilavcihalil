@@ -19,8 +19,8 @@ const db = admin.firestore();
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 if (!TOKEN) throw new Error('TELEGRAM_BOT_TOKEN env değişkeni eksik!');
 
-const WEBHOOK_URL   = process.env.WEBHOOK_URL;    // örn: https://kasa-bot.onrender.com
-const SECRET_TOKEN  = process.env.WEBHOOK_SECRET;  // istediğin rastgele bir şifre
+const WEBHOOK_URL   = process.env.WEBHOOK_URL;  
+const SECRET_TOKEN  = process.env.WEBHOOK_SECRET;
 
 const bot = new TelegramBot(TOKEN);
 
@@ -47,19 +47,16 @@ app.get('/', (_req, res) => res.send('Kasa Bot çalışıyor 🤖'));
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🤖 Kasa Bot webhook sunucusu port ${PORT}'de çalışıyor...`));
 
-// ── İzin verilen chat ID'leri (güvenlik) ──
-// ALLOWED_CHAT_IDS env: "123456,789012" gibi virgülle ayrılmış
 const ALLOWED_IDS = (process.env.ALLOWED_CHAT_IDS || '')
   .split(',')
   .map(s => s.trim())
   .filter(Boolean);
 
 function isAllowed(chatId) {
-  if (ALLOWED_IDS.length === 0) return true; // kısıtlama yoksa herkese açık
+  if (ALLOWED_IDS.length === 0) return true;
   return ALLOWED_IDS.includes(String(chatId));
 }
 
-// ── Tarih aralığı yardımcıları ──
 function todayRange() {
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);

@@ -513,7 +513,9 @@ const dailyHourUTC = (dailyHourTR - 3 + 24) % 24;
 
 cron.schedule(`${dailyMinTR} ${dailyHourUTC} * * *`, async () => {
   console.log(`🕐 Otomatik gün sonu Z raporu gönderiliyor (TR ${dailyHourTR}:${String(dailyMinTR).padStart(2,'0')})...`);
-  const range = todayRange();
+  // Eğer rapor saati gece yarısına çok yakınsa (00:00 - 04:00 arası), 
+  // muhtemelen bir önceki günün raporu isteniyordur.
+  const range = (dailyHourTR < 4) ? yesterdayRange() : todayRange();
   try {
     const receipts = await getReceipts(range.start, range.end);
     const text = [

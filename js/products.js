@@ -82,6 +82,7 @@ function buildMenuPanel(categories) {
                 ${hasPortions ? `
                 <div class="item-portions" id="portions-${item.name.replace(/\s/g, '_')}">
                     <div class="ps-btn" data-p="0.5">Yarım</div>
+                    <div class="ps-btn" data-p="0.75">0.75</div>
                     <div class="ps-btn" data-p="1">Tam</div>
                     <div class="ps-btn" data-p="1.5">1.5</div>
                 </div>

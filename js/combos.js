@@ -18,13 +18,12 @@ async function loadCombos() {
     }
 }
 
-// ── Kombo fiyatını hesapla (güncel ürün fiyatları ile) ──
 function getComboPrice(combo, categories) {
     let total = 0;
     combo.items.forEach(ci => {
         const product = findProductByName(ci.name, categories);
         if (product) {
-            total += Math.round(product.price * ci.portion);
+            total += product.price * ci.portion;
         }
     });
     return total;
@@ -56,7 +55,7 @@ function addComboToCart(comboId, categories, multiplier = 1) {
     });
 
     if (addedCount > 0) {
-        const pLabel = multiplier === 0.5 ? '½' : multiplier === 1.5 ? '1½' : '';
+        const pLabel = multiplier === 0.5 ? '½' : multiplier === 0.75 ? '¾' : multiplier === 1.5 ? '1½' : '';
         const nameWithPortion = pLabel ? `${combo.name} (${pLabel})` : combo.name;
         showToast(`⚡ ${combo.emoji} ${nameWithPortion} eklendi`, 'success');
     }
@@ -119,7 +118,7 @@ function buildCombosPanel(categories) {
         combos.forEach(combo => {
             const totalPrice = getComboPrice(combo, categories);
             const itemNames = combo.items.map(ci => {
-                const pLabel = ci.portion === 0.5 ? '½' : ci.portion === 1.5 ? '1½' : '';
+                const pLabel = ci.portion === 0.5 ? '½' : ci.portion === 0.75 ? '¾' : ci.portion === 1.5 ? '1½' : '';
                 return pLabel ? `${ci.name} (${pLabel})` : ci.name;
             });
 
@@ -132,11 +131,12 @@ function buildCombosPanel(categories) {
                 <div class="item-main">
                     <div class="emoji">${combo.emoji}</div>
                     <div class="name">${combo.name}</div>
-                    <div class="price">₺${totalPrice}</div>
+                    <div class="price">₺${totalPrice.toFixed(2)}</div>
                 </div>
                 <div class="combo-contents">${itemNames.join(' + ')}</div>
                 <div class="item-portions">
                     <div class="ps-btn" data-p="0.5">Yarım</div>
+                    <div class="ps-btn" data-p="0.75">0.75</div>
                     <div class="ps-btn" data-p="1">Tam</div>
                     <div class="ps-btn" data-p="1.5">1.5</div>
                 </div>
@@ -204,9 +204,9 @@ async function renderComboList() {
         const totalPrice = getComboPrice(combo, categories);
         const itemList = combo.items.map(ci => {
             const p = findProductByName(ci.name, categories);
-            const pLabel = ci.portion === 0.5 ? 'Yarım' : ci.portion === 1.5 ? '1.5' : 'Tam';
-            const unitPrice = p ? Math.round(p.price * ci.portion) : 0;
-            return `<span class="combo-item-tag">${ci.name} (${pLabel}) ₺${unitPrice}</span>`;
+            const pLabel = ci.portion === 0.5 ? 'Yarım' : ci.portion === 0.75 ? '0.75' : ci.portion === 1.5 ? '1.5' : 'Tam';
+            const unitPrice = p ? p.price * ci.portion : 0;
+            return `<span class="combo-item-tag">${ci.name} (${pLabel}) ₺${unitPrice.toFixed(2)}</span>`;
         }).join('');
 
         html += `
@@ -214,7 +214,7 @@ async function renderComboList() {
             <div class="combo-card-header">
                 <span class="combo-card-emoji">${combo.emoji}</span>
                 <span class="combo-card-name">${combo.name}</span>
-                <span class="combo-card-price">₺${totalPrice}</span>
+                <span class="combo-card-price">₺${totalPrice.toFixed(2)}</span>
             </div>
             <div class="combo-card-items">${itemList}</div>
             <div class="combo-card-actions">
@@ -319,6 +319,7 @@ function createComboItemRow(ci, index, categories) {
         </select>
         <select class="combo-portion-select" data-index="${index}">
             <option value="0.5" ${ci.portion === 0.5 ? 'selected' : ''}>Yarım</option>
+            <option value="0.75" ${ci.portion === 0.75 ? 'selected' : ''}>0.75</option>
             <option value="1" ${ci.portion === 1 ? 'selected' : ''}>Tam</option>
             <option value="1.5" ${ci.portion === 1.5 ? 'selected' : ''}>1.5</option>
         </select>

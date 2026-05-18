@@ -72,7 +72,7 @@ async function renderHistory() {
         html += `
             <div class="history-group-title">
                 <span>📅 ${group}</span>
-                <span class="group-total-badge">Toplam: ₺${groupTotal.toLocaleString('tr-TR')}</span>
+                <span class="group-total-badge">Toplam: ₺${groupTotal.toFixed(2)}</span>
             </div>
         `;
 
@@ -94,7 +94,7 @@ async function renderHistory() {
                     </div>
                     <div class="history-card-items">${itemsSummary}</div>
                     <div class="history-card-bottom">
-                        <span class="history-card-total">₺${r.total} <span style="font-size:0.75rem; color:${ptColor}; margin-left:4px;">(${pt})</span></span>
+                        <span class="history-card-total">₺${r.total.toFixed(2)} <span style="font-size:0.75rem; color:${ptColor}; margin-left:4px;">(${pt})</span></span>
                         <div class="history-card-actions">
                             <button class="hc-btn" onclick="viewReceipt('${r.id}')">🧾 Görüntüle</button>
                             <button class="hc-btn delete" onclick="deleteReceipt('${r.id}')">🗑️ Sil</button>

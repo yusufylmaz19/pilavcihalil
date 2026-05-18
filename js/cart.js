@@ -2,6 +2,7 @@ let cart = [];
 
 function getPortionLabel(p) {
     if (p === 0.5) return '½';
+    if (p === 0.75) return '¾';
     if (p === 1) return '1';
     if (p === 1.5) return '1½';
     return p.toString();
@@ -9,13 +10,14 @@ function getPortionLabel(p) {
 
 function getPortionText(p) {
     if (p === 0.5) return 'Yarım';
+    if (p === 0.75) return '0.75';
     if (p === 1) return 'Tam';
     if (p === 1.5) return '1.5';
     return p.toString();
 }
 
 function calcItemPrice(item) {
-    return Math.round(item.basePrice * item.portion);
+    return item.basePrice * item.portion;
 }
 
 function setPaymentType(type) {
@@ -69,7 +71,7 @@ function renderCart() {
     const totalPrice = cart.reduce((s, c) => s + calcItemPrice(c) * c.qty, 0);
 
     countEl.textContent = totalItems;
-    totalEl.textContent = '₺' + totalPrice;
+    totalEl.textContent = '₺' + totalPrice.toFixed(2);
     saveBtn.disabled = cart.length === 0;
 
     // Reset ödeme alanı
@@ -90,14 +92,14 @@ function renderCart() {
         <div class="cart-item">
             <div class="cart-item-info">
                 <div class="cart-item-name">${c.emoji} ${c.name} ${portionBadge}</div>
-                <div class="cart-item-price">₺${c.basePrice} × ${getPortionLabel(c.portion)} = ₺${unitPrice}</div>
+                <div class="cart-item-price">₺${c.basePrice.toFixed(2)} × ${getPortionLabel(c.portion)} = ₺${unitPrice.toFixed(2)}</div>
             </div>
             <div class="qty-controls">
                 <button class="qty-btn minus" onclick="updateCartQty(${i}, -1)">−</button>
                 <span class="qty-val">${c.qty}</span>
                 <button class="qty-btn" onclick="updateCartQty(${i}, 1)">+</button>
             </div>
-            <div class="cart-item-total">₺${lineTotal}</div>
+            <div class="cart-item-total">₺${lineTotal.toFixed(2)}</div>
         </div>`;
     }).join('');
 }
@@ -194,7 +196,7 @@ function showReceipt(receipt) {
         ${receipt.items.map(it => `
             <div class="r-row">
                 <span>${it.name} x${it.qty}</span>
-                <span>₺${it.price * it.qty}</span>
+                <span>₺${(it.price * it.qty).toFixed(2)}</span>
             </div>
         `).join('')}
         <hr class="r-divider"/>

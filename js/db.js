@@ -68,11 +68,44 @@ async function removeReceipt(id) {
 
 async function getReceiptCount() {
     try {
-        const snap = await getFirestore().collection(RECEIPTS_COL).get();
-        return snap.size;
+        const snap = await getFirestore().collection(RECEIPTS_COL).count().get();
+        return snap.data().count;
     } catch (err) {
-        console.error('getReceiptCount hatası:', err);
-        if (typeof showToast === 'function') showToast('❌ Adisyon sayısı alınamadı: ' + (err.message || err), '');
+        console.warn('count() metodu basarisiz oldu, fallback kullaniliyor:', err);
+        try {
+            const snap = await getFirestore().collection(RECEIPTS_COL).get();
+            return snap.size;
+        } catch (e) {
+            console.error('getReceiptCount hatası:', e);
+            if (typeof showToast === 'function') showToast('❌ Adisyon sayısı alınamadı: ' + (e.message || e), '');
+            throw e;
+        }
+    }
+}
+
+async function getHistoryPaged(page = 1, pageSize = 10) {
+    try {
+        const totalCount = await getReceiptCount();
+        const limitCount = page * pageSize;
+        const snap = await getFirestore()
+            .collection(RECEIPTS_COL)
+            .orderBy('date', 'desc')
+            .limit(limitCount)
+            .get();
+        
+        const docs = snap.docs;
+        const startIdx = (page - 1) * pageSize;
+        const pageDocs = docs.slice(startIdx, startIdx + pageSize).map(d => d.data());
+        
+        return {
+            items: pageDocs,
+            totalCount: totalCount,
+            totalPages: Math.max(1, Math.ceil(totalCount / pageSize)),
+            currentPage: page
+        };
+    } catch (err) {
+        console.error('getHistoryPaged hatası:', err);
+        if (typeof showToast === 'function') showToast('❌ Adisyonlar yüklenemedi: ' + (err.message || err), '');
         throw err;
     }
 }

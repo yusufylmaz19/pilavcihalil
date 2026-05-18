@@ -1,114 +1,113 @@
 {
   "restaurant": {
+    "hero_image": "assets/hero.png",
+    "pdf_menu": "assets/Max_Pilav_Halil_Usta_Menu.pdf",
+    "slogan": "Sultanbeyli'nin Lezzet Durağı",
+    "name": "Max Pilav Halil Usta",
+    "hero_desc": "Taze malzemeler, özel soslar ve lezzet dolu porsiyon pilav çeşitleriyle hizmetinizdeyiz.",
     "hero_badge": "Sultanbeyli'nin En Lezzetli Pilav Durağı",
     "logo": "assets/logo.png",
-    "slogan": "Sultanbeyli'nin Lezzet Durağı",
-    "pdf_menu": "assets/Max_Pilav_Halil_Usta_Menu.pdf",
-    "hero_desc": "Taze malzemeler, özel soslar ve lezzet dolu porsiyon pilav çeşitleriyle hizmetinizdeyiz.",
-    "hero_image": "assets/hero.png",
-    "name": "Max Pilav Halil Usta",
     "instagram": "https://www.instagram.com/maxpilav_halilusta/"
   },
   "contact": {
-    "phones": [
-      {
-        "href": "tel:+905461591649",
-        "label": "Ana Hat (WhatsApp)",
-        "whatsapp": true,
-        "id": "phone-main",
-        "whatsapp_href": "https://wa.me/905461591649",
-        "number": "+90 546 159 16 49"
-      },
-      {
-        "number": "+90 534 498 29 27",
-        "whatsapp_href": "",
-        "id": "phone-2",
-        "href": "tel:+905344982927",
-        "whatsapp": false,
-        "label": "İkinci Hat"
-      }
-    ],
-    "address": {
-      "maps_embed": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3012.0543741!2d29.2803217!3d40.9377971!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cad11c63cb5e65%3A0xa208c42792774c6d!2sMax%20Pilav%20Halil%20Usta!5e0!3m2!1str!2str!4v1700000000000!5m2!1str!2str",
-      "maps_link": "https://www.google.com/maps/place/Max+Pilav+Halil+Usta/@40.9412824,29.2711242,14z/data=!4m6!3m5!1s0x14cad11c63cb5e65:0xa208c42792774c6d!8m2!3d40.9377971!4d29.2825466!16s%2Fg%2F11z55kjgr1?entry=ttu",
-      "text": "Necip Fazıl Mh. Milli İrade Cd, Cihan Cd. No4/B, 34920 Sultanbeyli / İstanbul"
-    },
     "hours": [
       {
+        "open": "11:30",
         "day": "Pazartesi – Cumartesi",
-        "close": "01:30",
-        "open": "11:30"
+        "close": "01:30"
       },
       {
+        "open": "11:30",
         "day": "Pazar",
-        "close": "00:00",
-        "open": "11:30"
+        "close": "00:00"
       }
     ],
     "email": {
       "address": "maxpilavhalilusta@gmail.com",
       "href": "mailto:maxpilavhalilusta@gmail.com"
+    },
+    "phones": [
+      {
+        "whatsapp_href": "https://wa.me/905461591649",
+        "label": "Ana Hat (WhatsApp)",
+        "href": "tel:+905461591649",
+        "id": "phone-main",
+        "number": "+90 546 159 16 49",
+        "whatsapp": true
+      },
+      {
+        "label": "İkinci Hat",
+        "whatsapp_href": "",
+        "href": "tel:+905344982927",
+        "whatsapp": false,
+        "number": "+90 534 498 29 27",
+        "id": "phone-2"
+      }
+    ],
+    "address": {
+      "maps_link": "https://www.google.com/maps/place/Max+Pilav+Halil+Usta/@40.9412824,29.2711242,14z/data=!4m6!3m5!1s0x14cad11c63cb5e65:0xa208c42792774c6d!8m2!3d40.9377971!4d29.2825466!16s%2Fg%2F11z55kjgr1?entry=ttu",
+      "maps_embed": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3012.0543741!2d29.2803217!3d40.9377971!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cad11c63cb5e65%3A0xa208c42792774c6d!2sMax%20Pilav%20Halil%20Usta!5e0!3m2!1str!2str!4v1700000000000!5m2!1str!2str",
+      "text": "Necip Fazıl Mh. Milli İrade Cd, Cihan Cd. No4/B, 34920 Sultanbeyli / İstanbul"
     }
   },
   "platforms": [
     {
-      "name": "Yemeksepeti",
-      "active": true,
+      "emoji": "🍽️",
+      "id": "platform-yemeksepeti",
       "cta": "Hemen sipariş ver →",
+      "name": "Yemeksepeti",
       "theme": "yemeksepeti",
       "href": "https://www.yemeksepeti.com/restaurant/ykr3/max-pilav-halil-usta",
-      "emoji": "🍽️",
-      "id": "platform-yemeksepeti"
-    },
-    {
-      "theme": "trendyol",
-      "href": "https://tgoyemek.com/restoranlar/442672",
-      "cta": "Hemen sipariş ver →",
-      "active": true,
-      "name": "Trendyol Go",
-      "emoji": "🟠",
-      "id": "platform-trendyol"
-    },
-    {
-      "emoji": "🟣",
-      "id": "platform-getir",
-      "href": "https://getir.com/yemek/restoran/max-pilav-halil-usta-orhangazi-mah-sultanbeyli-istanbul",
-      "theme": "getir",
-      "name": "Getir Yemek",
-      "cta": "Hemen sipariş ver →",
       "active": true
     },
     {
-      "name": "Telefonla Sipariş",
+      "emoji": "🟠",
+      "cta": "Hemen sipariş ver →",
+      "id": "platform-trendyol",
+      "name": "Trendyol Go",
+      "theme": "trendyol",
+      "href": "https://tgoyemek.com/restoranlar/442672",
+      "active": true
+    },
+    {
       "active": true,
-      "cta": "+90 546 159 16 49",
-      "theme": "tel",
+      "href": "https://getir.com/yemek/restoran/max-pilav-halil-usta-orhangazi-mah-sultanbeyli-istanbul",
+      "name": "Getir Yemek",
+      "theme": "getir",
+      "cta": "Hemen sipariş ver →",
+      "id": "platform-getir",
+      "emoji": "🟣"
+    },
+    {
+      "active": true,
       "href": "tel:+905461591649",
-      "emoji": "📞",
-      "id": "platform-tel"
+      "theme": "tel",
+      "name": "Telefonla Sipariş",
+      "cta": "+90 546 159 16 49",
+      "id": "platform-tel",
+      "emoji": "📞"
     }
   ],
   "combos": [
     {
-      "color": "fajita",
-      "group": "duz",
-      "name": "Fajita Menü",
       "id": "fajita-menu",
+      "group": "duz",
       "emoji": "🌯",
       "items": [
         {
-          "portion": 1,
-          "name": "Pilav Porsiyon"
+          "name": "Pilav Porsiyon",
+          "portion": 1
         },
         {
           "portion": 1,
           "name": "Fajita Tavuk"
         }
-      ]
+      ],
+      "name": "Fajita Menü",
+      "color": "fajita"
     },
     {
       "name": "Köri Kremalı Menü",
-      "group": "duz",
       "color": "kori-krema",
       "items": [
         {
@@ -116,37 +115,41 @@
           "name": "Pilav Porsiyon"
         },
         {
-          "portion": 1,
-          "name": "Köri Kremalı Tavuk"
+          "name": "Köri Kremalı Tavuk",
+          "portion": 1
         }
       ],
+      "emoji": "🥛",
       "id": "kori-kremali-menu",
-      "emoji": "🥛"
+      "group": "duz"
     },
     {
-      "name": "Köri Menü",
+      "id": "kori-menu",
       "group": "duz",
+      "emoji": "🍛",
       "color": "kori",
+      "name": "Köri Menü",
       "items": [
         {
-          "portion": 1,
-          "name": "Pilav Porsiyon"
+          "name": "Pilav Porsiyon",
+          "portion": 1
         },
         {
-          "portion": 1,
-          "name": "Köri Tavuk"
+          "name": "Köri Tavuk",
+          "portion": 1
         }
-      ],
-      "emoji": "🍛",
-      "id": "kori-menu"
+      ]
     },
     {
-      "id": "misirli-fajita",
       "emoji": "🌯",
+      "id": "misirli-fajita",
+      "group": "misirli",
+      "color": "fajita",
+      "name": "Mısırlı Fajita Menü",
       "items": [
         {
-          "portion": 1,
-          "name": "Pilav Porsiyon"
+          "name": "Pilav Porsiyon",
+          "portion": 1
         },
         {
           "portion": 1,
@@ -156,22 +159,17 @@
           "portion": 1,
           "name": "Mısır"
         }
-      ],
-      "group": "misirli",
-      "color": "fajita",
-      "name": "Mısırlı Fajita Menü"
+      ]
     },
     {
-      "emoji": "🍛",
-      "id": "misirli-kori",
       "items": [
         {
           "portion": 1,
           "name": "Pilav Porsiyon"
         },
         {
-          "portion": 1,
-          "name": "Köri Tavuk"
+          "name": "Köri Tavuk",
+          "portion": 1
         },
         {
           "portion": 1,
@@ -179,16 +177,16 @@
         }
       ],
       "color": "kori",
+      "name": "Mısırlı Köri Menü",
+      "id": "misirli-kori",
       "group": "misirli",
-      "name": "Mısırlı Köri Menü"
+      "emoji": "🍛"
     },
     {
-      "id": "misirli-kori-kremali",
-      "emoji": "🥛",
       "items": [
         {
-          "portion": 1,
-          "name": "Pilav Porsiyon"
+          "name": "Pilav Porsiyon",
+          "portion": 1
         },
         {
           "portion": 1,
@@ -199,47 +197,49 @@
           "name": "Mısır"
         }
       ],
-      "group": "misirli",
+      "name": "Mısırlı Köri Kremalı Menü",
       "color": "kori-krema",
-      "name": "Mısırlı Köri Kremalı Menü"
+      "emoji": "🥛",
+      "id": "misirli-kori-kremali",
+      "group": "misirli"
     },
     {
-      "name": "Mısırlı Pilav",
-      "color": "misir",
+      "emoji": "🌽",
       "group": "misirli",
+      "id": "misirli-pilav",
       "items": [
         {
           "portion": 1,
           "name": "Pilav Porsiyon"
+        },
+        {
+          "name": "Mısır",
+          "portion": 1
+        }
+      ],
+      "name": "Mısırlı Pilav",
+      "color": "misir"
+    },
+    {
+      "items": [
+        {
+          "name": "Pilav Porsiyon",
+          "portion": 1
+        },
+        {
+          "name": "Soslu Baharatlı Tavuk",
+          "portion": 1
         },
         {
           "portion": 1,
           "name": "Mısır"
         }
       ],
-      "id": "misirli-pilav",
-      "emoji": "🌽"
-    },
-    {
       "color": "soslu",
-      "group": "misirli",
       "name": "Mısırlı Soslu Menü",
-      "id": "misirli-soslu",
       "emoji": "🌶️",
-      "items": [
-        {
-          "portion": 1,
-          "name": "Pilav Porsiyon"
-        },
-        {
-          "portion": 1,
-          "name": "Soslu Baharatlı Tavuk"
-        },
-        {
-          "portion": 1,
-          "name": "Mısır"
-        }
-      ]
+      "id": "misirli-soslu",
+      "group": "misirli"
     },
     {
       "items": [
@@ -252,20 +252,20 @@
           "name": "Tiftik Tavuk"
         },
         {
-          "portion": 1,
-          "name": "Mısır"
+          "name": "Mısır",
+          "portion": 1
         }
       ],
-      "id": "misirli-tiftik-tavuk",
-      "emoji": "🍗",
-      "name": "Mısırlı Tiftik Tavuk Menü",
       "color": "white",
-      "group": "misirli"
+      "name": "Mısırlı Tiftik Tavuk Menü",
+      "id": "misirli-tiftik-tavuk",
+      "group": "misirli",
+      "emoji": "🍗"
     },
     {
-      "name": "Nohutlu Fajita Menü",
+      "emoji": "🌯",
       "group": "nohutlu",
-      "color": "fajita",
+      "id": "nohutlu-fajita",
       "items": [
         {
           "portion": 1,
@@ -276,60 +276,62 @@
           "name": "Fajita Tavuk"
         },
         {
-          "portion": 1,
-          "name": "Nohut"
+          "name": "Nohut",
+          "portion": 1
         }
       ],
-      "emoji": "🌯",
-      "id": "nohutlu-fajita"
+      "name": "Nohutlu Fajita Menü",
+      "color": "fajita"
     },
     {
       "id": "nohutlu-kori",
+      "group": "nohutlu",
       "emoji": "🍛",
+      "name": "Nohutlu Köri Menü",
+      "color": "kori",
       "items": [
         {
-          "portion": 1,
-          "name": "Pilav Porsiyon"
+          "name": "Pilav Porsiyon",
+          "portion": 1
         },
         {
-          "portion": 1,
-          "name": "Köri Tavuk"
+          "name": "Köri Tavuk",
+          "portion": 1
         },
         {
-          "portion": 1,
-          "name": "Nohut"
+          "name": "Nohut",
+          "portion": 1
         }
-      ],
-      "group": "nohutlu",
-      "color": "kori",
-      "name": "Nohutlu Köri Menü"
+      ]
     },
     {
+      "color": "kori-krema",
+      "name": "Nohutlu Köri Kremalı Menü",
       "items": [
         {
-          "portion": 1,
-          "name": "Pilav Porsiyon"
+          "name": "Pilav Porsiyon",
+          "portion": 1
         },
         {
-          "portion": 1,
-          "name": "Köri Kremalı Tavuk"
+          "name": "Köri Kremalı Tavuk",
+          "portion": 1
         },
         {
-          "portion": 1,
-          "name": "Nohut"
+          "name": "Nohut",
+          "portion": 1
         }
       ],
-      "id": "nohutlu-kori-kremali",
       "emoji": "🥛",
-      "name": "Nohutlu Köri Kremalı Menü",
-      "color": "kori-krema",
+      "id": "nohutlu-kori-kremali",
       "group": "nohutlu"
     },
     {
+      "name": "Nohutlu Pilav",
+      "color": "nohut",
       "items": [
         {
-          "portion": 1,
-          "name": "Pilav Porsiyon"
+          "name": "Pilav Porsiyon",
+          "portion": 1
         },
         {
           "portion": 1,
@@ -338,18 +340,15 @@
       ],
       "emoji": "🍛",
       "id": "nohutlu-pilav",
-      "name": "Nohutlu Pilav",
-      "group": "nohutlu",
-      "color": "nohut"
+      "group": "nohutlu"
     },
     {
       "name": "Nohutlu Soslu Menü",
       "color": "soslu",
-      "group": "nohutlu",
       "items": [
         {
-          "portion": 1,
-          "name": "Pilav Porsiyon"
+          "name": "Pilav Porsiyon",
+          "portion": 1
         },
         {
           "portion": 1,
@@ -360,13 +359,14 @@
           "name": "Nohut"
         }
       ],
-      "emoji": "🌶️",
-      "id": "nohutlu-soslu"
+      "id": "nohutlu-soslu",
+      "group": "nohutlu",
+      "emoji": "🌶️"
     },
     {
-      "name": "Nohutlu Tiftik Tavuk Menü",
+      "emoji": "🍗",
+      "id": "nohutlu-tiftik-tavuk",
       "group": "nohutlu",
-      "color": "white",
       "items": [
         {
           "portion": 1,
@@ -381,42 +381,42 @@
           "name": "Nohut"
         }
       ],
-      "emoji": "🍗",
-      "id": "nohutlu-tiftik-tavuk"
+      "name": "Nohutlu Tiftik Tavuk Menü",
+      "color": "white"
     },
     {
-      "items": [
-        {
-          "portion": 1,
-          "name": "Pilav Porsiyon"
-        },
-        {
-          "portion": 1,
-          "name": "Soslu Baharatlı Tavuk"
-        }
-      ],
       "emoji": "🌶️",
       "id": "soslu-menu",
+      "group": "duz",
       "name": "Soslu Baharatlı Menü",
       "color": "soslu",
-      "group": "duz"
-    },
-    {
-      "color": "white",
-      "group": "duz",
-      "name": "Tiftik Tavuk Menü",
-      "emoji": "🍗",
-      "id": "tiftik-tavuk-menu",
       "items": [
         {
-          "portion": 1,
-          "name": "Pilav Porsiyon"
+          "name": "Pilav Porsiyon",
+          "portion": 1
         },
         {
-          "portion": 1,
-          "name": "Tiftik Tavuk"
+          "name": "Soslu Baharatlı Tavuk",
+          "portion": 1
         }
       ]
+    },
+    {
+      "name": "Tiftik Tavuk Menü",
+      "color": "white",
+      "items": [
+        {
+          "name": "Pilav Porsiyon",
+          "portion": 1
+        },
+        {
+          "name": "Tiftik Tavuk",
+          "portion": 1
+        }
+      ],
+      "emoji": "🍗",
+      "group": "duz",
+      "id": "tiftik-tavuk-menu"
     }
   ],
   "menu": {
@@ -443,7 +443,7 @@
             "name": "Tiftik Tavuk",
             "emoji": "🍗",
             "desc": "Sade haşlama tavuk",
-            "price": 40,
+            "price": 60,
             "hasPortions": true,
             "color": "white"
           },
@@ -530,6 +530,14 @@
         "label": "🥤 İçecekler",
         "items": [
           {
+            "name": "Su",
+            "emoji": "💧",
+            "desc": "Doğal kaynak suyu",
+            "price": 10,
+            "hasPortions": false,
+            "color": "su"
+          },
+          {
             "name": "B.Ayran",
             "emoji": "🥛",
             "desc": "Büyük boy ayran",
@@ -600,14 +608,6 @@
             "price": 60,
             "hasPortions": false,
             "color": "cay"
-          },
-          {
-            "name": "Su",
-            "emoji": "💧",
-            "desc": "Doğal kaynak suyu",
-            "price": 20,
-            "hasPortions": false,
-            "color": "su"
           },
           {
             "name": "Çay",

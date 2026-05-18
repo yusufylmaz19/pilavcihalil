@@ -1243,7 +1243,8 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .quick-edit-popup .qe-row label {
   font-size:0.75rem; color:var(--text3); font-weight:600; min-width:50px;
 }
-.quick-edit-popup .qe-row input {
+.quick-edit-popup .qe-row input,
+.quick-edit-popup .qe-row select {
   flex:1;
   background:var(--bg3);
   border:1px solid var(--border2);
@@ -1254,7 +1255,12 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   font-size:0.8rem;
   outline:none;
 }
-.quick-edit-popup .qe-row input:focus { border-color:var(--orange); }
+.quick-edit-popup .qe-row select {
+  cursor: pointer;
+  color-scheme: dark;
+}
+.quick-edit-popup .qe-row input:focus,
+.quick-edit-popup .qe-row select:focus { border-color:var(--orange); }
 .quick-edit-popup .qe-btns {
   display:flex; gap:6px; justify-content:flex-end; margin-top:6px;
 }

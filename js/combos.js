@@ -136,7 +136,6 @@ function buildCombosPanel(categories) {
                 <div class="combo-contents">${itemNames.join(' + ')}</div>
                 <div class="item-portions">
                     <div class="ps-btn" data-p="0.5">Yarım</div>
-                    <div class="ps-btn" data-p="0.75">0.75</div>
                     <div class="ps-btn" data-p="1">Tam</div>
                     <div class="ps-btn" data-p="1.5">1.5</div>
                 </div>
@@ -319,7 +318,6 @@ function createComboItemRow(ci, index, categories) {
         </select>
         <select class="combo-portion-select" data-index="${index}">
             <option value="0.5" ${ci.portion === 0.5 ? 'selected' : ''}>Yarım</option>
-            <option value="0.75" ${ci.portion === 0.75 ? 'selected' : ''}>0.75</option>
             <option value="1" ${ci.portion === 1 ? 'selected' : ''}>Tam</option>
             <option value="1.5" ${ci.portion === 1.5 ? 'selected' : ''}>1.5</option>
         </select>

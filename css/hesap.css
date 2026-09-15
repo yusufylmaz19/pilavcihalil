@@ -1995,7 +1995,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   overflow: hidden;
 }
 .bill-payment-area .payment-input-wrap:focus-within {
-  border-color: var(--border2);
+  border-color: var(--orange);
   box-shadow: none;
 }
 .bill-payment-area .payment-input {

@@ -74,11 +74,7 @@ async function generateZReport() {
         return;
     }
 
-    const allReceipts = await getHistory();
-    const filtered = allReceipts.filter(r => {
-        const d = new Date(r.date);
-        return d >= range.start && d <= range.end;
-    });
+    const filtered = await getReceiptsByDateRange(range.start, range.end);
 
     const body = document.getElementById('zreport-body');
 

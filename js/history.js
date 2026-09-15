@@ -1,6 +1,6 @@
 let historyGrouping = 'day';
 let currentHistoryPage = 1;
-let historyPageSize = 100;
+let historyPageSize = 20;
 let totalHistoryPages = 1;
 
 async function toggleHistory() {
@@ -174,9 +174,9 @@ async function renderHistory(page = 1) {
 
 async function viewReceipt(id) {
     try {
-        const doc = await getFirestore().collection(RECEIPTS_COL).doc(id).get();
-        if (doc.exists) {
-            showReceipt(doc.data());
+        const receipt = await getReceiptById(id);
+        if (receipt) {
+            showReceipt(receipt);
         } else {
             showToast('❌ Adisyon bulunamadı', '');
         }

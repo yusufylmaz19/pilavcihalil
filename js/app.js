@@ -72,3 +72,32 @@ async function initApp() {
 }
 
 // initApp, auth.js tarafından giriş onaylandıktan sonra çağrılır.
+
+// Diğer bir cihazdan yapılan değişiklikleri gerektiğinde elle al.
+// Normal kullanım cache üzerinden ilerlediği için her sayfa yenilemede okuma yapılmaz.
+async function refreshAdminData() {
+  const btn = document.getElementById('btn-refresh-data');
+  if (btn) btn.disabled = true;
+  try {
+    _invalidate('settings');
+    _invalidate('products');
+    _invalidate('combos');
+    _invalidateHistory();
+
+    const [, , combos] = await Promise.all([
+      getSettings(),
+      getAllProducts(),
+      getAllCombos()
+    ]);
+    activeCombos = combos;
+    const merged = await getMergedCategories();
+    buildMenuPanel(merged);
+    buildCombosPanel(merged);
+    showToast('Firebase verileri yenilendi.', 'success');
+  } catch (err) {
+    console.error('Veri yenileme hatası:', err);
+    showToast('Veriler yenilenemedi.', '');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}

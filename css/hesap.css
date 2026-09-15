@@ -1982,7 +1982,36 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   background: var(--control-bg);
   border-color: var(--border2);
 }
-.payment-input { font-variant-numeric: tabular-nums; }
+.payment-input { font-variant-numeric: tabular-nums;  }
+.bill-payment-area .payment-received-row {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+.bill-payment-area .payment-input-wrap {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+.bill-payment-area .payment-input-wrap:focus-within {
+  border-color: var(--border2);
+  box-shadow: none;
+}
+.bill-payment-area .payment-input {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 0;
+  text-align: right;
+  appearance: textfield;
+}
+.bill-payment-area .payment-input:focus,
+.bill-payment-area .payment-input:focus-visible {
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+}
+.bill-payment-area .payment-currency { flex: 0 0 auto; }
 .change-row { background: var(--surface); border-color: var(--border2); }
 .btn-save { min-height: 50px; display: flex; justify-content: center; align-items: center; gap: 9px; border-radius: 8px; background: var(--orange); box-shadow: none; }
 .btn-save svg { width: 18px; height: 18px; }

@@ -97,11 +97,11 @@
                         </div>
                         <input type="hidden" id="payment-type" value="nakit" />
                     </div>
-                    <div class="payment-row">
+                    <div class="payment-row payment-received-row">
                         <label class="payment-label" for="paid-amount">Alınan</label>
                         <div class="payment-input-wrap">
                             <span class="payment-currency">₺</span>
-                            <input type="number" id="paid-amount" class="payment-input" placeholder="0" min="0" oninput="calcChange()" />
+                            <input type="number" id="paid-amount" class="payment-input" placeholder="0" min="0" step="0.01" inputmode="decimal" oninput="calcChange()" />
                         </div>
                     </div>
                     <div class="change-row" id="change-row">

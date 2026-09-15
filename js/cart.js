@@ -107,7 +107,7 @@ function renderCart() {
 function calcChange() {
     const totalPrice = cart.reduce((s, c) => s + calcItemPrice(c) * c.qty, 0);
     const paidInput = document.getElementById('paid-amount');
-    const paid = parseFloat(paidInput ? paidInput.value : 0) || 0;
+    const paid = Math.max(0, parseFloat(paidInput ? paidInput.value : 0) || 0);
     const change = paid - totalPrice;
     const changeEl = document.getElementById('change-val');
     const changeRow = document.getElementById('change-row');
@@ -136,7 +136,7 @@ async function saveReceipt() {
 
     const total = cart.reduce((s, c) => s + calcItemPrice(c) * c.qty, 0);
     const paidInput = document.getElementById('paid-amount');
-    const paid = parseFloat(paidInput.value) || 0;
+    const paid = Math.max(0, parseFloat(paidInput ? paidInput.value : 0) || 0);
     const change = paid > 0 ? paid - total : 0;
 
     const receiptItems = cart.map(c => ({

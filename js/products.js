@@ -144,6 +144,7 @@ function showQuickEdit(e, item) {
 
     popup.innerHTML = `
         <div class="qe-title">${item.emoji} ${item.name}</div>
+        <div class="qe-row"><label>Ürün Adı</label><input type="text" id="qe-name" value="${item.name}" maxlength="80" /></div>
         <div class="qe-row"><label>Fiyat</label><input type="number" id="qe-price" value="${item.price}" min="0" /></div>
         <div class="qe-row"><label>Porsiyon Seçeneği</label><input type="checkbox" id="qe-hasPortions" ${item.hasPortions ? 'checked' : ''} style="width: auto; transform: scale(1.3); margin-left: 10px;" /></div>
         <div class="qe-row"><label>Açıklama</label><input type="text" id="qe-desc" value="${item.desc || ''}" /></div>
@@ -174,25 +175,43 @@ function showQuickEdit(e, item) {
     document.body.appendChild(popup);
 
     document.getElementById('qe-save-btn').addEventListener('click', async () => {
+        const newName = document.getElementById('qe-name').value.trim();
         const newPrice = parseFloat(document.getElementById('qe-price').value) || 0;
         const newDesc = document.getElementById('qe-desc').value.trim();
         const newEmoji = document.getElementById('qe-emoji').value.trim() || item.emoji;
         const newHasPortions = document.getElementById('qe-hasPortions').checked;
         const newColor = document.getElementById('qe-color').value;
 
-        await saveProduct({
-            name: item.name,
+        if (!newName) {
+            showToast('❌ Ürün adı boş olamaz!', '');
+            return;
+        }
+        if (newName.includes('/')) {
+            showToast('❌ Ürün adında / karakteri kullanılamaz!', '');
+            return;
+        }
+        const products = await getAllProducts();
+        if (newName.toLocaleLowerCase('tr-TR') !== item.name.toLocaleLowerCase('tr-TR') && products.some(p => p.name.toLocaleLowerCase('tr-TR') === newName.toLocaleLowerCase('tr-TR'))) {
+            showToast('❌ Bu isimde bir ürün zaten var!', '');
+            return;
+        }
+
+        await renameProduct(item.name, {
+            name: newName,
             emoji: newEmoji,
             desc: newDesc,
             price: newPrice,
             category: item._catId || '',
-            isCustom: !!item._custom,
+            categoryLabel: item._catLabel || item.categoryLabel || '',
+            isCustom: !!(item.isCustom || item._custom),
             hasPortions: newHasPortions,
-            color: newColor
+            color: newColor,
+            order: item.order ?? 999
         });
 
         closeQuickEdit();
-        showToast(`✅ ${item.name} güncellendi!`, 'success');
+        if (typeof loadCombos === 'function') await loadCombos();
+        showToast(`✅ ${newName} güncellendi!`, 'success');
         await refreshMenu();
     });
 
@@ -294,6 +313,7 @@ async function toggleEditForm(name, catId) {
     const form = document.createElement('div');
     form.className = 'prod-edit-form show';
     form.innerHTML = `
+        <div class="prod-edit-row"><label>Ürün Adı</label><input type="text" id="pedit-name-${name.replace(/\s/g, '_')}" value="${currentItem.name}" maxlength="80" /></div>
         <div class="prod-edit-row"><label>Emoji</label><input type="text" id="pedit-emoji-${name.replace(/\s/g, '_')}" value="${emojiText}" /></div>
         <div class="prod-edit-row"><label>Porsiyon Seçeneği</label><input type="checkbox" id="pedit-hasPortions-${name.replace(/\s/g, '_')}" ${currentItem.hasPortions ? 'checked' : ''} style="width: auto; transform: scale(1.3); margin-left: 10px;" /></div>
         <div class="prod-edit-row"><label>Açıklama</label><input type="text" id="pedit-desc-${name.replace(/\s/g, '_')}" value="${descText}" /></div>
@@ -335,6 +355,7 @@ async function toggleEditForm(name, catId) {
 
 async function saveEditedProduct(name, catId) {
     const safeName = name.replace(/\s/g, '_');
+    const newName = document.getElementById('pedit-name-' + safeName)?.value.trim() || '';
     const emoji = document.getElementById('pedit-emoji-' + safeName)?.value.trim() || '🍽️';
     const desc = document.getElementById('pedit-desc-' + safeName)?.value.trim() || '';
     const price = parseFloat(document.getElementById('pedit-price-' + safeName)?.value) || 0;
@@ -342,13 +363,26 @@ async function saveEditedProduct(name, catId) {
     const hasPortions = document.getElementById('pedit-hasPortions-' + safeName)?.checked ?? false;
     const color = document.getElementById('pedit-color-' + safeName)?.value || '';
 
+    if (!newName) {
+        showToast('❌ Ürün adı boş olamaz!', '');
+        return;
+    }
+    if (newName.includes('/')) {
+        showToast('❌ Ürün adında / karakteri kullanılamaz!', '');
+        return;
+    }
+
     // Mevcut order değerini koru
     const allProds = await getAllProducts();
     const existing = allProds.find(p => p.name === name);
+    if (newName.toLocaleLowerCase('tr-TR') !== name.toLocaleLowerCase('tr-TR') && allProds.some(p => p.name.toLocaleLowerCase('tr-TR') === newName.toLocaleLowerCase('tr-TR'))) {
+        showToast('❌ Bu isimde bir ürün zaten var!', '');
+        return;
+    }
     const catLabel = defaultCategories.find(c => c.id === newCat)?.label || '⭐ Özel';
 
-    await saveProduct({
-        name,
+    await renameProduct(name, {
+        name: newName,
         emoji,
         desc,
         price,
@@ -360,7 +394,8 @@ async function saveEditedProduct(name, catId) {
         order: existing?.order ?? 999
     });
 
-    showToast(`✅ ${name} kaydedildi!`, 'success');
+    if (typeof loadCombos === 'function') await loadCombos();
+    showToast(`✅ ${newName} kaydedildi!`, 'success');
     await renderProductList();
     await refreshMenu();
 }

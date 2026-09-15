@@ -146,6 +146,44 @@ async function saveProduct(product) {
     }
 }
 
+// Ürün adı aynı zamanda belge kimliği olduğu için yeniden adlandırmayı atomik yap.
+// Ürünü kullanan kombolar da yeni ada geçirilir; geçmiş adisyonlara dokunulmaz.
+async function renameProduct(oldName, product) {
+    const newName = product.name.trim();
+    if (!oldName || oldName === newName) {
+        await saveProduct({ ...product, name: newName });
+        return;
+    }
+
+    try {
+        const db = getFirestore();
+        const oldRef = db.collection(PRODUCTS_COL).doc(oldName);
+        const newRef = db.collection(PRODUCTS_COL).doc(newName);
+        const newDoc = await newRef.get();
+        if (newDoc.exists) throw new Error('Bu isimde bir ürün zaten var.');
+
+        const comboSnap = await db.collection(COMBOS_COL).get();
+        const batch = db.batch();
+        batch.set(newRef, { ...product, name: newName });
+        batch.delete(oldRef);
+
+        comboSnap.docs.forEach(doc => {
+            const combo = doc.data();
+            if (!(combo.items || []).some(item => item.name === oldName)) return;
+            const items = combo.items.map(item => item.name === oldName ? { ...item, name: newName } : item);
+            batch.update(doc.ref, { items });
+        });
+
+        await batch.commit();
+        _invalidate('products');
+        _invalidate('combos');
+    } catch (err) {
+        console.error('renameProduct hatası:', err);
+        if (typeof showToast === 'function') showToast('❌ Ürün adı güncellenemedi: ' + (err.message || err), '');
+        throw err;
+    }
+}
+
 async function removeProduct(name) {
     try {
         await getFirestore().collection(PRODUCTS_COL).doc(name).delete();

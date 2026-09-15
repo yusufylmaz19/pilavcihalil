@@ -2048,3 +2048,65 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+/* Product identity: one surface, restrained color cues. */
+.item-btn[data-color] {
+  --item-accent: var(--orange2);
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  box-shadow: inset 0 3px 0 var(--item-accent);
+}
+.item-btn[data-color="white"] { --item-accent: #c5d0c9; }
+.item-btn[data-color="nohut"] { --item-accent: #b99143; }
+.item-btn[data-color="misir"] { --item-accent: #d5aa36; }
+.item-btn[data-color="kori"] { --item-accent: #c9783f; }
+.item-btn[data-color="kori-krema"] { --item-accent: #c8ad68; }
+.item-btn[data-color="fajita"] { --item-accent: #b85f4f; }
+.item-btn[data-color="soslu"] { --item-accent: #aa4e48; }
+.item-btn[data-color="kola"] { --item-accent: #846b59; }
+.item-btn[data-color="soda"] { --item-accent: #6094a8; }
+.item-btn[data-color="meyve"] { --item-accent: #c68146; }
+.item-btn[data-color="salgam"] { --item-accent: #916c9c; }
+.item-btn[data-color="su"] { --item-accent: #6f9db6; }
+.item-btn[data-color="cay"] { --item-accent: #9d6655; }
+
+.item-btn[data-color] .emoji {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 9px;
+  border: 1px solid color-mix(in srgb, var(--item-accent) 30%, transparent);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--item-accent) 12%, var(--surface));
+  font-size: 1.25rem;
+}
+.item-btn[data-color]:hover {
+  border-color: color-mix(in srgb, var(--item-accent) 55%, var(--border2));
+  background: color-mix(in srgb, var(--item-accent) 8%, var(--surface));
+  box-shadow: inset 0 3px 0 var(--item-accent), 0 10px 24px rgba(0, 0, 0, .14);
+  transform: translateY(-2px);
+}
+.item-btn[data-color]:active {
+  transform: scale(.98);
+  background: color-mix(in srgb, var(--item-accent) 12%, var(--surface));
+}
+.item-btn[data-color] .price { color: var(--orange2); }
+.item-btn[data-color] .ps-btn {
+  background: var(--control-bg);
+  border-color: var(--border2);
+  color: var(--text);
+}
+.item-btn[data-color] .ps-btn:hover {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: #fff;
+}
+.combo-contents {
+  color: var(--text2);
+  border-top-color: var(--border2);
+}
+.combo-cat-title {
+  color: var(--text2) !important;
+  border-bottom-color: var(--border2) !important;
+}

@@ -8,7 +8,8 @@
     <link rel="icon" type="image/png" href="assets/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script>document.documentElement.dataset.theme=localStorage.getItem('max-admin-theme')||'dark';</script>
     <link rel="stylesheet" href="css/hesap.css" />
 </head>
 <body>
@@ -45,15 +46,16 @@
         </div>
     </div>
     <div class="topbar-right">
-        <button class="topbar-btn" id="btn-zrapor" onclick="openZReport()">📊 Z Raporu</button>
-        <button class="topbar-btn" id="btn-combos" onclick="openComboManager()">⚡ Kombolar</button>
-        <button class="topbar-btn" id="btn-products" onclick="openProductManager()">🍱 Ürünler</button>
-        <button class="topbar-btn" id="btn-history" onclick="toggleHistory()">📋 Geçmiş</button>
-        <button class="topbar-btn" id="btn-settings" onclick="openSettings()">⚙️ Ayarlar</button>
-        <a class="topbar-btn" href="index.html">🏠 Ana Sayfa</a>
+        <button class="topbar-btn" id="btn-zrapor" onclick="openZReport()"><i data-lucide="chart-no-axes-combined"></i><span>Z Raporu</span></button>
+        <button class="topbar-btn" id="btn-combos" onclick="openComboManager()"><i data-lucide="layers-3"></i><span>Kombolar</span></button>
+        <button class="topbar-btn" id="btn-products" onclick="openProductManager()"><i data-lucide="package-open"></i><span>Ürünler</span></button>
+        <button class="topbar-btn" id="btn-history" onclick="toggleHistory()"><i data-lucide="history"></i><span>Geçmiş</span></button>
+        <button class="topbar-btn" id="btn-settings" onclick="openSettings()"><i data-lucide="settings-2"></i><span>Ayarlar</span></button>
+        <a class="topbar-btn" href="index.html"><i data-lucide="store"></i><span>Ana Sayfa</span></a>
+        <button class="topbar-btn theme-toggle" id="theme-toggle" type="button" aria-label="Açık temaya geç" title="Temayı değiştir"><i data-lucide="sun"></i></button>
         <div class="topbar-user">
             <span id="topbar-user-name"></span>
-            <button class="topbar-btn topbar-signout" onclick="openLogoutModal()">🚪 Çıkış</button>
+            <button class="topbar-btn topbar-signout" onclick="openLogoutModal()"><i data-lucide="log-out"></i><span>Çıkış</span></button>
         </div>
     </div>
 </header>
@@ -67,35 +69,35 @@
     <!-- RIGHT: STAGING + BILL -->
     <aside class="cart-panel">
         <!-- MAIN BILL (HESAP) -->
-        <div class="bill-section" style="display: flex; flex-direction: row; width: 100%;">
-            <div class="bill-items-area" style="flex: 1; display: flex; flex-direction: column; min-width: 0;">
+        <div class="bill-section">
+            <div class="bill-items-area">
                 <div class="cart-header">
-                    <h2>🧾 Hesap <span class="cart-count" id="cart-count">0</span></h2>
+                    <h2><i data-lucide="receipt-text"></i> Hesap <span class="cart-count" id="cart-count">0</span></h2>
                     <button class="cart-clear" id="btn-clear" onclick="clearCart()">Temizle</button>
                 </div>
                 <div class="cart-items" id="cart-items">
                     <div class="cart-empty" id="cart-empty">
-                        <div class="empty-icon">🛒</div>
+                        <div class="empty-icon"><i data-lucide="shopping-basket"></i></div>
                         Sipariş oluşturup hesaba ekleyin
                     </div>
                 </div>
             </div>
             
-            <div class="bill-payment-area" style="width: 280px; display: flex; flex-direction: column; border-left: 1px solid var(--border); background: var(--bg3);">
-                <div class="cart-footer" style="border-top: none; flex: 1; display: flex; flex-direction: column;">
+            <div class="bill-payment-area">
+                <div class="cart-footer">
                     <div class="cart-total-row">
                         <span class="cart-total-label">Toplam</span>
                         <span class="cart-total-val" id="cart-total">₺0</span>
                     </div>
                     <div class="payment-row" style="margin-bottom: 16px;">
                         <div class="payment-segmented" id="payment-segmented" style="width: 100%;">
-                            <div class="pay-seg-btn active" onclick="setPaymentType('nakit')">💵 Nakit</div>
-                            <div class="pay-seg-btn" onclick="setPaymentType('kart')">💳 Kart</div>
+                            <div class="pay-seg-btn active" onclick="setPaymentType('nakit')"><i data-lucide="banknote"></i> Nakit</div>
+                            <div class="pay-seg-btn" onclick="setPaymentType('kart')"><i data-lucide="credit-card"></i> Kart</div>
                         </div>
                         <input type="hidden" id="payment-type" value="nakit" />
                     </div>
                     <div class="payment-row">
-                        <label class="payment-label" for="paid-amount">💵 Alınan</label>
+                        <label class="payment-label" for="paid-amount">Alınan</label>
                         <div class="payment-input-wrap">
                             <span class="payment-currency">₺</span>
                             <input type="number" id="paid-amount" class="payment-input" placeholder="0" min="0" oninput="calcChange()" />
@@ -105,8 +107,8 @@
                         <span class="change-label">Para Üstü</span>
                         <span class="change-val" id="change-val">₺0</span>
                     </div>
-                    <button class="btn-save" id="btn-save" disabled onclick="saveReceipt()" style="margin-top: auto;">
-                        💾 Hesabı Kaydet &amp; Yazdır
+                    <button class="btn-save" id="btn-save" disabled onclick="saveReceipt()">
+                        <i data-lucide="printer-check"></i> Hesabı Kaydet &amp; Yazdır
                     </button>
                 </div>
             </div>
@@ -368,6 +370,8 @@
 </div>
 <!-- /app-content -->
 
+<script src="js/vendor/lucide.min.js"></script>
+<script src="js/hesap-theme.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>

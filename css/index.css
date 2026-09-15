@@ -12,3 +12,8 @@
 .social-dock .whatsapp:hover{background:#205d46}
 .social-dock svg{width:21px;height:21px}
 @media(max-width:760px){.social-dock{right:14px;bottom:14px}.social-dock a{width:42px;height:42px}}
+/* Show the poster only when WebGL is unavailable; this prevents a flash on refresh. */
+.food-scene canvas{opacity:1;transition:none}
+.scene-fallback{visibility:hidden;opacity:0}
+.webgl-failed canvas{visibility:hidden}
+.webgl-failed .scene-fallback{visibility:visible;opacity:1}

@@ -1667,10 +1667,20 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   padding: 14px 22px;
   border-top: 1px solid var(--border);
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   justify-content: flex-end;
   flex-shrink: 0;
 }
+
+.settings-refresh-btn {
+  margin-right: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-muted);
+}
+.settings-refresh-btn svg { width: 15px; height: 15px; }
 
 .settings-section {
   margin-bottom: 24px;

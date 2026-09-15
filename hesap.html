@@ -51,8 +51,6 @@
         <button class="topbar-btn" id="btn-products" onclick="openProductManager()"><i data-lucide="package-open"></i><span>Ürünler</span></button>
         <button class="topbar-btn" id="btn-history" onclick="toggleHistory()"><i data-lucide="history"></i><span>Geçmiş</span></button>
         <button class="topbar-btn" id="btn-settings" onclick="openSettings()"><i data-lucide="settings-2"></i><span>Ayarlar</span></button>
-        <a class="topbar-btn" href="index.html"><i data-lucide="store"></i><span>Ana Sayfa</span></a>
-        <button class="topbar-btn" id="btn-refresh-data" onclick="refreshAdminData()" title="Firebase verilerini yenile"><i data-lucide="refresh-cw"></i><span>Veriyi Yenile</span></button>
         <button class="topbar-btn theme-toggle" id="theme-toggle" type="button" aria-label="Açık temaya geç" title="Temayı değiştir"><i data-lucide="sun"></i></button>
         <div class="topbar-user">
             <span id="topbar-user-name"></span>
@@ -344,6 +342,7 @@
     </div>
     <div class="modal-body" id="settings-body"></div>
     <div class="modal-footer">
+      <button class="btn-cancel-prod settings-refresh-btn" id="btn-refresh-data" onclick="refreshAdminData()" title="Firebase verilerini yeniden yükler ve okuma yapar"><i data-lucide="refresh-cw"></i><span>Veriyi Yenile</span></button>
       <button class="btn-cancel-prod" onclick="closeSettings()">İptal</button>
       <button class="btn-cancel-prod" id="export-json-btn" onclick="exportDataJson()">📥 data.json İndir</button>
       <button class="btn-save-prod" id="settings-save-btn" onclick="saveSettingsForm()">💾 Kaydet</button>

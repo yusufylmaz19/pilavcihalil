@@ -2,13 +2,38 @@ let menuData = null;
 let defaultCategories = [];
 let managedCategories = [];
 
-function applyCategories(settings) {
+function categoryNameKey(label) {
+    return String(label || '').replace(/^[^\p{L}\p{N}]+/u, '').trim().toLocaleLowerCase('tr-TR');
+}
+
+function applyCategories(settings, products = []) {
     const saved = settings?.categories;
-    managedCategories = Array.isArray(saved) ? saved.map(c => ({ ...c })) : [...defaultCategories.map(c => ({ id: c.id, label: c.label, visible: true })), { id: 'ozel', label: '⭐ Özel', visible: true }];
+    const source = Array.isArray(saved) ? saved : [...defaultCategories, { id: 'ozel', label: '⭐ Özel' }];
+    const result = [];
+    const knownIds = new Set();
+    const add = raw => {
+        if (!raw?.id || knownIds.has(raw.id)) return;
+        const key = categoryNameKey(raw.label);
+        const existing = result.find(c => categoryNameKey(c.label) === key);
+        const ids = [raw.id, ...(raw.aliases || [])].filter(Boolean);
+        ids.forEach(id => knownIds.add(id));
+        if (existing) {
+            existing.aliases = [...new Set([...(existing.aliases || []), ...ids.filter(id => id !== existing.id)])];
+        } else {
+            result.push({ id: raw.id, label: raw.label || raw.id, visible: raw.visible !== false, aliases: ids.filter(id => id !== raw.id) });
+        }
+    };
+    source.forEach(add);
+    products.forEach(p => {
+        const id = p.category || 'ozel';
+        if (!knownIds.has(id)) add({ id, label: p.categoryLabel || defaultCategories.find(c => c.id === id)?.label || id });
+    });
+    managedCategories = result;
 }
 
 async function loadCategories() {
-    applyCategories(await getSettings());
+    const [settings, products] = await Promise.all([getSettings(), getAllProducts()]);
+    applyCategories(settings, products);
 }
 
 function categoryOptions(selected) {
@@ -33,7 +58,8 @@ async function getMergedCategories(includeHidden = false) {
     });
 
     products.forEach(p => {
-        const catId = p.category || 'ozel';
+        const originalId = p.category || 'ozel';
+        const catId = managedCategories.find(c => c.id === originalId || c.aliases?.includes(originalId))?.id || originalId;
         if (!catMap[catId]) {
             catMap[catId] = { id: catId, label: p.categoryLabel || '⭐ Özel', items: [] };
             catOrder.push(catId);
@@ -612,7 +638,7 @@ async function addCategory(event) {
     const input = event.currentTarget.elements.label;
     const label = input.value.trim();
     if (!label) return;
-    if (managedCategories.some(c => c.label.toLocaleLowerCase('tr-TR') === label.toLocaleLowerCase('tr-TR'))) {
+    if (managedCategories.some(c => categoryNameKey(c.label) === categoryNameKey(label))) {
         showToast('Bu kategori adı zaten var.', ''); return;
     }
     const id = 'kategori-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
@@ -623,7 +649,7 @@ async function addCategory(event) {
 
 async function updateCategory(id, rawLabel) {
     const label = rawLabel.trim();
-    if (!label || managedCategories.some(c => c.id !== id && c.label.toLocaleLowerCase('tr-TR') === label.toLocaleLowerCase('tr-TR'))) {
+    if (!label || managedCategories.some(c => c.id !== id && categoryNameKey(c.label) === categoryNameKey(label))) {
         showToast('Geçerli ve benzersiz bir kategori adı girin.', ''); return;
     }
     await persistCategories(managedCategories.map(c => c.id === id ? { ...c, label } : c));
@@ -636,10 +662,10 @@ async function toggleCategoryVisibility(id) {
 
 async function deleteCategory(id) {
     const products = await getAllProducts();
-    if (products.some(p => p.category === id)) {
+    const cat = managedCategories.find(c => c.id === id);
+    if (products.some(p => p.category === id || cat?.aliases?.includes(p.category))) {
         showToast('Önce bu kategorideki ürünleri başka kategoriye taşıyın.', ''); return;
     }
-    const cat = managedCategories.find(c => c.id === id);
     if (!cat || !confirm(`"${cat.label}" kategorisini silmek istiyor musunuz?`)) return;
     await persistCategories(managedCategories.filter(c => c.id !== id));
     showToast('Kategori silindi.', 'success');

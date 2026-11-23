@@ -17,7 +17,8 @@ async function exportDataJson() {
         // Ürünleri kategoriye göre grupla, sadece gerekli alanları tut
         const grouped = {};
         (products || []).forEach(p => {
-            const cat = p.category || 'diger';
+            const original = p.category || 'diger';
+            const cat = managedCategories.find(c => c.id === original || c.aliases?.includes(original))?.id || original;
             if (!grouped[cat]) grouped[cat] = [];
             grouped[cat].push({
                 name:        p.name,

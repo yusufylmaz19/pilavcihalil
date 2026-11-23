@@ -91,7 +91,7 @@ async function refreshAdminData() {
       getAllCombos()
     ]);
     activeCombos = combos;
-    applyCategories(settings);
+    applyCategories(settings, await getAllProducts());
     const merged = await getMergedCategories();
     buildMenuPanel(merged);
     buildCombosPanel(merged);

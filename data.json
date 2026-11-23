@@ -1,33 +1,37 @@
 {
   "restaurant": {
-    "instagram": "https://www.instagram.com/maxpilav_halilusta/",
-    "name": "Max Pilav Halil Usta",
-    "logo": "assets/mark.svg",
     "hero_desc": "Taze malzemeler, özel soslar ve lezzet dolu porsiyon pilav çeşitleriyle hizmetinizdeyiz.",
-    "hero_badge": "Sultanbeyli'nin En Lezzetli Pilav Durağı",
-    "slogan": "Sultanbeyli'nin Lezzet Durağı",
+    "name": "Max Pilav Halil Usta",
     "hero_image": "assets/hero.png",
-    "pdf_menu": "assets/Max_Pilav_Halil_Usta_Menu.pdf"
+    "instagram": "https://www.instagram.com/maxpilav_halilusta/",
+    "pdf_menu": "assets/Max_Pilav_Halil_Usta_Menu.pdf",
+    "logo": "assets/logo.png",
+    "slogan": "Sultanbeyli'nin Lezzet Durağı",
+    "hero_badge": "Sultanbeyli'nin En Lezzetli Pilav Durağı"
   },
   "contact": {
     "phones": [
       {
         "id": "phone-main",
-        "whatsapp_href": "https://wa.me/905461591649",
         "number": "+90 546 159 16 49",
+        "whatsapp": true,
+        "whatsapp_href": "https://wa.me/905461591649",
         "href": "tel:+905461591649",
-        "label": "Ana Hat (WhatsApp)",
-        "whatsapp": true
+        "label": "Ana Hat (WhatsApp)"
       },
       {
         "label": "İkinci Hat",
+        "id": "phone-2",
         "number": "+90 534 498 29 27",
         "whatsapp": false,
-        "id": "phone-2",
         "whatsapp_href": "",
         "href": "tel:+905344982927"
       }
     ],
+    "email": {
+      "href": "mailto:maxpilavhalilusta@gmail.com",
+      "address": "maxpilavhalilusta@gmail.com"
+    },
     "hours": [
       {
         "day": "Pazartesi – Cumartesi",
@@ -35,63 +39,61 @@
         "open": "11:30"
       },
       {
+        "day": "Pazar",
         "open": "11:30",
-        "close": "00:00",
-        "day": "Pazar"
+        "close": "00:00"
       }
     ],
     "address": {
-      "maps_link": "https://www.google.com/maps/place/Max+Pilav+Halil+Usta/@40.9412824,29.2711242,14z/data=!4m6!3m5!1s0x14cad11c63cb5e65:0xa208c42792774c6d!8m2!3d40.9377971!4d29.2825466!16s%2Fg%2F11z55kjgr1?entry=ttu",
       "maps_embed": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3012.0543741!2d29.2803217!3d40.9377971!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cad11c63cb5e65%3A0xa208c42792774c6d!2sMax%20Pilav%20Halil%20Usta!5e0!3m2!1str!2str!4v1700000000000!5m2!1str!2str",
+      "maps_link": "https://www.google.com/maps/place/Max+Pilav+Halil+Usta/@40.9412824,29.2711242,14z/data=!4m6!3m5!1s0x14cad11c63cb5e65:0xa208c42792774c6d!8m2!3d40.9377971!4d29.2825466!16s%2Fg%2F11z55kjgr1?entry=ttu",
       "text": "Necip Fazıl Mh. Milli İrade Cd, Cihan Cd. No4/B, 34920 Sultanbeyli / İstanbul"
-    },
-    "email": {
-      "href": "mailto:maxpilavhalilusta@gmail.com",
-      "address": "maxpilavhalilusta@gmail.com"
     }
   },
   "platforms": [
     {
-      "id": "platform-yemeksepeti",
-      "cta": "Hemen sipariş ver →",
-      "theme": "yemeksepeti",
       "href": "https://www.yemeksepeti.com/restaurant/ykr3/max-pilav-halil-usta",
-      "emoji": "🍽️",
+      "theme": "yemeksepeti",
+      "cta": "Hemen sipariş ver →",
       "name": "Yemeksepeti",
-      "active": true
+      "id": "platform-yemeksepeti",
+      "active": false,
+      "emoji": "🍽️"
     },
     {
-      "active": true,
-      "cta": "Hemen sipariş ver →",
       "name": "Trendyol Go",
       "href": "https://tgoyemek.com/restoranlar/442672",
-      "theme": "trendyol",
+      "id": "platform-trendyol",
       "emoji": "🟠",
-      "id": "platform-trendyol"
-    },
-    {
-      "name": "Getir Yemek",
-      "href": "https://getir.com/yemek/restoran/max-pilav-halil-usta-orhangazi-mah-sultanbeyli-istanbul",
       "cta": "Hemen sipariş ver →",
       "active": true,
-      "emoji": "🟣",
-      "id": "platform-getir",
-      "theme": "getir"
+      "theme": "trendyol"
     },
     {
+      "theme": "getir",
+      "cta": "Hemen sipariş ver →",
+      "active": false,
+      "id": "platform-getir",
+      "emoji": "🟣",
+      "href": "https://getir.com/yemek/restoran/max-pilav-halil-usta-orhangazi-mah-sultanbeyli-istanbul",
+      "name": "Getir Yemek"
+    },
+    {
+      "name": "Telefonla Sipariş",
       "id": "platform-tel",
-      "cta": "+90 546 159 16 49",
-      "active": true,
       "href": "tel:+905461591649",
-      "theme": "tel",
       "emoji": "📞",
-      "name": "Telefonla Sipariş"
+      "active": true,
+      "cta": "+90 546 159 16 49",
+      "theme": "tel"
     }
   ],
   "combos": [
     {
       "color": "fajita",
+      "group": "duz",
       "emoji": "🌯",
+      "id": "fajita-menu",
       "items": [
         {
           "portion": 1,
@@ -102,14 +104,13 @@
           "portion": 1
         }
       ],
-      "group": "duz",
-      "id": "fajita-menu",
       "name": "Fajita Menü"
     },
     {
-      "name": "Köri Kremalı Menü",
-      "emoji": "🥛",
       "color": "kori-krema",
+      "emoji": "🥛",
+      "group": "duz",
+      "name": "Köri Kremalı Menü",
       "items": [
         {
           "portion": 1,
@@ -120,76 +121,75 @@
           "name": "Köri Kremalı Tavuk"
         }
       ],
-      "id": "kori-kremali-menu",
-      "group": "duz"
+      "id": "kori-kremali-menu"
     },
     {
-      "name": "Köri Menü",
-      "items": [
-        {
-          "name": "Pilav Porsiyon",
-          "portion": 1
-        },
-        {
-          "portion": 1,
-          "name": "Köri Tavuk"
-        }
-      ],
-      "color": "kori",
-      "emoji": "🍛",
-      "id": "kori-menu",
-      "group": "duz"
-    },
-    {
-      "id": "pilav-ustu-kuru-1786961830771",
       "group": "duz",
-      "name": "Pilav Üstü Kuru",
-      "color": "nohut",
-      "emoji": "🥫",
+      "emoji": "🍛",
+      "color": "kori",
+      "id": "kori-menu",
+      "name": "Köri Menü",
       "items": [
         {
           "portion": 1,
           "name": "Pilav Porsiyon"
         },
         {
-          "portion": 0.5,
-          "name": "Kuru Fasulye"
+          "name": "Köri Tavuk",
+          "portion": 1
         }
       ]
     },
     {
-      "emoji": "🌶️",
-      "color": "soslu",
+      "color": "misir",
+      "emoji": "🥫",
+      "group": "duz",
+      "id": "pilav-ustu-kuru-1791885668663",
+      "name": "pilav üstü kuru",
       "items": [
         {
-          "name": "Pilav Porsiyon",
-          "portion": 1
+          "portion": 1,
+          "name": "Pilav Porsiyon"
+        },
+        {
+          "name": "Kuru fasulye",
+          "portion": 0.5
+        }
+      ]
+    },
+    {
+      "group": "duz",
+      "emoji": "🌶️",
+      "color": "soslu",
+      "id": "soslu-menu",
+      "name": "Soslu Baharatlı Menü",
+      "items": [
+        {
+          "portion": 1,
+          "name": "Pilav Porsiyon"
         },
         {
           "name": "Soslu Baharatlı Tavuk",
           "portion": 1
         }
-      ],
-      "id": "soslu-menu",
-      "group": "duz",
-      "name": "Soslu Baharatlı Menü"
+      ]
     },
     {
+      "name": "Tiftik Tavuk Menü",
       "emoji": "🍗",
+      "group": "duz",
       "color": "white",
-      "id": "tiftik-tavuk-menu",
       "items": [
         {
           "name": "Pilav Porsiyon",
           "portion": 1
         },
         {
-          "portion": 1,
-          "name": "Tiftik Tavuk"
+          "name": "Tiftik Tavuk",
+          "portion": 1
         }
       ],
-      "group": "duz",
-      "name": "Tiftik Tavuk Menü"
+      "id": "tiftik-tavuk-menu"
     }
   ],
   "menu": {
@@ -197,6 +197,7 @@
       {
         "id": "pilavlar",
         "label": "🍛 Pilavlar",
+        "visible": true,
         "items": [
           {
             "name": "Pilav Porsiyon",
@@ -211,15 +212,8 @@
       {
         "id": "tavuklar",
         "label": "🍗 Tavuklar",
+        "visible": true,
         "items": [
-          {
-            "name": "Kuru Fasulye",
-            "emoji": "🥫",
-            "desc": "Kuru Porsiyon",
-            "price": 60,
-            "hasPortions": true,
-            "color": "nohut"
-          },
           {
             "name": "Köri Tavuk",
             "emoji": "🍛",
@@ -259,12 +253,21 @@
             "price": 70,
             "hasPortions": true,
             "color": "white"
+          },
+          {
+            "name": "Kuru fasulye",
+            "emoji": "🥫",
+            "desc": "",
+            "price": 100,
+            "hasPortions": true,
+            "color": "misir"
           }
         ]
       },
       {
         "id": "corbalar",
         "label": "🍲 Çorbalar",
+        "visible": true,
         "items": [
           {
             "name": "Mercimek Çorbası",
@@ -287,6 +290,7 @@
       {
         "id": "icecekler",
         "label": "🥤 İçecekler",
+        "visible": true,
         "items": [
           {
             "name": "K.Ayran",
@@ -295,14 +299,6 @@
             "price": 30,
             "hasPortions": false,
             "color": "white"
-          },
-          {
-            "name": "Su",
-            "emoji": "💧",
-            "desc": "Doğal kaynak suyu",
-            "price": 15,
-            "hasPortions": false,
-            "color": "su"
           },
           {
             "name": "B.Ayran",
@@ -316,7 +312,7 @@
             "name": "Kola",
             "emoji": "🥤",
             "desc": "Soğuk içecek",
-            "price": 60,
+            "price": 80,
             "hasPortions": false,
             "color": "kola"
           },
@@ -340,7 +336,7 @@
             "name": "Meyve Suyu Kutu",
             "emoji": "🧃",
             "desc": "Büyük boy",
-            "price": 60,
+            "price": 80,
             "hasPortions": false,
             "color": "meyve"
           },
@@ -348,7 +344,7 @@
             "name": "Soğuk Çay (Didi)",
             "emoji": "🍵",
             "desc": "Serinletici",
-            "price": 60,
+            "price": 80,
             "hasPortions": false,
             "color": "cay"
           },
@@ -359,6 +355,52 @@
             "price": 15,
             "hasPortions": false,
             "color": "cay"
+          },
+          {
+            "name": "Su",
+            "emoji": "💧",
+            "desc": "Doğal kaynak suyu",
+            "price": 20,
+            "hasPortions": false,
+            "color": "su"
+          },
+          {
+            "name": "şalgam",
+            "emoji": "🌶",
+            "desc": "içecek",
+            "price": 40,
+            "hasPortions": false,
+            "color": "salgam"
+          }
+        ]
+      },
+      {
+        "id": "kategori-mwt2t8q4-jc0b",
+        "label": "🍚 Ekonomik Pilavlar",
+        "visible": true,
+        "items": [
+          {
+            "name": "Test",
+            "emoji": "🍽️",
+            "desc": "Test",
+            "price": 100,
+            "hasPortions": true,
+            "color": "white"
+          }
+        ]
+      },
+      {
+        "id": "ozel",
+        "label": "⭐ Özel",
+        "visible": true,
+        "items": [
+          {
+            "name": "kurye servis ücreti",
+            "emoji": "🏍",
+            "desc": "paket ücreti",
+            "price": 100,
+            "hasPortions": false,
+            "color": "misir"
           }
         ]
       }

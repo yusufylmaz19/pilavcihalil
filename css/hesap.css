@@ -1104,6 +1104,16 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 .prod-body::-webkit-scrollbar { width:5px; }
 .prod-body::-webkit-scrollbar-thumb { background:var(--surface2); border-radius:9px; }
+.category-manager-head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.category-manager-head h3 { margin:0; }
+.category-manager p { color:var(--text2); font-size:.82rem; }
+.category-row, .category-add-form { display:flex; align-items:center; gap:7px; margin:8px 0; flex-wrap:wrap; }
+.category-row input, .category-add-form input { flex:1 1 200px; min-width:0; padding:10px; color:var(--text); background:var(--bg3); border:1px solid var(--border2); border-radius:8px; }
+.category-row button { color:var(--text); background:var(--surface); border:1px solid var(--border2); border-radius:8px; padding:9px; cursor:pointer; }
+.category-row button:disabled { opacity:.4; cursor:default; }
+.category-row.dragging { opacity:.65; border:1px dashed var(--orange); border-radius:8px; }
+.category-row .category-drag-handle { cursor:grab; touch-action:none; user-select:none; font-size:1.3rem; line-height:1; min-width:36px; }
+.category-row .category-drag-handle:active { cursor:grabbing; }
 
 .prod-cat-title {
   font-size:0.8rem; font-weight:600; color:var(--orange2);

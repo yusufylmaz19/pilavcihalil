@@ -48,6 +48,7 @@ async function initApp() {
 
     // Firestore'da ayar yoksa varsayılan değerlerle doldur
     await seedSettings();
+    await loadCategories();
 
     // Firestore'da ürün yoksa data.json'dan yükle
     await seedProducts();
@@ -84,12 +85,13 @@ async function refreshAdminData() {
     _invalidate('combos');
     _invalidateHistory();
 
-    const [, , combos] = await Promise.all([
+    const [settings, , combos] = await Promise.all([
       getSettings(),
       getAllProducts(),
       getAllCombos()
     ]);
     activeCombos = combos;
+    applyCategories(settings);
     const merged = await getMergedCategories();
     buildMenuPanel(merged);
     buildCombosPanel(merged);

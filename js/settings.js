@@ -14,16 +14,6 @@ async function exportDataJson() {
             getAllCombos()
         ]);
 
-        // Kategori id → label eşlemesi
-        const CAT_LABELS = {
-            'pilavlar':    '🍛 Pilavlar',
-            'tavuklar':    '🍗 Tavuklar',
-            'yan-urunler': '🍟 Ekstralar',
-            'corbalar':    '🍲 Çorbalar',
-            'icecekler':   '🥤 İçecekler'
-        };
-        const CAT_ORDER = Object.keys(CAT_LABELS);
-
         // Ürünleri kategoriye göre grupla, sadece gerekli alanları tut
         const grouped = {};
         (products || []).forEach(p => {
@@ -40,18 +30,13 @@ async function exportDataJson() {
         });
 
         // Sıralı kategori dizisi oluştur
-        const categories = CAT_ORDER
-            .filter(id => grouped[id] && grouped[id].length > 0)
-            .map(id => ({
-                id,
-                label: CAT_LABELS[id],
-                items: grouped[id]
-            }));
+        const categories = managedCategories
+            .map(c => ({ id: c.id, label: c.label, visible: c.visible !== false, items: grouped[c.id] || [] }));
 
         // Kategorisi tanımsız ürünler varsa sona ekle
         Object.keys(grouped).forEach(id => {
-            if (!CAT_ORDER.includes(id)) {
-                categories.push({ id, label: id, items: grouped[id] });
+            if (!managedCategories.some(c => c.id === id)) {
+                categories.push({ id, label: products.find(p => p.category === id)?.categoryLabel || id, visible: true, items: grouped[id] });
             }
         });
 

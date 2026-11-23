@@ -1,15 +1,33 @@
 let menuData = null;
 let defaultCategories = [];
+let managedCategories = [];
+
+function applyCategories(settings) {
+    const saved = settings?.categories;
+    managedCategories = Array.isArray(saved) ? saved.map(c => ({ ...c })) : [...defaultCategories.map(c => ({ id: c.id, label: c.label, visible: true })), { id: 'ozel', label: '⭐ Özel', visible: true }];
+}
+
+async function loadCategories() {
+    applyCategories(await getSettings());
+}
+
+function categoryOptions(selected) {
+    return managedCategories.map(c => `<option value="${escapeCategoryHtml(c.id)}" ${c.id === selected ? 'selected' : ''}>${escapeCategoryHtml(c.label)}</option>`).join('');
+}
+
+function escapeCategoryHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[ch]);
+}
 
 // Tüm ürünleri Firestore'dan çek, kategori sırasını defaultCategories'e göre koru
-async function getMergedCategories() {
+async function getMergedCategories(includeHidden = false) {
     const products = await getAllProducts();
 
     const catMap = {};
     const catOrder = [];
 
     // Kategori sırasını data.json'dan al
-    defaultCategories.forEach(cat => {
+    managedCategories.forEach(cat => {
         catMap[cat.id] = { id: cat.id, label: cat.label, items: [] };
         catOrder.push(cat.id);
     });
@@ -29,7 +47,7 @@ async function getMergedCategories() {
     });
 
     return catOrder
-        .filter(id => catMap[id] && catMap[id].items.length > 0)
+        .filter(id => catMap[id] && catMap[id].items.length > 0 && (includeHidden || managedCategories.find(c => c.id === id)?.visible !== false))
         .map(id => catMap[id]);
 }
 
@@ -256,7 +274,7 @@ function closeProdOutside(e) {
 
 async function renderProductList() {
     const body = document.getElementById('prod-body');
-    const categories = await getMergedCategories();
+    const categories = await getMergedCategories(true);
 
     let html = '';
     categories.forEach(cat => {
@@ -338,8 +356,7 @@ async function toggleEditForm(name, catId) {
         </div>
         <div class="prod-edit-row"><label>Kategori</label>
             <select id="pedit-cat-${name.replace(/\s/g, '_')}">
-                ${defaultCategories.map(c => `<option value="${c.id}" ${c.id === (currentItem.category || catId) ? 'selected' : ''}>${c.label}</option>`).join('')}
-                <option value="ozel" ${(currentItem.category || catId) === 'ozel' ? 'selected' : ''}>⭐ Özel</option>
+                ${categoryOptions(currentItem.category || catId)}
             </select>
         </div>
         <div class="prod-edit-btns">
@@ -379,7 +396,7 @@ async function saveEditedProduct(name, catId) {
         showToast('❌ Bu isimde bir ürün zaten var!', '');
         return;
     }
-    const catLabel = defaultCategories.find(c => c.id === newCat)?.label || '⭐ Özel';
+    const catLabel = managedCategories.find(c => c.id === newCat)?.label || '⭐ Özel';
 
     await renameProduct(name, {
         name: newName,
@@ -446,8 +463,7 @@ function showAddProductForm() {
             </div>
             <div class="prod-edit-row"><label>Kategori</label>
                 <select id="pnew-cat">
-                    ${defaultCategories.map(c => `<option value="${c.id}">${c.label}</option>`).join('')}
-                    <option value="ozel">⭐ Özel</option>
+                    ${categoryOptions()}
                 </select>
             </div>
             <div class="prod-edit-btns">
@@ -480,7 +496,7 @@ async function addNewProduct() {
         return;
     }
 
-    const catLabel = defaultCategories.find(c => c.id === category)?.label || '⭐ Özel';
+    const catLabel = managedCategories.find(c => c.id === category)?.label || '⭐ Özel';
 
     await saveProduct({
         name, emoji, desc, price,
@@ -496,4 +512,135 @@ async function addNewProduct() {
     document.getElementById('add-product-form')?.remove();
     await renderProductList();
     await refreshMenu();
+}
+
+function showCategoryManager() {
+    const body = document.getElementById('prod-body');
+    body.innerHTML = `<div class="category-manager">
+        <div class="category-manager-head"><h3>Kategoriler</h3><button type="button" class="btn-cancel-prod" onclick="renderProductList()">Ürünlere dön</button></div>
+        <p>Sıralamak için tutamacı sürükleyin. Gizlenen kategorinin ürünleri saklanır.</p>
+        <div id="category-rows"></div>
+        <form id="category-add-form" class="category-add-form">
+            <input name="label" required maxlength="60" placeholder="Yeni kategori adı (emoji ekleyebilirsiniz)" aria-label="Yeni kategori adı">
+            <button type="submit" class="btn-save-prod">+ Kategori ekle</button>
+        </form>
+    </div>`;
+    document.getElementById('category-add-form').onsubmit = addCategory;
+    renderCategoryRows();
+}
+
+function renderCategoryRows() {
+    const rows = document.getElementById('category-rows');
+    if (!rows) return;
+    rows.innerHTML = '';
+    managedCategories.forEach(cat => {
+        const row = document.createElement('div');
+        row.className = 'category-row';
+        row.dataset.categoryId = cat.id;
+        const handle = document.createElement('button');
+        handle.type = 'button';
+        handle.className = 'category-drag-handle';
+        handle.textContent = '⠿';
+        handle.title = 'Sürükleyerek sırala';
+        handle.setAttribute('aria-label', `${cat.label} kategorisini sürükleyerek sırala`);
+        handle.onpointerdown = event => startCategoryDrag(event, row, handle);
+        row.appendChild(handle);
+        const label = document.createElement('input');
+        label.value = cat.label;
+        label.maxLength = 60;
+        label.setAttribute('aria-label', 'Kategori adı');
+        row.appendChild(label);
+        const button = (caption, title, handler, disabled = false) => {
+            const el = document.createElement('button');
+            el.type = 'button'; el.textContent = caption; el.title = title; el.disabled = disabled;
+            el.onclick = handler; row.appendChild(el);
+        };
+        button('Kaydet', 'Adı güncelle', () => updateCategory(cat.id, label.value));
+        button(cat.visible === false ? 'Göster' : 'Gizle', 'Menü görünürlüğü', () => toggleCategoryVisibility(cat.id));
+        button('Sil', 'Kategoriyi sil', () => deleteCategory(cat.id));
+        rows.appendChild(row);
+    });
+}
+
+function startCategoryDrag(event, row, handle) {
+    if (event.button !== 0 && event.pointerType === 'mouse') return;
+    event.preventDefault();
+    const rows = row.parentElement;
+    const originalOrder = [...rows.children].map(el => el.dataset.categoryId);
+    row.classList.add('dragging');
+    const onMove = moveEvent => {
+        const target = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY)?.closest('.category-row');
+        if (!target || target === row || target.parentElement !== rows) return;
+        const midpoint = target.getBoundingClientRect().top + target.offsetHeight / 2;
+        rows.insertBefore(row, moveEvent.clientY < midpoint ? target : target.nextSibling);
+    };
+    const onEnd = async () => {
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onEnd);
+        window.removeEventListener('pointercancel', onCancel);
+        row.classList.remove('dragging');
+        const order = [...rows.children].map(el => el.dataset.categoryId);
+        if (order.every((id, index) => id === originalOrder[index])) return;
+        const byId = new Map(managedCategories.map(cat => [cat.id, cat]));
+        try {
+            await persistCategories(order.map(id => byId.get(id)));
+            showToast('Kategori sırası kaydedildi.', 'success');
+        } catch (error) {
+            renderCategoryRows();
+        }
+    };
+    const onCancel = () => {
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onEnd);
+        window.removeEventListener('pointercancel', onCancel);
+        renderCategoryRows();
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onEnd);
+    window.addEventListener('pointercancel', onCancel);
+}
+
+async function persistCategories(next) {
+    await saveSettings({ categories: next });
+    managedCategories = next;
+    renderCategoryRows();
+    await refreshMenu();
+}
+
+async function addCategory(event) {
+    event.preventDefault();
+    const input = event.currentTarget.elements.label;
+    const label = input.value.trim();
+    if (!label) return;
+    if (managedCategories.some(c => c.label.toLocaleLowerCase('tr-TR') === label.toLocaleLowerCase('tr-TR'))) {
+        showToast('Bu kategori adı zaten var.', ''); return;
+    }
+    const id = 'kategori-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
+    await persistCategories([{ id, label, visible: true }, ...managedCategories]);
+    input.value = '';
+    showToast('Kategori eklendi.', 'success');
+}
+
+async function updateCategory(id, rawLabel) {
+    const label = rawLabel.trim();
+    if (!label || managedCategories.some(c => c.id !== id && c.label.toLocaleLowerCase('tr-TR') === label.toLocaleLowerCase('tr-TR'))) {
+        showToast('Geçerli ve benzersiz bir kategori adı girin.', ''); return;
+    }
+    await persistCategories(managedCategories.map(c => c.id === id ? { ...c, label } : c));
+    showToast('Kategori güncellendi.', 'success');
+}
+
+async function toggleCategoryVisibility(id) {
+    await persistCategories(managedCategories.map(c => c.id === id ? { ...c, visible: c.visible === false } : c));
+}
+
+async function deleteCategory(id) {
+    const products = await getAllProducts();
+    if (products.some(p => p.category === id)) {
+        showToast('Önce bu kategorideki ürünleri başka kategoriye taşıyın.', ''); return;
+    }
+    const cat = managedCategories.find(c => c.id === id);
+    if (!cat || !confirm(`"${cat.label}" kategorisini silmek istiyor musunuz?`)) return;
+    await persistCategories(managedCategories.filter(c => c.id !== id));
+    showToast('Kategori silindi.', 'success');
 }

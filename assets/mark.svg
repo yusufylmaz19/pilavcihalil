@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Max Pilav işareti">
+  <rect width="64" height="64" rx="15" fill="#123f2f"/>
+  <path d="M13 33h38c-1.2 11.5-8.4 18-19 18s-17.8-6.5-19-18Z" fill="#f4f0dc"/>
+  <path d="M13 33h38" fill="none" stroke="#c7773e" stroke-width="3" stroke-linecap="round"/>
+  <path d="m21 24 4-4m7 6 4-4m8 2 3-3" fill="none" stroke="#f4f0dc" stroke-width="3" stroke-linecap="round"/>
+</svg>
